@@ -182,7 +182,9 @@ function queryEngine(engine, target, sources, inventoryVersion, analysisGenerati
 
 function assertDecision(result, expected, label) {
   const value = result?.value;
-  const status = value?.kind === "semanticView" ? value.view.decision.status : "missing";
+  const status = value?.kind === "semanticView"
+    ? value.view.authoringContext.disposition
+    : "missing";
   const matches = expected === "not-established" ? status !== "established" : status === expected;
   if (!matches) throw new Error(`${label}: expected ${expected}, observed ${status}`);
 }

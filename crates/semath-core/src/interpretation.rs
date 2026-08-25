@@ -679,7 +679,10 @@ fn conflict_hypothesis(
         document_version: input.lifecycle.document_version,
         scope_path: input.scope_path.to_vec(),
         range,
-        formula: None,
+        // This projection receives the already selected formula decision. Bind
+        // its conflict hypothesis to that exact root so consumers can verify
+        // the formula identity without guessing from sibling evidence ranges.
+        formula: input.formula.cloned(),
         relation: None,
         bindings: Vec::new(),
         conditions: Vec::new(),

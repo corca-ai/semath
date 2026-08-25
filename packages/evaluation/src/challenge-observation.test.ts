@@ -4,7 +4,10 @@ import type {
   MathInterpretationEvidenceInfo,
   MathInterpretationHypothesisInfo,
 } from "../../protocol/src/index";
-import { observeSelectedFormulaDecision } from "./challenge-observation";
+import {
+  observeSelectedFormulaDecision,
+  selectedFormulaMeaningIsEstablishmentGrade,
+} from "./challenge-observation";
 
 const formula: MathFormulaAnchorInfo = {
   documentVersion: 1,
@@ -385,6 +388,21 @@ describe("selected-formula challenge observation", () => {
         ],
       }).recognizedRelations[0]?.authority,
     ).toBe("candidate");
+  });
+
+  test("does not borrow authority from a lower-ranked same-law variant", () => {
+    const selectedCandidate = hypothesis("test:law", "supported", { formula });
+    const otherAuthority = hypothesis("test:law", "explicit", { formula });
+    expect(
+      selectedFormulaMeaningIsEstablishmentGrade({
+        disposition: "established",
+        formula,
+        hypotheses: [
+          selectedCandidate,
+          { ...otherAuthority, hypothesisId: "test:law-authority", rank: 1 },
+        ],
+      }),
+    ).toBe(false);
   });
 
   test("rejects matched binding anchors with invalid numeric ranges", () => {

@@ -5488,6 +5488,35 @@ fn strictly_exported_selected_root_is_established_and_explicit() {
 }
 
 #[test]
+fn complete_root_law_outranks_its_nested_explanatory_relation() {
+    let content = "Let $A$ and $B$ be events with positive $\\mathbb{P}(B)$. Conditional probability is $\\mathbb{P}(A\\mid B)=\\frac{\\mathbb{P}(A\\cap B)}{\\mathbb{P}(B)}$.";
+    let view = semantic_view_at(
+        content,
+        content.rfind("\\mathbb{P}(A\\mid B)").unwrap() as u32,
+    );
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+    let relation_ids = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .filter_map(|hypothesis| {
+            hypothesis
+                .relation
+                .as_ref()
+                .map(|relation| relation.relation_id.as_str())
+        })
+        .collect::<std::collections::BTreeSet<_>>();
+    assert!(relation_ids.contains("probability:conditional-probability"));
+    assert!(relation_ids.contains("probability:event-intersection"));
+}
+
+#[test]
 fn asserted_only_preceding_recognition_cannot_form_an_equation_link() {
     let content = "For a Newtonian fluid, the Newtonian shear relation is $x=y\\dot z$, but the report does not identify the roles of x, y, or z. Let $P$ be power, $F$ force, and $x$ velocity. The accepted power relation is $P=F\\cdot x$.";
     let prior = semantic_view_at(content, content.find("x=y\\dot z").unwrap() as u32);
@@ -6854,5 +6883,91 @@ fn equality_chain_transfers_and_retracts_typed_facts_as_one_dependency_closure()
             .all(|claim| claim.value != "Vector[3]"),
         "{:?}",
         view.context.claims
+    );
+}
+
+#[test]
+fn explicit_role_shapes_do_not_conflict_with_neutral_formula_structure() {
+    let cases = [
+        (
+            "For Bernoulli head decomposition, suppose $r$ is total head scalar, $a$ is pressure head scalar, $b$ is velocity head scalar, and $j$ is elevation head scalar. $r = a + b + j$",
+            "r = a + b + j",
+            "fluid-mechanics:bernoulli-head-decomposition",
+        ),
+        (
+            "For Continuous Lyapunov equation, suppose $r$ is n by n state matrix, $a$ is n by n lyapunov certificate matrix, and $b$ is n by n lyapunov forcing matrix. $0 = r^T a + a r + b$",
+            "0 = r^T a + a r + b",
+            "control-systems:continuous-lyapunov-equation",
+        ),
+        (
+            "For Thermal resistance relation, here $o$ denotes temperature difference scalar, $m$ denotes heat-transfer rate scalar, and $i$ denotes thermal resistance scalar. $o = m i$",
+            "o = m i",
+            "thermodynamics-heat-transfer:thermal-resistance-rate",
+        ),
+    ];
+
+    for (content, formula, relation_id) in cases {
+        let view = semantic_view_at(content, content.rfind(formula).unwrap() as u32 + 1);
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Established,
+            "{relation_id}: diagnostics={:#?}",
+            view.diagnostics,
+        );
+        assert!(
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .any(|hypothesis| hypothesis.hypothesis_id == relation_id),
+            "{relation_id}: hypotheses={:#?}",
+            view.authoring_context.interpretations.hypotheses,
+        );
+    }
+}
+
+#[test]
+fn explicit_nonestablishment_refuses_the_selected_formula_relation() {
+    let content = "The altered expression does not establish the reviewed probability-statistics relation. $-\\mu=E(X)$";
+    let view = semantic_view_at(content, content.find("-\\mu=E(X)").unwrap() as u32);
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Unsupported,
+        "diagnostics={:#?}",
+        view.diagnostics,
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .all(|hypothesis| hypothesis.hypothesis_id != "probability:expected-value-definition"),
+        "hypotheses={:#?}",
+        view.authoring_context.interpretations.hypotheses,
+    );
+}
+
+#[test]
+fn selected_formula_conflicts_retain_the_exact_formula_owner() {
+    let content = "Let $x$ and $y$ denote scalar calibration values. The first normative claim is $x=y$. The second normative claim is $x\\ne y$. Both claims are simultaneously binding.";
+    let view = semantic_view_at(content, content.find("x\\ne y").unwrap() as u32);
+    let formula = view.authoring_context.formula.as_ref().expect("formula");
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting,
+        "{view:#?}",
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .filter(|hypothesis| {
+                hypothesis.support == crate::MathInterpretationSupportTier::Contradicted
+            })
+            .any(|hypothesis| hypothesis.formula.as_ref() == Some(formula)),
+        "{view:#?}",
     );
 }

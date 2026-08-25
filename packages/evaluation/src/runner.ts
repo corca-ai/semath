@@ -2,6 +2,8 @@ import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   SEMATH_PROTOCOL_VERSION,
   type DocumentLanguage,
+  type MathFormulaAnchorInfo,
+  type MathInterpretationHypothesisInfo,
   type ProjectDocument,
   type ProjectSnapshot,
   type QueryEnvelope,
@@ -23,7 +25,27 @@ import {
   evidenceIsSourceLinked,
   rolesMatch,
 } from "./observation";
+import { sameFormulaAnchor } from "./challenge-observation";
 import type { CaseObservation } from "./scorecard";
+
+type QualityFormulaHypothesis = Pick<
+  MathInterpretationHypothesisInfo,
+  "conditions" | "formula" | "kind" | "relation" | "support"
+>;
+
+interface QualityFormulaContext {
+  readonly formula?: MathFormulaAnchorInfo;
+  readonly interpretations: {
+    readonly hypotheses: readonly QualityFormulaHypothesis[];
+  };
+}
+
+type ObservedQualityRelation = Omit<
+  NonNullable<MathInterpretationHypothesisInfo["relation"]>,
+  "conditions"
+> & {
+  conditions: MathInterpretationHypothesisInfo["conditions"];
+};
 
 export interface PlannedQualityCase {
   case: CorpusCase;
@@ -160,7 +182,7 @@ export function explainQualityCase(
   result: QueryResult | undefined,
 ): CaseExplanation {
   const view = result?.value.kind === "semanticView" ? result.value.view : undefined;
-  const observedRelations = (view?.context.relations ?? []).map(
+  const observedRelations = observedQualityRelations(view?.authoringContext).map(
     (relation) => relation.relationId,
   );
   const target = "lawId" in item.case ? item.case.lawId : undefined;
@@ -200,7 +222,7 @@ export function explainQualityCase(
     expected,
     observedRelations,
     reason,
-    status: view?.decision.status ?? "missing",
+    status: view?.authoringContext.disposition ?? "missing",
     suiteId: item.suiteId,
   };
 }
@@ -211,34 +233,85 @@ function observe(
 ): CaseObservation {
   const view = result?.value.kind === "semanticView" ? result.value.view : undefined;
   const targetLawId = "lawId" in item.case ? item.case.lawId : undefined;
-  const relation = targetLawId
-    ? view?.context.relations.find((candidate) =>
+  const relations = observedQualityRelations(view?.authoringContext);
+  const targetRelations = targetLawId
+    ? relations.filter((candidate) =>
         candidate.relationId.endsWith(`:${targetLawId}`),
       )
-    : undefined;
+    : [];
+  const expectedRoles =
+    "expectedRoles" in item.case ? item.case.expectedRoles : undefined;
+  const relation =
+    targetRelations.find((candidate) =>
+      rolesMatch(candidate.roles, expectedRoles, item.case.macros),
+    ) ?? targetRelations[0];
   const recognizedLawIds = [
     ...new Set(
-      (view?.context.relations ?? []).map((candidate) =>
+      relations.map((candidate) =>
         candidate.relationId.slice(candidate.relationId.lastIndexOf(":") + 1),
       ),
     ),
   ].sort();
   return {
     caseId: item.case.id,
-    evidenceIntegrity: Boolean(
-      relation && evidenceIsSourceLinked(relation.evidence, relation.conditions),
+    evidenceIntegrity: targetRelations.some(
+      (candidate) =>
+        rolesMatch(candidate.roles, expectedRoles, item.case.macros) &&
+        evidenceIsSourceLinked(candidate.evidence, candidate.conditions),
     ),
     recognizedLawIds,
     ...(item.generatedFrom ? { generatedFrom: item.generatedFrom } : {}),
     rolesCorrect: rolesMatch(
       relation?.roles ?? [],
-      "expectedRoles" in item.case ? item.case.expectedRoles : undefined,
+      expectedRoles,
       item.case.macros,
     ),
-    ...(view ? { status: view.decision.status } : {}),
+    ...(view ? { status: view.authoringContext.disposition } : {}),
     suiteId: item.suiteId,
-    targetPresent: Boolean(relation),
+    targetPresent: targetRelations.length > 0,
   };
+}
+
+export function observedQualityRelations(
+  context: QualityFormulaContext | undefined,
+): readonly ObservedQualityRelation[] {
+  const selected = context?.formula;
+  if (!selected) return [];
+  const relations = context.interpretations.hypotheses
+    .filter(
+      (hypothesis) =>
+        hypothesis.kind === "typed-law" &&
+        hypothesis.relation !== undefined &&
+        hypothesis.formula !== undefined &&
+        hypothesis.support !== "contradicted" &&
+        sameFormulaAnchor(hypothesis.formula, selected),
+    )
+    .map((hypothesis) => ({
+      ...hypothesis.relation!,
+      conditions: hypothesis.conditions,
+    }));
+  return relations
+    .sort((left, right) => qualityRelationKey(left).localeCompare(qualityRelationKey(right)))
+    .filter(
+      (relation, index, all) =>
+        index === 0 || qualityRelationKey(all[index - 1]!) !== qualityRelationKey(relation),
+    );
+}
+
+function qualityRelationKey(relation: ObservedQualityRelation): string {
+  const roles = [...relation.roles]
+    .map((role) => `${role.role}\u0000${role.symbol}\u0000${role.conceptId ?? ""}`)
+    .sort();
+  const evidence = relation.evidence
+    .flatMap((item) => item.sourceRanges)
+    .map((range) => `${range.startOffset}:${range.endOffset}`)
+    .sort();
+  const conditions = [...relation.conditions]
+    .map((condition) => `${condition.conditionId}\u0000${condition.status}`)
+    .sort();
+  return [relation.relationId, ...roles, "evidence", ...evidence, "conditions", ...conditions].join(
+    "\u0001",
+  );
 }
 
 function materializeDocuments(entry: CorpusCase, prefix: string): CorpusDocument[] {

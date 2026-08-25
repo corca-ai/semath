@@ -1,4 +1,18 @@
-import type { QueryResult, SourceRange } from "../../protocol/src/index";
+import type {
+  MathAuthoringContext,
+  MathFormulaAnchorInfo,
+  MathInterpretationHypothesisInfo,
+  QueryResult,
+  SourceRange,
+} from "../../protocol/src/index";
+import {
+  evidenceBelongsToFormulaDocument,
+  hypothesisIsEstablishmentGrade,
+  interpretationEvidenceIsGrounded,
+  observeSelectedFormulaDecision,
+  sameFormulaAnchor,
+  selectedFormulaMeaningIsEstablishmentGrade,
+} from "./challenge-observation";
 import {
   normalizeSymbol,
   roleInstancesMatch,
@@ -32,6 +46,8 @@ export type SemanticSafetyTransform =
 export type SemanticSafetyDecision =
   | "ambiguous"
   | "conflicting"
+  | "conventional"
+  | "engine-limited"
   | "established"
   | "partial"
   | "unsupported";
@@ -81,6 +97,7 @@ export type SemanticSafetyNavigationExpectation =
     };
 
 export interface SemanticSafetyExpectation {
+  readonly decisionDomain: "selected-formula";
   readonly decisions: readonly SemanticSafetyDecision[];
   readonly excludedRelationIds: readonly string[];
   readonly maximumProblems: number;
@@ -124,7 +141,7 @@ export interface SemanticSafetyCase {
 export interface SemanticSafetySpec {
   readonly cases: readonly SemanticSafetyCase[];
   readonly id: string;
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
 }
 
 export interface PlannedSemanticSafetyCase {
@@ -142,6 +159,7 @@ export interface PlannedSemanticSafetyCase {
 }
 
 export interface SemanticSafetyObservedRelation {
+  readonly establishmentGrade: boolean;
   readonly relationId: string;
   readonly roles: readonly ObservedRole[];
   readonly sourceGrounded: boolean;
@@ -156,6 +174,7 @@ export interface SemanticSafetyObservedLocation {
 export interface SemanticSafetyObservation {
   readonly caseId: string;
   readonly decision: SemanticSafetyDecision;
+  readonly decisionDomain: "selected-formula";
   readonly definitions: readonly SemanticSafetyObservedLocation[];
   readonly prepareRename: {
     readonly fileId?: string;
@@ -200,8 +219,8 @@ export function parseSemanticSafetySpec(
 ): SemanticSafetySpec {
   const root = record(value, "semantic safety spec");
   exact(root, ["schemaVersion", "id", "cases"], "semantic safety spec");
-  if (root.schemaVersion !== 1) {
-    throw new Error("semantic safety spec.schemaVersion: must be 1");
+  if (root.schemaVersion !== 2) {
+    throw new Error("semantic safety spec.schemaVersion: must be 2");
   }
   const laws = new Map(lawCatalog.map((law) => [law.lawId, law]));
   unique([...laws.keys()], "semantic safety law catalog");
@@ -213,7 +232,7 @@ export function parseSemanticSafetySpec(
   return {
     cases,
     id: text(root.id, "semantic safety spec.id"),
-    schemaVersion: 1,
+    schemaVersion: 2,
   };
 }
 
@@ -259,11 +278,16 @@ export function observeSemanticSafetyCase(
     throw new Error(`${item.id}: diagnostics result is missing`);
   }
   const view = results.semanticView.value.view;
-  const proofEvidence = view.decision.reasons
-    .filter(
-      (reason) => reason.kind === "proof" || reason.kind === "source-conflict",
-    )
-    .flatMap((reason) => reason.evidence);
+  const formulaDecision = observeSelectedFormulaDecision({
+    disposition: view.authoringContext.disposition,
+    formula: view.authoringContext.formula,
+    hypotheses: view.authoringContext.interpretations.hypotheses,
+  });
+  const establishmentGrounded = selectedFormulaMeaningIsEstablishmentGrade({
+    disposition: view.authoringContext.disposition,
+    formula: view.authoringContext.formula,
+    hypotheses: view.authoringContext.interpretations.hypotheses,
+  });
   const navigationFile = item.navigationCursor?.fileId;
   const navigationPath = item.documents.find(
     (document) => document.fileId === navigationFile,
@@ -280,7 +304,8 @@ export function observeSemanticSafetyCase(
   }
   return {
     caseId: item.id,
-    decision: view.decision.status,
+    decision: view.authoringContext.disposition,
+    decisionDomain: "selected-formula",
     definitions,
     prepareRename: {
       ...(navigationFile ? { fileId: navigationFile } : {}),
@@ -299,32 +324,16 @@ export function observeSemanticSafetyCase(
       )
       .map((diagnostic) => diagnostic.code)
       .sort(),
-    meaningRelationId:
-      view.decision.status === "established" ||
-      view.decision.status === "partial"
-        ? view.decision.meaning.relationId === null
-          ? null
-          : relationLeaf(view.decision.meaning.relationId)
-        : null,
+    meaningRelationId: formulaDecision.decision.meaningRelationId
+      ? relationLeaf(formulaDecision.decision.meaningRelationId)
+      : null,
     proofGrounded:
-      proofEvidence.length > 0 &&
-      proofEvidence.every(
-        (evidence) => evidence.sourceRanges.length > 0,
-      ),
+      view.authoringContext.disposition === "conflicting"
+        ? formulaDecision.decision.sourceGrounded
+        : view.authoringContext.disposition === "established" &&
+          establishmentGrounded,
     references,
-    relations: view.context.relations.map((relation) => ({
-      relationId: relationLeaf(relation.relationId),
-      roles: relation.roles.map((role) => ({
-        role: role.role,
-        symbol: role.symbol,
-        ...(role.conceptId ? { conceptId: role.conceptId } : {}),
-      })),
-      sourceGrounded:
-        relation.evidence.length > 0 &&
-        relation.evidence.every(
-          (evidence) => evidence.sourceRanges.length > 0,
-        ),
-    })),
+    relations: observedFormulaRelations(view.authoringContext),
     rename: {
       edits:
         editValue?.kind === "editProposal"
@@ -343,6 +352,65 @@ export function observeSemanticSafetyCase(
         : {}),
     },
   };
+}
+
+export function observedFormulaRelations(
+  context: MathAuthoringContext,
+): readonly SemanticSafetyObservedRelation[] {
+  const formula = context.formula;
+  if (!formula) return [];
+  const relations = context.interpretations.hypotheses
+    .filter(
+      (
+        hypothesis,
+      ): hypothesis is MathInterpretationHypothesisInfo & {
+        readonly formula: MathFormulaAnchorInfo;
+        readonly relation: NonNullable<
+          MathInterpretationHypothesisInfo["relation"]
+        >;
+      } =>
+        hypothesis.formula !== undefined &&
+        hypothesis.relation !== undefined &&
+        hypothesis.support !== "contradicted" &&
+        sameFormulaAnchor(hypothesis.formula, formula),
+    )
+    .map((hypothesis) => {
+      const supportingEvidence = hypothesis.evidence.filter(
+        (evidence) => evidence.role === "supporting",
+      );
+      return {
+        establishmentGrade: hypothesisIsEstablishmentGrade(hypothesis),
+        relationId: relationLeaf(hypothesis.relation.relationId),
+        roles: hypothesis.relation.roles.map((role) => ({
+          role: role.role,
+          symbol: role.symbol,
+          ...(role.conceptId ? { conceptId: role.conceptId } : {}),
+        })),
+        sourceGrounded:
+          supportingEvidence.length > 0 &&
+          supportingEvidence.every(
+            (evidence) =>
+              interpretationEvidenceIsGrounded(evidence) &&
+              evidenceBelongsToFormulaDocument(evidence, formula),
+          ),
+      };
+    });
+  return relations
+    .sort((left, right) => semanticSafetyRelationKey(left).localeCompare(semanticSafetyRelationKey(right)))
+    .filter(
+      (relation, index, all) =>
+        index === 0 ||
+        semanticSafetyRelationKey(all[index - 1]!) !== semanticSafetyRelationKey(relation),
+    );
+}
+
+function semanticSafetyRelationKey(
+  relation: SemanticSafetyObservedRelation,
+): string {
+  const roles = [...relation.roles]
+    .map((role) => `${role.role}\u0000${role.symbol}\u0000${role.conceptId ?? ""}`)
+    .sort();
+  return `${relation.relationId}\u0001${roles.join("\u0001")}\u0001${relation.sourceGrounded}\u0001${relation.establishmentGrade}`;
 }
 
 export function scoreSemanticSafetySuite(
@@ -682,6 +750,7 @@ function parseExpectation(
   exact(
     item,
     [
+      "decisionDomain",
       "decisions",
       "proofGrounded",
       "relations",
@@ -741,6 +810,11 @@ function parseExpectation(
     }
   }
   return {
+    decisionDomain: oneOf(
+      item.decisionDomain,
+      ["selected-formula"] as const,
+      `${path}.decisionDomain`,
+    ),
     decisions: parseDecisions(item.decisions, `${path}.decisions`),
     excludedRelationIds,
     maximumProblems: integer(item.maximumProblems, `${path}.maximumProblems`),
@@ -949,6 +1023,11 @@ function scoreCase(
 ): { readonly contract: string[]; readonly safety: string[] } {
   const contract: string[] = [];
   const safety: string[] = [];
+  if (observed.decisionDomain !== item.expected.decisionDomain) {
+    contract.push(
+      `decision domain ${observed.decisionDomain}; expected ${item.expected.decisionDomain}`,
+    );
+  }
   if (!item.expected.decisions.includes(observed.decision)) {
     const message = `decision ${observed.decision}; expected one of ${item.expected.decisions.join(", ")}`;
     if (
@@ -966,12 +1045,47 @@ function scoreCase(
     const message = `proof grounding ${observed.proofGrounded}; expected ${item.expected.proofGrounded}`;
     (observed.proofGrounded ? safety : contract).push(message);
   }
+  const observedAuthorityGroups = new Map<
+    string,
+    Set<boolean>
+  >();
+  for (const relation of observed.relations) {
+    const key = semanticSafetyRelationIdentityKey(relation);
+    const grades = observedAuthorityGroups.get(key) ?? new Set<boolean>();
+    grades.add(relation.establishmentGrade);
+    observedAuthorityGroups.set(key, grades);
+    if (
+      relation.establishmentGrade &&
+      !(
+        item.expected.proofGrounded &&
+        item.expected.decisions.includes("established") &&
+        item.expected.relations.some(
+          (expected) =>
+            expected.sourceGrounded &&
+            relationLeaf(relation.relationId) === expected.relationId &&
+            roleInstancesMatch(relation.roles, expected.roles, undefined),
+        )
+      )
+    ) {
+      safety.push(
+        `unexpected establishment-grade relation ${relation.relationId}`,
+      );
+    }
+  }
+  for (const [key, grades] of observedAuthorityGroups) {
+    if (grades.size > 1) {
+      safety.push(`${key} has inconsistent authority projections`);
+    }
+  }
   for (const expected of item.expected.relations) {
-    const relation = observed.relations.find(
+    const matchingRelations = observed.relations.filter(
       (candidate) =>
         relationLeaf(candidate.relationId) === expected.relationId &&
         roleInstancesMatch(candidate.roles, expected.roles, undefined),
     );
+    const relation =
+      matchingRelations.find((candidate) => candidate.sourceGrounded) ??
+      matchingRelations[0];
     if (!relation) {
       contract.push(`missing relation ${expected.relationId}`);
     } else if (relation.sourceGrounded !== expected.sourceGrounded) {
@@ -998,6 +1112,15 @@ function scoreCase(
   return { contract, safety };
 }
 
+function semanticSafetyRelationIdentityKey(
+  relation: SemanticSafetyObservedRelation,
+): string {
+  const roles = [...relation.roles]
+    .map((role) => `${role.role}:${normalizeSymbol(role.symbol, undefined)}`)
+    .sort();
+  return `${relationLeaf(relation.relationId)}[${roles.join(",")}]`;
+}
+
 function parseDecisions(value: unknown, path: string): readonly SemanticSafetyDecision[] {
   const decisions = array(value, path).map((decision, index) =>
     oneOf(
@@ -1005,6 +1128,8 @@ function parseDecisions(value: unknown, path: string): readonly SemanticSafetyDe
       [
         "ambiguous",
         "conflicting",
+        "conventional",
+        "engine-limited",
         "established",
         "partial",
         "unsupported",
@@ -1183,6 +1308,7 @@ function stableObservation(observation: SemanticSafetyObservation): unknown {
           .map((role) => `${role.role}:${normalizeSymbol(role.symbol, undefined)}`)
           .sort(),
         sourceGrounded: relation.sourceGrounded,
+        establishmentGrade: relation.establishmentGrade,
       }))
       .sort((left, right) => left.relationId.localeCompare(right.relationId)),
     rename: {

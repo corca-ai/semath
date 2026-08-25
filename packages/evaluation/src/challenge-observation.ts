@@ -66,9 +66,13 @@ export function observeSelectedFormulaDecision(
         (item) => item.role === "contradicting",
       );
       return (
-        evidence.length > 0 &&
-        evidence.every(interpretationEvidenceIsGrounded) &&
         selectedFormula !== undefined &&
+        evidence.length > 0 &&
+        evidence.every(
+          (item) =>
+            interpretationEvidenceIsGrounded(item) &&
+            evidenceBelongsToFormulaDocument(item, selectedFormula),
+        ) &&
         hypothesisContradictsFormula(hypothesis, selectedFormula)
       );
     });
@@ -99,7 +103,7 @@ export function observeSelectedFormulaDecision(
   };
 }
 
-function hypothesisIsEstablishmentGrade(
+export function hypothesisIsEstablishmentGrade(
   hypothesis: FormulaRelationHypothesis,
 ): boolean {
   const relationRoles = hypothesis.relation.roles;
@@ -107,6 +111,7 @@ function hypothesisIsEstablishmentGrade(
   const roleIds = relationRoles.map((role) => role.role);
   const bindingParameters = bindings.map((binding) => binding.parameter);
   return (
+    hypothesis.kind === "typed-law" &&
     (hypothesis.support === "explicit" || hypothesis.support === "derived") &&
     hypothesis.missingDiscriminatorIds.length === 0 &&
     relationRoles.length > 0 &&
@@ -125,6 +130,28 @@ function hypothesisIsEstablishmentGrade(
         bindingEvidenceIsGrounded(hypothesis, binding.evidence),
     ) &&
     hypothesis.conditions.every((condition) => condition.status === "verified")
+  );
+}
+
+export function selectedFormulaMeaningIsEstablishmentGrade(
+  input: SelectedFormulaObservationInput,
+): boolean {
+  const selectedFormula = input.formula;
+  if (!selectedFormula) return false;
+  const meaning = selectFormulaMeaning(
+    input.disposition,
+    input.hypotheses.filter(
+      (hypothesis): hypothesis is FormulaRelationHypothesis =>
+        hypothesis.formula !== undefined &&
+        hypothesis.relation !== undefined &&
+        sameFormulaAnchor(hypothesis.formula, selectedFormula),
+    ),
+  );
+  return (
+    meaning?.formula !== undefined &&
+    meaning.relation !== undefined &&
+    sameFormulaAnchor(meaning.formula, selectedFormula) &&
+    hypothesisIsEstablishmentGrade(meaning as FormulaRelationHypothesis)
   );
 }
 
@@ -226,7 +253,7 @@ function formulaReasonKinds(
   return ["uncertainty"];
 }
 
-function hypothesisContradictsFormula(
+export function hypothesisOwnsSelectedFormula(
   hypothesis: MathInterpretationHypothesisInfo,
   formula: MathFormulaAnchorInfo,
 ): boolean {
@@ -241,7 +268,9 @@ function hypothesisContradictsFormula(
   );
 }
 
-function evidenceOwnsFormula(
+const hypothesisContradictsFormula = hypothesisOwnsSelectedFormula;
+
+export function evidenceOwnsFormula(
   evidence: MathInterpretationEvidenceInfo,
   formula: MathFormulaAnchorInfo,
 ): boolean {
@@ -256,7 +285,7 @@ function evidenceOwnsFormula(
   );
 }
 
-function interpretationEvidenceIsGrounded(
+export function interpretationEvidenceIsGrounded(
   evidence: MathInterpretationEvidenceInfo,
 ): boolean {
   return (
@@ -264,8 +293,7 @@ function interpretationEvidenceIsGrounded(
     evidence.sourceAnchors.length > 0 &&
     evidence.sourceAnchors.every(
       (anchor) =>
-        anchor.lifecycle === "current" &&
-        anchor.location.range.endOffset > anchor.location.range.startOffset,
+        anchor.lifecycle === "current" && validSourceRange(anchor.location.range),
     ) &&
     evidence.evidence.sourceRanges.every((range) =>
       evidence.sourceAnchors.some((anchor) =>
@@ -280,7 +308,20 @@ function interpretationEvidenceIsGrounded(
   );
 }
 
-function sameFormulaAnchor(
+export function evidenceBelongsToFormulaDocument(
+  evidence: MathInterpretationEvidenceInfo,
+  formula: MathFormulaAnchorInfo,
+): boolean {
+  return evidence.sourceAnchors.every(
+    (anchor) =>
+      anchor.documentVersion === formula.documentVersion &&
+      anchor.location.fileId === formula.location.fileId &&
+      anchor.location.path === formula.location.path &&
+      scopeOwns(anchor.scopePath, formula.scopePath),
+  );
+}
+
+export function sameFormulaAnchor(
   left: MathFormulaAnchorInfo,
   right: MathFormulaAnchorInfo,
 ): boolean {

@@ -1894,8 +1894,14 @@ impl RelationLowerer<'_> {
                 let _ = self.lower_expression(body);
                 return Some(result);
             }
-            SemanticExprKind::Number(_) => {
-                self.emit_scalar_constant(&result);
+            SemanticExprKind::Number(value) => {
+                // Zero is shape-polymorphic in scientific formulas: it can be
+                // the additive identity for scalars, vectors, or matrices.
+                // Giving it an intrinsic scalar proof poisons equations such as
+                // the matrix Lyapunov balance `0 = A^T P + P A + Q`.
+                if value != "0" {
+                    self.emit_scalar_constant(&result);
+                }
                 return Some(result);
             }
             _ => return Some(result),
@@ -4464,8 +4470,27 @@ impl SemathEngine {
                     .is_some_and(|relation| relation.range == root.range)
             })
         });
+        let exact_root_formulas = selected_root
+            .map(|root| {
+                local_formulas
+                    .iter()
+                    .filter(|formula| {
+                        formula
+                            .relation
+                            .as_ref()
+                            .is_some_and(|relation| relation.range == root.range)
+                    })
+                    .cloned()
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        let formula_decision_candidates = if exact_root_formulas.is_empty() {
+            &local_formulas
+        } else {
+            &exact_root_formulas
+        };
         let mut formula_decision = decide_meaning(MeaningDecisionInput {
-            formulas: &local_formulas,
+            formulas: formula_decision_candidates,
             symbol: None,
             symbol_proof: &[],
             candidates: &formula_context.candidates,

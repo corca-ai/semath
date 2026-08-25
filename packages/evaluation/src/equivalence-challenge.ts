@@ -1,5 +1,22 @@
 import type { CorpusDocument } from "./model";
 
+export const EQUIVALENCE_DECISION_DOMAINS = [
+  "cursor-entity",
+  "selected-formula",
+] as const;
+
+export type EquivalenceDecisionDomain =
+  (typeof EQUIVALENCE_DECISION_DOMAINS)[number];
+
+export type EquivalenceDecision =
+  | "established"
+  | "partial"
+  | "conventional"
+  | "ambiguous"
+  | "conflicting"
+  | "unsupported"
+  | "engine-limited";
+
 export const EQUIVALENCE_FAMILIES = [
   "orientation",
   "scalar-permutation",
@@ -13,8 +30,9 @@ export type EquivalenceFamily = (typeof EQUIVALENCE_FAMILIES)[number];
 
 export interface EquivalenceChallengeCase {
   readonly cursor: { readonly fileId: string; readonly needle: string };
+  readonly decisionDomain: EquivalenceDecisionDomain;
   readonly documents: readonly CorpusDocument[];
-  readonly expectedDecision: "established" | "partial" | "unsupported";
+  readonly expectedDecision: EquivalenceDecision;
   readonly expectedRelationId: string | null;
   readonly family: EquivalenceFamily;
   readonly id: string;
@@ -22,20 +40,26 @@ export interface EquivalenceChallengeCase {
 }
 
 export interface EquivalenceChallenge {
-  readonly baseline: {
-    readonly commit: string;
-    readonly passed: number;
-    readonly total: number;
+  readonly lineage: {
+    readonly previousCommit: string;
+    readonly previousSchemaVersion: 1;
   };
   readonly cases: readonly EquivalenceChallengeCase[];
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
 }
 
 export interface EquivalenceObservation {
   readonly caseId: string;
-  readonly decision: string;
+  readonly decision: EquivalenceDecision;
+  readonly decisionDomain: EquivalenceDecisionDomain;
   readonly problemCount: number;
-  readonly relationId: string | null;
+  readonly relationIds: readonly string[];
+}
+
+export interface EquivalenceDomainObservation {
+  readonly decision: EquivalenceDecision;
+  readonly problemCount: number;
+  readonly relationIds: readonly string[];
 }
 
 export interface EquivalenceScorecard {
@@ -47,12 +71,15 @@ export interface EquivalenceScorecard {
 
 export function parseEquivalenceChallenge(value: unknown): EquivalenceChallenge {
   const root = record(value, "equivalence challenge");
-  exact(root, ["schemaVersion", "baseline", "cases"], "equivalence challenge");
-  if (root.schemaVersion !== 1) throw new Error("equivalence challenge.schemaVersion: must be 1");
-  const baseline = record(root.baseline, "equivalence challenge.baseline");
-  exact(baseline, ["commit", "passed", "total"], "equivalence challenge.baseline");
-  if (!Array.isArray(root.cases) || root.cases.length < 24) {
-    throw new Error("equivalence challenge.cases: must contain at least 24 frozen cases");
+  exact(root, ["schemaVersion", "lineage", "cases"], "equivalence challenge");
+  if (root.schemaVersion !== 2) throw new Error("equivalence challenge.schemaVersion: must be 2");
+  const lineage = record(root.lineage, "equivalence challenge.lineage");
+  exact(lineage, ["previousCommit", "previousSchemaVersion"], "equivalence challenge.lineage");
+  if (lineage.previousSchemaVersion !== 1) {
+    throw new Error("equivalence challenge.lineage.previousSchemaVersion: must be 1");
+  }
+  if (!Array.isArray(root.cases) || root.cases.length !== 24) {
+    throw new Error("equivalence challenge.cases: must contain exactly 24 frozen cases");
   }
   const cases = root.cases.map((item, index) => parseCase(item, index));
   unique(cases.map((item) => item.id), "equivalence challenge.cases.id");
@@ -61,19 +88,13 @@ export function parseEquivalenceChallenge(value: unknown): EquivalenceChallenge 
       throw new Error(`equivalence challenge.cases: ${family} requires at least 4 cases`);
     }
   }
-  const total = integer(baseline.total, "equivalence challenge.baseline.total");
-  const passed = integer(baseline.passed, "equivalence challenge.baseline.passed");
-  if (total !== cases.length || passed < 0 || passed > total) {
-    throw new Error("equivalence challenge.baseline: invalid score");
-  }
   return {
-    baseline: {
-      commit: text(baseline.commit, "equivalence challenge.baseline.commit"),
-      passed,
-      total,
+    lineage: {
+      previousCommit: text(lineage.previousCommit, "equivalence challenge.lineage.previousCommit"),
+      previousSchemaVersion: 1,
     },
     cases,
-    schemaVersion: 1,
+    schemaVersion: 2,
   };
 }
 
@@ -84,6 +105,15 @@ export function scoreEquivalenceChallenge(
   const byId = new Map(observations.map((item) => [item.caseId, item]));
   const failures: string[] = [];
   if (byId.size !== observations.length) failures.push("duplicate observations");
+  if (observations.length !== challenge.cases.length) {
+    failures.push(`observation count ${observations.length}; expected ${challenge.cases.length}`);
+  }
+  const expectedIds = new Set(challenge.cases.map((item) => item.id));
+  for (const observed of observations) {
+    if (!expectedIds.has(observed.caseId)) {
+      failures.push(`${observed.caseId}: unexpected observation`);
+    }
+  }
   for (const item of challenge.cases) {
     const observed = byId.get(item.id);
     if (!observed) {
@@ -93,8 +123,12 @@ export function scoreEquivalenceChallenge(
     if (observed.decision !== item.expectedDecision) {
       failures.push(`${item.id}: decision ${observed.decision}; expected ${item.expectedDecision}`);
     }
-    if (observed.relationId !== item.expectedRelationId) {
-      failures.push(`${item.id}: relation ${observed.relationId}; expected ${item.expectedRelationId}`);
+    if (observed.decisionDomain !== item.decisionDomain) {
+      failures.push(`${item.id}: decision domain ${observed.decisionDomain}; expected ${item.decisionDomain}`);
+    }
+    const expectedRelationIds = item.expectedRelationId ? [item.expectedRelationId] : [];
+    if (!sameStrings(observed.relationIds, expectedRelationIds)) {
+      failures.push(`${item.id}: relations ${observed.relationIds.join(",") || "none"}; expected ${expectedRelationIds.join(",") || "none"}`);
     }
     if (observed.problemCount !== 0) {
       failures.push(`${item.id}: exposed ${observed.problemCount} user problem(s)`);
@@ -104,24 +138,55 @@ export function scoreEquivalenceChallenge(
     cases: challenge.cases.length,
     failures,
     ...(failures[0] ? { firstFailure: failures[0] } : {}),
-    passed: challenge.cases.length - new Set(failures.map((failure) => failure.split(":", 1)[0])).size,
+    passed:
+      challenge.cases.length -
+      challenge.cases.filter((item) =>
+        failures.some((failure) => failure.startsWith(`${item.id}:`)),
+      ).length,
+  };
+}
+
+export function selectEquivalenceObservation(
+  caseId: string,
+  decisionDomain: EquivalenceDecisionDomain,
+  cursorEntity: EquivalenceDomainObservation,
+  selectedFormula: EquivalenceDomainObservation,
+): EquivalenceObservation {
+  const selected = decisionDomain === "cursor-entity" ? cursorEntity : selectedFormula;
+  return {
+    caseId,
+    decision: selected.decision,
+    decisionDomain,
+    problemCount: selected.problemCount,
+    relationIds: [...new Set(selected.relationIds)].sort(),
   };
 }
 
 function parseCase(value: unknown, index: number): EquivalenceChallengeCase {
   const path = `equivalence challenge.cases[${index}]`;
   const item = record(value, path);
-  exact(item, ["id", "family", "documents", "cursor", "expectedDecision", "expectedRelationId", "variationTags"], path);
+  exact(item, ["id", "family", "documents", "cursor", "decisionDomain", "expectedDecision", "expectedRelationId", "variationTags"], path);
   const family = text(item.family, `${path}.family`);
   if (!(EQUIVALENCE_FAMILIES as readonly string[]).includes(family)) {
     throw new Error(`${path}.family: unknown family ${family}`);
   }
   const decision = text(item.expectedDecision, `${path}.expectedDecision`);
-  if (!["established", "partial", "unsupported"].includes(decision)) {
+  if (!["established", "partial", "conventional", "ambiguous", "conflicting", "unsupported", "engine-limited"].includes(decision)) {
     throw new Error(`${path}.expectedDecision: invalid decision`);
   }
-  if (item.expectedRelationId !== null && typeof item.expectedRelationId !== "string") {
-    throw new Error(`${path}.expectedRelationId: must be a string or null`);
+  const decisionDomain = text(item.decisionDomain, `${path}.decisionDomain`);
+  if (!(EQUIVALENCE_DECISION_DOMAINS as readonly string[]).includes(decisionDomain)) {
+    throw new Error(`${path}.decisionDomain: invalid decision domain`);
+  }
+  if (decisionDomain === "cursor-entity" && (decision === "conventional" || decision === "engine-limited")) {
+    throw new Error(`${path}.expectedDecision: invalid cursor-entity decision`);
+  }
+  const expectedRelationId =
+    item.expectedRelationId === null
+      ? null
+      : text(item.expectedRelationId, `${path}.expectedRelationId`);
+  if (item.expectedRelationId !== null && decisionDomain !== "selected-formula") {
+    throw new Error(`${path}.expectedRelationId: relation expectations require selected-formula domain`);
   }
   if (!Array.isArray(item.documents) || !item.documents.length) throw new Error(`${path}.documents: must not be empty`);
   const documents = item.documents.map((value, documentIndex) => {
@@ -135,13 +200,18 @@ function parseCase(value: unknown, index: number): EquivalenceChallengeCase {
   if (!Array.isArray(item.variationTags) || !item.variationTags.length) throw new Error(`${path}.variationTags: must not be empty`);
   return {
     cursor: { fileId: text(cursor.fileId, `${path}.cursor.fileId`), needle: text(cursor.needle, `${path}.cursor.needle`) },
+    decisionDomain: decisionDomain as EquivalenceDecisionDomain,
     documents,
-    expectedDecision: decision as EquivalenceChallengeCase["expectedDecision"],
-    expectedRelationId: item.expectedRelationId,
+    expectedDecision: decision as EquivalenceDecision,
+    expectedRelationId,
     family: family as EquivalenceFamily,
     id: text(item.id, `${path}.id`),
     variationTags: item.variationTags.map((tag, tagIndex) => text(tag, `${path}.variationTags[${tagIndex}]`)),
   };
+}
+
+function sameStrings(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function record(value: unknown, path: string): Record<string, unknown> {
@@ -158,11 +228,6 @@ function exact(value: Record<string, unknown>, keys: readonly string[], path: st
 function text(value: unknown, path: string): string {
   if (typeof value !== "string" || !value.trim()) throw new Error(`${path}: must be non-empty text`);
   return value;
-}
-
-function integer(value: unknown, path: string): number {
-  if (!Number.isSafeInteger(value)) throw new Error(`${path}: must be an integer`);
-  return value as number;
 }
 
 function unique(values: readonly string[], path: string): void {

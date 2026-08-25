@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::sync::LazyLock;
 
-use crate::concept::{classify_role, classify_role_candidates};
+use crate::concept::{classify_role, classify_role_candidates, is_pack_quantity_concept};
 use crate::pack::{PackDimensionExponent, built_in_packs};
 use crate::parser::ParsedMath;
 use crate::prose::definition_available_from;
@@ -145,6 +145,28 @@ static QUANTITY_CATALOG: LazyLock<QuantityCatalog> = LazyLock::new(|| {
         std::cmp::Reverse(unit.aliases.first().map_or(unit.symbol.len(), String::len))
     });
     catalog
+});
+
+static CONCEPT_QUANTITY_KINDS: LazyLock<BTreeMap<String, String>> = LazyLock::new(|| {
+    let mut mappings = BTreeMap::<String, String>::new();
+    let mut ambiguous = std::collections::BTreeSet::new();
+    for pack in built_in_packs() {
+        for role in pack.laws.iter().flat_map(|law| &law.roles) {
+            let Some(quantity) = &role.quantity else {
+                continue;
+            };
+            if mappings
+                .get(&role.concept)
+                .is_some_and(|existing| existing != quantity)
+            {
+                ambiguous.insert(role.concept.clone());
+            } else {
+                mappings.insert(role.concept.clone(), quantity.clone());
+            }
+        }
+    }
+    mappings.retain(|concept, _| !ambiguous.contains(concept));
+    mappings
 });
 
 pub(crate) fn unit_symbol_supports_quantity(symbol: &str, quantity_kind_id: &str) -> bool {
@@ -432,13 +454,29 @@ fn find_quantity_kind(description: &str) -> Option<&'static QuantityKindSpec> {
     if classify_role_candidates(description).len() > 1 {
         return None;
     }
-    if let Some(concept_id) = classify_role(description)
-        && let Some(kind) = QUANTITY_CATALOG
+    if let Some(concept_id) = classify_role(description) {
+        // A complete semantic role phrase outranks incidental quantity words
+        // inside it. For example, pressure head and velocity head are both
+        // length-valued head components; treating the adjectives as standalone
+        // pressure and velocity declarations invents a dimensional conflict.
+        if let Some(kind) = QUANTITY_CATALOG
             .kinds
             .iter()
             .find(|kind| kind.id == concept_id)
-    {
-        return Some(kind);
+        {
+            return Some(kind);
+        }
+        if let Some(quantity_id) = CONCEPT_QUANTITY_KINDS.get(&concept_id)
+            && let Some(kind) = QUANTITY_CATALOG
+                .kinds
+                .iter()
+                .find(|kind| kind.id == *quantity_id)
+        {
+            return Some(kind);
+        }
+        if is_pack_quantity_concept(&concept_id) {
+            return None;
+        }
     }
     let mut semantic_description = description;
     for separator in [" along ", " through ", " across ", " normal to "] {
@@ -477,7 +515,7 @@ fn find_unit(description: &str) -> Option<&'static UnitSpec> {
     QUANTITY_CATALOG.units.iter().find(|unit| {
         unit.aliases
             .iter()
-            .any(|alias| contains_term(&lower, &alias.to_lowercase()))
+            .any(|alias| explicit_symbol(&lower, &alias.to_lowercase()))
             || explicit_symbol(description, &unit.symbol)
     })
 }
@@ -536,7 +574,8 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::{
-        Dimension, Exponent, find_quantity_kind, observe_quantities, unit_symbol_supports_quantity,
+        Dimension, Exponent, find_quantity_kind, find_unit, observe_quantities,
+        unit_symbol_supports_quantity,
     };
     use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
@@ -586,6 +625,8 @@ mod tests {
             find_quantity_kind("electric force on the charge").map(|kind| kind.id.as_str()),
             Some("quantities-units:force")
         );
+        assert!(find_quantity_kind("pressure head scalar").is_none());
+        assert!(find_quantity_kind("velocity head scalar").is_none());
     }
 
     #[test]
@@ -606,6 +647,8 @@ mod tests {
             "m",
             "quantities-units:frequency"
         ));
+        assert!(find_unit("second section area scalar").is_none());
+        assert!(find_unit("duration measured in seconds").is_some());
     }
 
     #[test]

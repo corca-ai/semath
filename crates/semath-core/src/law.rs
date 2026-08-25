@@ -1779,9 +1779,25 @@ fn unify_exact_all(
     placeholders: &BTreeSet<String>,
     bindings: &BTreeMap<String, SemanticExpr>,
 ) -> Vec<BTreeMap<String, SemanticExpr>> {
+    unify_exact_all_with_polarity(template, actual, placeholders, bindings, false)
+}
+
+fn unify_exact_all_with_polarity(
+    template: &SemanticExpr,
+    actual: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+    bindings: &BTreeMap<String, SemanticExpr>,
+    allow_signed_placeholder: bool,
+) -> Vec<BTreeMap<String, SemanticExpr>> {
     if let SemanticExprKind::Symbol(name) = &template.kind
         && placeholders.contains(name)
     {
+        // A standalone law role is an operand, not permission to absorb a
+        // polarity-changing wrapper. Product factors are the exception: a
+        // coefficient role must be able to bind a signed scalar such as `-3`.
+        if !allow_signed_placeholder && matches!(actual.kind, SemanticExprKind::Negate(_)) {
+            return Vec::new();
+        }
         return match bindings.get(name) {
             Some(bound) if equivalent(bound, actual) => vec![bindings.clone()],
             Some(_) => Vec::new(),
@@ -1892,7 +1908,7 @@ fn unify_exact_all(
         (SemanticExprKind::Product(left), SemanticExprKind::Product(right))
             if left.len() == right.len() =>
         {
-            unify_sequence(left.iter(), right.iter(), placeholders, bindings)
+            unify_product_sequence(left.iter(), right.iter(), placeholders, bindings)
         }
         (
             SemanticExprKind::Apply {
@@ -2429,6 +2445,26 @@ fn unify_sequence<'a>(
             candidates
                 .into_iter()
                 .flat_map(|candidate| unify_exact_all(template, actual, placeholders, &candidate))
+                .take(MAX_UNIFICATION_CANDIDATES)
+                .collect()
+        },
+    )
+}
+
+fn unify_product_sequence<'a>(
+    template: impl IntoIterator<Item = &'a SemanticExpr>,
+    actual: impl IntoIterator<Item = &'a SemanticExpr>,
+    placeholders: &BTreeSet<String>,
+    bindings: &BTreeMap<String, SemanticExpr>,
+) -> Vec<BTreeMap<String, SemanticExpr>> {
+    template.into_iter().zip(actual).fold(
+        vec![bindings.clone()],
+        |candidates, (template, actual)| {
+            candidates
+                .into_iter()
+                .flat_map(|candidate| {
+                    unify_exact_all_with_polarity(template, actual, placeholders, &candidate, true)
+                })
                 .take(MAX_UNIFICATION_CANDIDATES)
                 .collect()
         },
