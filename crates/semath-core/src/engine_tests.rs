@@ -3183,6 +3183,36 @@ fn exact_formula_selector_anchor_does_not_increase_semantic_certainty() {
 }
 
 #[test]
+fn formula_disposition_is_invariant_across_sibling_cursor_claims() {
+    let content = "The source calls $x$ the unique sample. Inspect $g=x$.";
+    let at_g = semantic_view_at(content, content.rfind("g=x").unwrap() as u32);
+    let at_x = semantic_view_at(content, content.rfind("g=x").unwrap() as u32 + 2);
+
+    assert_eq!(
+        at_g.authoring_context.disposition, at_x.authoring_context.disposition,
+        "g={at_g:#?}\nx={at_x:#?}"
+    );
+    assert_eq!(
+        at_g.authoring_context.lifecycle, at_x.authoring_context.lifecycle,
+        "g={at_g:#?}\nx={at_x:#?}"
+    );
+    assert_eq!(
+        at_g.authoring_context.interpretations.analysis_limits,
+        at_x.authoring_context.interpretations.analysis_limits,
+        "g={at_g:#?}\nx={at_x:#?}"
+    );
+    assert_eq!(
+        at_g.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Unsupported,
+        "{at_g:#?}"
+    );
+    assert_ne!(
+        at_g.authoring_context.claim_evidence, at_x.authoring_context.claim_evidence,
+        "cursor claim links should remain independently selected"
+    );
+}
+
+#[test]
 fn authoring_claim_anchor_uses_the_claims_own_included_document() {
     let main = "\\input{definitions}\nInspect $A$.";
     let definitions = "Let $A$ denote an event.";

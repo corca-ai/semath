@@ -4390,7 +4390,7 @@ impl SemathEngine {
             .as_ref()
             .filter(|_| selected_root_has_source_meaning)
             .and_then(|root| self.canonical_meaning_owner(document, root));
-        let (mut formula_context, formula_structural_candidates) =
+        let (formula_context, formula_structural_candidates) =
             if let Some(range) = queried_formula_range {
                 (
                     observations.formula_context(
@@ -4403,12 +4403,16 @@ impl SemathEngine {
             } else {
                 (context.clone(), Vec::new())
             };
+        let root_claim_support = selected_root
+            .map(|root| self.formula_root_index_claims(document, root))
+            .unwrap_or_default();
+        let mut formula_claim_context = formula_context.clone();
         if let Some(root) = selected_root {
             self.append_formula_index_claims(
                 document,
                 root,
                 display_focus.as_ref(),
-                &mut formula_context,
+                &mut formula_claim_context,
             );
         }
         let (mut interpretation_domains, formula_domains_truncated) = queried_formula_range
@@ -4469,13 +4473,9 @@ impl SemathEngine {
         if !queried_formula_is_rejected
             && !formula_retracted
             && !formula_engine_limited
+            && conventional_candidates.is_empty()
             && matches!(formula_decision, MeaningDecision::Unsupported { .. })
-            && formula_context.claims.iter().any(|claim| {
-                claim
-                    .evidence
-                    .iter()
-                    .any(|evidence| evidence.rule_id != "semath/canonical-symbol-identity")
-            })
+            && !root_claim_support.is_empty()
         {
             formula_decision = MeaningDecision::Partial {
                 meaning: crate::MeaningConclusion {
@@ -4490,8 +4490,7 @@ impl SemathEngine {
                 reasons: vec![crate::DecisionReason {
                     kind: crate::DecisionReasonKind::Proof,
                     label: "Partial meaning is grounded in reviewed source claims.".into(),
-                    evidence: formula_context
-                        .claims
+                    evidence: root_claim_support
                         .iter()
                         .flat_map(|claim| claim.evidence.iter().cloned())
                         .collect(),
@@ -4576,6 +4575,7 @@ impl SemathEngine {
             &local_formulas,
             &linked_formulas,
             &formula_context,
+            &formula_claim_context,
             &interpretation_domains,
             &formula_structural_candidates,
             authoring_decision,
@@ -4607,6 +4607,7 @@ impl SemathEngine {
         local_formulas: &[LawRecognition],
         linked_formulas: &[SourceLinkedFormula],
         context: &SemanticContextInfo,
+        claim_context: &SemanticContextInfo,
         interpretation_domains: &[DomainActivation],
         interpretation_structural_candidates: &[SemanticCandidateInfo],
         decision: &MeaningDecision,
@@ -4657,7 +4658,7 @@ impl SemathEngine {
 
         let approximation = queried_relation
             .and_then(|relation| self.math_approximation(relation, local_formulas, context));
-        let mut claim_evidence = self.math_claim_evidence(context);
+        let mut claim_evidence = self.math_claim_evidence(claim_context);
         truncated |= claim_evidence.len() > MAX_AUTHORING_ITEMS;
         claim_evidence.truncate(MAX_AUTHORING_ITEMS);
 
@@ -5456,6 +5457,48 @@ impl SemathEngine {
             })
     }
 
+    fn formula_root_index_claims(
+        &self,
+        document: &AnalyzedDocument,
+        root: &SemanticExpr,
+    ) -> Vec<crate::SemanticClaimInfo> {
+        let owner_range = match &root.kind {
+            SemanticExprKind::System(_) => return Vec::new(),
+            SemanticExprKind::Relation { left, .. } => left.range.clone(),
+            _ => root.range.clone(),
+        };
+        let mut sources = document
+            .semantic_occurrences
+            .iter()
+            .filter(|seed| ranges_overlap(&seed.selection_range, &owner_range))
+            .filter_map(|seed| {
+                let focus = self.index.cursor_focus(&document.document.file_id, seed)?;
+                let entity = self.resolved_entity(&focus.occurrence_id)?;
+                Some((
+                    entity,
+                    focus,
+                    (
+                        u8::from(seed.selection_range != owner_range),
+                        seed.selection_range.start_offset,
+                        seed.selection_range.end_offset - seed.selection_range.start_offset,
+                    ),
+                ))
+            })
+            .collect::<Vec<_>>();
+        sources.sort_by_key(|(_, _, order)| *order);
+        let mut seen_entities = BTreeSet::new();
+        let mut claims = sources
+            .into_iter()
+            .filter(|(entity, _, _)| seen_entities.insert(entity.clone()))
+            .take(MAX_VIEW_CLAIMS)
+            .flat_map(|(_, focus, _)| self.formula_index_claims_for_focus(document, &focus, false))
+            .collect::<Vec<_>>();
+        claims.sort_by(|left, right| left.claim_id.cmp(&right.claim_id));
+        claims.dedup_by(|left, right| left.claim_id == right.claim_id);
+        claims.truncate(MAX_VIEW_CLAIMS);
+        claims
+    }
+
     fn append_formula_index_claims(
         &self,
         document: &AnalyzedDocument,
@@ -5469,12 +5512,22 @@ impl SemathEngine {
         }) else {
             return;
         };
+        let claims = self.formula_index_claims_for_focus(document, focus, true);
+        append_context_claims(context, claims);
+    }
+
+    fn formula_index_claims_for_focus(
+        &self,
+        document: &AnalyzedDocument,
+        focus: &CursorFocus,
+        include_selector_anchor: bool,
+    ) -> Vec<crate::SemanticClaimInfo> {
         let Some(entity) = self.resolved_entity(&focus.occurrence_id) else {
-            return;
+            return Vec::new();
         };
         let occurrence_id = focus.occurrence_id.clone();
         let Some(occurrence) = self.index.semantic.occurrence(&occurrence_id) else {
-            return;
+            return Vec::new();
         };
         let mut claims = index_claims_matching(
             &self.index.semantic,
@@ -5493,7 +5546,7 @@ impl SemathEngine {
                     )
             },
         );
-        if claims.is_empty() {
+        if include_selector_anchor && claims.is_empty() {
             claims = index_claims_matching(
                 &self.index.semantic,
                 &self.index.documents,
@@ -5510,7 +5563,7 @@ impl SemathEngine {
                 },
             );
         }
-        append_context_claims(context, claims);
+        claims
     }
 
     fn has_prior_excluding_occurrence(
