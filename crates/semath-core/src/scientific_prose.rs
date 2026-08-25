@@ -1486,6 +1486,40 @@ fn classify_discourse_frame(
         hedged_marker,
     );
 
+    let explicit_refusal_marker = first_marker(
+        &lower,
+        &[
+            "forbids ",
+            " cannot use ",
+            " cannot apply ",
+            " cannot be used",
+            " cannot be applied",
+            " should not use ",
+            " should not apply ",
+            " should not be used",
+            " should not be applied",
+            " is forbidden",
+            " are forbidden",
+            " is invalid",
+            " are invalid",
+            " is unavailable",
+            " are unavailable",
+            " is unusable",
+            " are unusable",
+            " must be discarded",
+            " must be ignored",
+            " must be rejected",
+            " must be withdrawn",
+            " is discarded",
+            " are discarded",
+            " is excluded",
+            " are excluded",
+            " is rejected",
+            " are rejected",
+            " is withdrawn",
+            " are withdrawn",
+        ],
+    );
     let negative_marker = if starts_with_any(
         &lower,
         &[
@@ -1512,6 +1546,7 @@ fn classify_discourse_frame(
         || lower.contains(" are not adopted")
         || lower.contains(" was not adopted")
         || lower.contains(" were not adopted")
+        || explicit_refusal_marker.is_some()
         || ((lower.starts_with("drops ") || lower.contains(" drops "))
             && lower.contains(" without assuming"))
         || lower.contains(" inapplicable")
@@ -1523,6 +1558,7 @@ fn classify_discourse_frame(
             &lower,
             &["not", "never", "without", "no longer", "inapplicable"],
         )
+        .or(explicit_refusal_marker)
     } else {
         None
     };
@@ -3214,10 +3250,24 @@ mod tests {
             "The cited gradient assumption is inapplicable to these data.",
             "The document drops the product derivative and claims $i=C(t)\\frac{dv}{dt}$ without assuming $\\dot C=0$.",
             "For comparison only, the report mentions $K=\\frac12mv^2$ but does not adopt the kinetic-energy model.",
+            "The model forbids the electric-power formula $P=VI$.",
+            "The archived relation $PV=nRT$ is invalid for this analysis.",
+            "The balance $\\Delta U=Q-W$ is unavailable in the open-system model.",
+            "The update $x_{k+1}=x_k-\\eta g_k$ must be discarded.",
+            "The equation $F=ma$ is excluded from this model.",
+            "The archived relation $PV=nRT$ cannot be used in this analysis.",
+            "The power formula $P=VI$ should not be applied to this device.",
+            "The balance $\\Delta U=Q-W$ is rejected for the open system.",
+            "The update $x_{k+1}=x_k-\\eta g_k$ is withdrawn.",
+            "The equation $F=ma$ is unusable for this model.",
         ] {
             let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
-            assert_eq!(clauses[0].frame.polarity, EvidencePolarity::Negative);
-            assert!(!clauses[0].frame.establishes());
+            assert_eq!(
+                clauses[0].frame.polarity,
+                EvidencePolarity::Negative,
+                "{source}: {clauses:#?}"
+            );
+            assert!(!clauses[0].frame.establishes(), "{source}: {clauses:#?}");
         }
     }
 }
