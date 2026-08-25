@@ -365,6 +365,7 @@ function applicationEnd(
     if (
       sibling && (sibling.kind === "delimiter" || sibling.kind === "group") &&
       sibling.state === "complete" &&
+      sibling.ranges.full.startOffset === occurrence.endOffset &&
       sibling.ranges.full.startOffset < sibling.ranges.full.endOffset
     ) return sibling.ranges.full.endOffset;
   }

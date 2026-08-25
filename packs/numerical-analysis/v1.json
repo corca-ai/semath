@@ -103,7 +103,7 @@
       "conceptKind": "quantity",
       "title": "Discretization step",
       "description": "A positive spatial, temporal, or iterative step parameter.",
-      "aliases": ["mesh spacing", "grid spacing", "time step"],
+      "aliases": ["mesh spacing", "grid spacing", "time step", "positive step size"],
       "parents": [],
       "references": ["leveque"]
     },
@@ -193,7 +193,7 @@
       "conceptKind": "quantity",
       "title": "Sampled function value",
       "description": "A function value at a declared quadrature or finite-difference node.",
-      "aliases": ["grid value", "nodal value"],
+      "aliases": ["grid value", "nodal value", "sample value"],
       "parents": [],
       "references": ["burden-faires"]
     },
@@ -288,7 +288,7 @@
         {"id": "approximate-value", "concept": "numerical-analysis:approximate-value", "description": "Approximate value."},
         {"id": "exact-value", "concept": "numerical-analysis:exact-value", "description": "Exact reference value."}
       ],
-      "conditions": [{"id": "declared-comparison", "kind": "same-context", "subjects": ["approximate-value", "exact-value"], "label": "Both values belong to the same declared approximation context."}],
+      "conditions": [{"id": "declared-comparison", "kind": "same-context", "subjects": ["approximate-value", "exact-value"], "label": "Both values belong to the same declared approximation context.", "evidencePhrases": ["same numerical comparison"]}],
       "activationPhrases": ["approximates the exact value", "numerical approximation"],
       "references": ["burden-faires"],
       "canonicalRelation": "approximate-value \\approx exact-value"
@@ -302,7 +302,7 @@
         {"id": "exact-value", "concept": "numerical-analysis:exact-value", "description": "Exact reference value."},
         {"id": "approximate-value", "concept": "numerical-analysis:approximate-value", "description": "Approximate value."}
       ],
-      "conditions": [{"id": "compatible-values", "kind": "shape-compatible", "subjects": ["exact-value", "approximate-value"], "label": "The exact and approximate values share a normed space."}],
+      "conditions": [{"id": "compatible-values", "kind": "shape-compatible", "subjects": ["exact-value", "approximate-value"], "label": "The exact and approximate values share a normed space.", "evidencePhrases": ["same numerical comparison"]}],
       "activationPhrases": ["absolute error"],
       "references": ["burden-faires"],
       "canonicalRelation": "absolute-error = \\operatorname{norm}(exact-value - approximate-value)"

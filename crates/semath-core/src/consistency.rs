@@ -238,6 +238,19 @@ pub(crate) fn observe_roles(
 fn role_claims(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Vec<ScopedRoleClaim> {
     let symbol_range = definition.location.range.clone();
     let available_from = definition_available_from(definition);
+    let occurrence_bound = definition
+        .evidence
+        .rule_id
+        .starts_with("formula-occurrence-role/");
+    let scope_offset = if occurrence_bound {
+        symbol_range.start_offset
+    } else {
+        definition
+            .evidence
+            .source_ranges
+            .first()
+            .map_or(symbol_range.start_offset, |range| range.start_offset)
+    };
     classify_role_candidates(&definition.description)
         .into_iter()
         .map(|role| ScopedRoleClaim {
@@ -253,13 +266,10 @@ fn role_claims(definition: &DefinitionInfo, scopes: &ScopeGraph) -> Vec<ScopedRo
                     source_anchors: definition.evidence.source_anchors.clone(),
                 },
             },
-            scope_id: scopes.id_at(symbol_range.start_offset),
+            scope_id: scopes.id_at(scope_offset),
             symbol_range: symbol_range.clone(),
             available_from,
-            occurrence_bound: definition
-                .evidence
-                .rule_id
-                .starts_with("formula-occurrence-role/"),
+            occurrence_bound,
         })
         .collect()
 }

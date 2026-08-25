@@ -384,6 +384,14 @@ mod tests {
             classify_role("preliminary volume rate").as_deref(),
             Some("quantities-units:volumetric-flow-rate")
         );
+        assert_eq!(
+            classify_role("positive step size scalar").as_deref(),
+            Some("numerical-analysis:discretization-step")
+        );
+        assert_eq!(
+            classify_role("sample value scalar").as_deref(),
+            Some("numerical-analysis:sample-value")
+        );
     }
 
     #[test]

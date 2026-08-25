@@ -449,7 +449,7 @@ export function validateFreshBlindRelease(
   }
   const entityDecisions = count(primary.map((probe) => probe.expected.decision));
   const formulaDecisions = count(primary.flatMap((probe) =>
-    probe.expected.formulaDecision === undefined
+    probe.expected.formulaDecision == null
       ? []
       : [probe.expected.formulaDecision.status]
   ));
@@ -745,7 +745,12 @@ function validateFormulaDecisionExpectations(
     (release.authoringSafety ?? []).map((item) => [item.probeId, item]),
   );
   for (const probe of release.fixture.probes) {
-    const expected = probe.expected.formulaDecision!;
+    const expected = probe.expected.formulaDecision;
+    if (!expected) {
+      throw new Error(
+        `${probe.id}: fresh release requires an exact selected formula decision`,
+      );
+    }
     const scenario = authoredScenarioFor(release.fixture, probe);
     const snapshot = authoredSnapshotFor(scenario, probe);
     const selected = resolveAuthoredAnchor(snapshot, expected.anchor);

@@ -94,7 +94,48 @@ describe("independently authored scientific corpus", () => {
         prepareRename: { refusalKind: "non-editable", status: "refused" },
         references: authorized,
         rename: { refusalKind: "non-editable", status: "refused" },
-      });
+    });
+  });
+
+  test("does not borrow selected-formula proof for a missing cursor entity", () => {
+    const probe = parseAuthoredScientificFixture(fixtureValue("holdout", 1))
+      .probes[0]!;
+    const refused = {
+      reason: { kind: "no-entity", message: "no entity at cursor" },
+      status: "refused",
+    } as const;
+    const result = (value: unknown) => ({ value });
+    const results = {
+      definition: result({ authorization: refused, kind: "locations", locations: [] }),
+      diagnostics: result({ diagnostics: [], kind: "diagnostics" }),
+      prepareRename: result({ authorization: refused, kind: "renamePreparation" }),
+      references: result({ authorization: refused, kind: "locations", locations: [] }),
+      rename: result({ authorization: refused, kind: "editProposal" }),
+      semanticView: result({
+        kind: "semanticView",
+        view: {
+          authoringContext: {
+            disposition: "established",
+            interpretations: { hypotheses: [] },
+          },
+          context: { relations: [] },
+          decision: {
+            reasons: [{
+              evidence: [{
+                kind: "formula",
+                ruleId: "selected-formula-proof",
+                sourceRanges: [{ startOffset: 1, endOffset: 4 }],
+                strength: "explicit",
+              }],
+              kind: "proof",
+            }],
+            status: "partial",
+          },
+        },
+      }),
+    } as unknown as AuthoredScientificSurfaceResults;
+
+    expect(observeAuthoredScientificProbe(probe, results).proofGrounded).toBe(false);
   });
 
   test("treats trailing equation tags as presentation outside semantic relation ranges", () => {
@@ -488,6 +529,7 @@ describe("independently authored scientific corpus", () => {
       },
       status: "partial",
     };
+    observation.surfaceAuthorizations = refusedSurfaceAuthorizations();
     const score = scoreAuthoredScientificFixture(fixture, [observation]);
     expect(score.failures).toEqual([]);
     expect(score.risk.falseEstablishment).toBe(0);
@@ -498,6 +540,131 @@ describe("independently authored scientific corpus", () => {
     };
     expect(scoreAuthoredScientificFixture(fixture, [observation]).risk)
       .toMatchObject({ falseEstablishment: 1 });
+  });
+
+  test("rejects authorized-empty schema-2 surfaces when refusal is reviewed", () => {
+    const value = fixtureValue("holdout", 1) as FixtureValue & {
+      schemaVersion: number;
+    };
+    value.schemaVersion = 2;
+    const expected = value.probes[0]!.expected as typeof value.probes[0]["expected"] & {
+      cursorOccurrence?: { fileId: string; needle: string };
+      formulaDecision?: null;
+      navigation: typeof value.probes[0]["expected"]["navigation"] & {
+        rename: { newName?: string; status: "unavailable" };
+      };
+    };
+    expected.cursorOccurrence = { fileId: "main", needle: "x_0" };
+    expected.formulaDecision = null;
+    expected.navigation.rename.newName = "y_0";
+    const fixture = parseAuthoredScientificFixture(value);
+    const observation = observationValue();
+    observation.formulaDecision = { location: null, status: "unsupported" };
+    observation.cursorSurfaceIdentity = {
+      entityId: {
+        anchor: { documentVersion: 1, fileId: "main", localId: 1 },
+        componentId: "component-1",
+        kind: "symbol",
+        scopePath: [],
+      },
+      location: {
+        fileId: "main",
+        path: "main.tex",
+        range: { startOffset: 36, endOffset: 39 },
+      },
+      occurrenceId: { documentVersion: 1, fileId: "main", localId: 1 },
+    };
+    observation.symbolLocation = observation.cursorSurfaceIdentity.location;
+    observation.surfaceAuthorizations = refusedSurfaceAuthorizations();
+    expect(scoreAuthoredScientificFixture(fixture, [observation]).failures)
+      .toEqual([]);
+
+    observation.surfaceAuthorizations = {
+      ...refusedSurfaceAuthorizations(),
+      definition: {
+        entityId: {
+          anchor: { documentVersion: 1, fileId: "main", localId: 1 },
+          componentId: "component-1",
+          kind: "symbol",
+          scopePath: [],
+        },
+        focusOccurrenceId: { documentVersion: 1, fileId: "main", localId: 1 },
+        status: "authorized",
+      },
+    };
+    const score = scoreAuthoredScientificFixture(fixture, [observation]);
+    expect(score.failures[0]).toContain(
+      "definition authorization authorized; expected refused",
+    );
+    expect(score.risk.navigationOrIdentity).toBe(1);
+  });
+
+  test("distinguishes an authorized empty schema-2 result from a refusal", () => {
+    const value = fixtureValue("holdout", 1) as FixtureValue & {
+      schemaVersion: number;
+    };
+    value.schemaVersion = 2;
+    const expected = value.probes[0]!.expected as typeof value.probes[0]["expected"] & {
+      cursorOccurrence?: { fileId: string; needle: string };
+      formulaDecision?: null;
+      navigation: typeof value.probes[0]["expected"]["navigation"] & {
+        definition: { authorization?: "authorized"; status: "unavailable" };
+        rename: { newName?: string; status: "unavailable" };
+      };
+    };
+    expected.cursorOccurrence = { fileId: "main", needle: "x_0" };
+    expected.formulaDecision = null;
+    expected.navigation.definition.authorization = "authorized";
+    expected.navigation.rename.newName = "y_0";
+    const fixture = parseAuthoredScientificFixture(value);
+    const observation = observationValue();
+    observation.formulaDecision = { location: null, status: "unsupported" };
+    observation.cursorSurfaceIdentity = {
+      entityId: {
+        anchor: { documentVersion: 1, fileId: "main", localId: 1 },
+        componentId: "component-1",
+        kind: "symbol",
+        scopePath: [],
+      },
+      location: {
+        fileId: "main",
+        path: "main.tex",
+        range: { startOffset: 36, endOffset: 39 },
+      },
+      occurrenceId: { documentVersion: 1, fileId: "main", localId: 1 },
+    };
+    observation.symbolLocation = observation.cursorSurfaceIdentity.location;
+    observation.surfaceAuthorizations = {
+      ...refusedSurfaceAuthorizations(),
+      definition: {
+        entityId: {
+          anchor: { documentVersion: 1, fileId: "main", localId: 1 },
+          componentId: "component-1",
+          kind: "symbol",
+          scopePath: [],
+        },
+        focusOccurrenceId: { documentVersion: 1, fileId: "main", localId: 1 },
+        status: "authorized",
+      },
+    };
+    expect(scoreAuthoredScientificFixture(fixture, [observation]).failures)
+      .toEqual([]);
+  });
+
+  test("requires a null schema-2 cursor occurrence to refuse entity authority", () => {
+    const value = fixtureValue("holdout", 1) as FixtureValue & {
+      schemaVersion: number;
+    };
+    value.schemaVersion = 2;
+    const expected = value.probes[0]!.expected as typeof value.probes[0]["expected"] & {
+      cursorOccurrence?: null;
+      formulaDecision?: null;
+    };
+    expected.cursorOccurrence = null;
+    expected.formulaDecision = null;
+    expect(() => parseAuthoredScientificFixture(value)).toThrow(
+      "a missing cursor occurrence must refuse cursor-entity authority",
+    );
   });
 
   test("keeps fixture schema 1 byte-compatible and rejects decision-domain fields", () => {
@@ -714,6 +881,18 @@ function observationValue(): WritableObservation {
     relations: [],
     renameEdits: [],
     symbol: "x_0",
+  };
+}
+
+function refusedSurfaceAuthorizations(): NonNullable<
+  AuthoredScientificObservation["surfaceAuthorizations"]
+> {
+  const refusal = { refusalKind: "unsupported", status: "refused" } as const;
+  return {
+    definition: refusal,
+    prepareRename: refusal,
+    references: refusal,
+    rename: refusal,
   };
 }
 

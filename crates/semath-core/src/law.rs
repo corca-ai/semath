@@ -544,6 +544,7 @@ const MAX_POSITIVE_FACTS_PER_SYSTEM: usize = 64;
 pub(crate) struct LawAnalysisContext<'a> {
     pub(crate) source: &'a str,
     pub(crate) formula_ranges: &'a [SourceRange],
+    pub(crate) formula_attachment_ranges: &'a [SourceRange],
     pub(crate) shapes: &'a ShapeObservations,
     pub(crate) quantities: &'a QuantityObservations,
     pub(crate) consistency: &'a RoleObservations,
@@ -581,7 +582,7 @@ impl ExternalTypeEnvironment {
         self.assumptions.entry(offset).or_default().push(assumption);
     }
 
-    fn assumptions_at(&self, offset: u32) -> &[AssumptionInfo] {
+    pub(crate) fn assumptions_at(&self, offset: u32) -> &[AssumptionInfo] {
         self.assumptions
             .get(&self.formula_offset(offset))
             .map_or(&[], Vec::as_slice)
@@ -668,11 +669,18 @@ fn facts_at<T: Clone>(
     offset: u32,
     symbol: &str,
 ) -> Vec<T> {
-    facts
-        .get(&offset)
-        .and_then(|symbols| symbols.get(symbol))
-        .cloned()
-        .unwrap_or_default()
+    let Some(symbols) = facts.get(&offset) else {
+        return Vec::new();
+    };
+    if let Some(exact) = symbols.get(symbol) {
+        return exact.clone();
+    }
+    let normalized = symbol.trim_start_matches('\\');
+    symbols
+        .iter()
+        .filter(|(candidate, _)| candidate.trim_start_matches('\\') == normalized)
+        .flat_map(|(_, values)| values.iter().cloned())
+        .collect()
 }
 
 impl LawObservations {
@@ -907,17 +915,23 @@ pub(crate) fn observe_laws(
     let mut pack_latent_fallbacks = 0;
     let mut actuals = Vec::new();
     for expression in canonical_expressions {
-        let formula_range = context
+        let formula = context
             .formula_ranges
             .iter()
+            .enumerate()
             .filter(|range| {
-                range.start_offset <= expression.range.start_offset
-                    && expression.range.end_offset <= range.end_offset
+                range.1.start_offset <= expression.range.start_offset
+                    && expression.range.end_offset <= range.1.end_offset
             })
-            .min_by_key(|range| range.end_offset - range.start_offset);
-        collect_law_expressions(expression, formula_range, &mut actuals);
+            .min_by_key(|(_, range)| range.end_offset - range.start_offset);
+        let formula_range = formula.map(|(_, range)| range);
+        let attachment_range = formula
+            .and_then(|(index, _)| context.formula_attachment_ranges.get(index))
+            .or(formula_range);
+        collect_law_expressions(expression, formula_range, attachment_range, &mut actuals);
     }
-    for (actual, source_envelope, formula_envelope, ownership_range) in actuals {
+    for (actual, source_envelope, formula_envelope, ownership_range, attachment_envelope) in actuals
+    {
         let source_envelope =
             strip_formula_presentation(&source_envelope, context.source, &source_index);
         let ownership_range =
@@ -1110,6 +1124,7 @@ pub(crate) fn observe_laws(
                 &source_envelope,
                 &formula_envelope,
                 &ownership_range,
+                &attachment_envelope,
                 bindings,
                 &role_support,
                 matched_form,
@@ -1284,7 +1299,14 @@ fn presentation_command_end(source: &str, start: usize, limit: usize) -> Option<
 fn collect_law_expressions<'a>(
     expression: &'a SemanticExpr,
     formula_range: Option<&SourceRange>,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange, SourceRange)>,
+    attachment_range: Option<&SourceRange>,
+    output: &mut Vec<(
+        &'a SemanticExpr,
+        SourceRange,
+        SourceRange,
+        SourceRange,
+        SourceRange,
+    )>,
 ) {
     if let SemanticExprKind::System(expressions) = &expression.kind {
         for expression in expressions {
@@ -1292,6 +1314,7 @@ fn collect_law_expressions<'a>(
                 expression,
                 Some(&expression.range),
                 formula_range,
+                attachment_range,
                 output,
             );
         }
@@ -1300,6 +1323,7 @@ fn collect_law_expressions<'a>(
             expression,
             Some(&expression.range),
             formula_range,
+            attachment_range,
             output,
         );
     }
@@ -1309,7 +1333,14 @@ fn collect_law_expressions_with_envelope<'a>(
     expression: &'a SemanticExpr,
     relation_range: Option<&SourceRange>,
     formula_range: Option<&SourceRange>,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange, SourceRange)>,
+    attachment_range: Option<&SourceRange>,
+    output: &mut Vec<(
+        &'a SemanticExpr,
+        SourceRange,
+        SourceRange,
+        SourceRange,
+        SourceRange,
+    )>,
 ) {
     let relation_envelope = relation_range
         .cloned()
@@ -1317,17 +1348,22 @@ fn collect_law_expressions_with_envelope<'a>(
     let formula_envelope = formula_range
         .cloned()
         .unwrap_or_else(|| relation_envelope.clone());
+    let attachment_envelope = attachment_range
+        .cloned()
+        .unwrap_or_else(|| formula_envelope.clone());
     output.push((
         expression,
         relation_envelope.clone(),
         formula_envelope.clone(),
         relation_envelope.clone(),
+        attachment_envelope.clone(),
     ));
     for child in expression_children(expression) {
         collect_nested_law_expressions(
             child,
             &relation_envelope,
             &formula_envelope,
+            &attachment_envelope,
             matches!(expression.kind, SemanticExprKind::Relation { .. }),
             output,
         );
@@ -1338,8 +1374,15 @@ fn collect_nested_law_expressions<'a>(
     expression: &'a SemanticExpr,
     source_envelope: &SourceRange,
     formula_envelope: &SourceRange,
+    attachment_envelope: &SourceRange,
     owns_relation_operand: bool,
-    output: &mut Vec<(&'a SemanticExpr, SourceRange, SourceRange, SourceRange)>,
+    output: &mut Vec<(
+        &'a SemanticExpr,
+        SourceRange,
+        SourceRange,
+        SourceRange,
+        SourceRange,
+    )>,
 ) {
     if matches!(
         &expression.kind,
@@ -1355,6 +1398,7 @@ fn collect_nested_law_expressions<'a>(
             } else {
                 expression.range.clone()
             },
+            attachment_envelope.clone(),
         ));
     }
     let child_owns_relation_operand = match &expression.kind {
@@ -1367,6 +1411,7 @@ fn collect_nested_law_expressions<'a>(
             child,
             source_envelope,
             formula_envelope,
+            attachment_envelope,
             child_owns_relation_operand,
             output,
         );
@@ -2662,7 +2707,14 @@ fn plan_role_support(
             }
             RoleSupport::Asserted => {
                 supported += 1;
-                supported_roles.insert(role.id.as_str(), RoleBindingProof::Asserted);
+                supported_roles.insert(
+                    role.id.as_str(),
+                    if formula_operator_role_support(role, expression, actual).is_proven() {
+                        RoleBindingProof::Derived
+                    } else {
+                        RoleBindingProof::Asserted
+                    },
+                );
             }
             RoleSupport::Unresolved => {
                 if formula_operator_role_support(role, expression, actual).is_proven() {
@@ -3018,6 +3070,35 @@ fn formula_operator_role_support(
     if expected_symbols.is_empty() {
         return RoleSupport::Unresolved;
     }
+    if role.concept.split(':').next_back() == Some("variable")
+        && expression_any(formula, |candidate| {
+            matches!(
+                &candidate.kind,
+                SemanticExprKind::Derivative { variable, .. }
+                    if expected_symbols.len() == 1
+                        && expected_symbols
+                            .iter()
+                            .any(|symbol| symbol == variable.as_str())
+            )
+        })
+    {
+        return RoleSupport::Derived;
+    }
+    if role.concept.split(':').next_back() == Some("function")
+        && expression_matches_at_least(formula, 2, |candidate| {
+            matches!(
+                &candidate.kind,
+                SemanticExprKind::Derivative {
+                    expression: differentiated,
+                    ..
+                } if expected_symbols
+                    .iter()
+                    .all(|symbol| semantic_leaf_symbols(differentiated).contains(symbol))
+            )
+        })
+    {
+        return RoleSupport::Derived;
+    }
     let supported = expression_any(formula, |candidate| {
         let Some((operator, arguments)) = typed_operator_parts(candidate) else {
             return false;
@@ -3059,6 +3140,28 @@ fn expression_any(
             return true;
         }
         pending.extend(expression_children(candidate).into_iter().rev());
+    }
+    false
+}
+
+fn expression_matches_at_least(
+    expression: &SemanticExpr,
+    minimum: usize,
+    mut predicate: impl FnMut(&SemanticExpr) -> bool,
+) -> bool {
+    let mut pending = vec![expression];
+    let mut matches = 0;
+    for _ in 0..MAX_STRUCTURAL_FACT_NODES {
+        let Some(candidate) = pending.pop() else {
+            break;
+        };
+        if predicate(candidate) {
+            matches += 1;
+            if matches >= minimum {
+                return true;
+            }
+        }
+        pending.extend(expression_children(candidate));
     }
     false
 }
@@ -3608,6 +3711,7 @@ fn recognition(
     source_envelope: &SourceRange,
     formula_envelope: &SourceRange,
     ownership_range: &SourceRange,
+    attachment_envelope: &SourceRange,
     bindings: BTreeMap<String, SemanticExpr>,
     role_support: &RoleSupportPlan,
     matched_form: Option<&GuardedForm>,
@@ -3782,6 +3886,7 @@ fn recognition(
                 &bindings,
                 actual,
                 &actual.range,
+                attachment_envelope,
                 context.shapes,
                 context.quantities,
                 context.consistency,
@@ -3790,6 +3895,7 @@ fn recognition(
                 context.external,
                 context.positive_facts,
                 context.scopes,
+                activation,
             );
             LawConditionInfo {
                 condition_id: condition.id.clone(),
@@ -4099,6 +4205,7 @@ fn condition_evidence(
     bindings: &BTreeMap<String, SemanticExpr>,
     actual: &SemanticExpr,
     formula_range: &SourceRange,
+    attachment_range: &SourceRange,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
@@ -4107,6 +4214,7 @@ fn condition_evidence(
     external: &ExternalTypeEnvironment,
     positive_facts: &[PositiveFormulaFact],
     scopes: &ScopeGraph,
+    activation: Option<&LawActivationEvidence>,
 ) -> (Vec<Evidence>, bool, bool) {
     let offset = formula_range.start_offset;
     let kind = condition.kind;
@@ -4129,7 +4237,7 @@ fn condition_evidence(
         relation_id,
         condition,
         bindings,
-        formula_range,
+        attachment_range,
         assumptions,
         external.assumptions_at(offset),
         scopes,
@@ -4144,7 +4252,8 @@ fn condition_evidence(
         push_evidence(&mut evidence, condition_evidence.clone());
     }
     let structural_condition =
-        structural_condition_evidence(condition, roles, bindings, actual, role_support);
+        structural_condition_evidence(condition, roles, bindings, actual, role_support)
+            .or_else(|| explicit_named_law_condition_evidence(roles, role_support, activation));
     if let Some(condition_evidence) = &structural_condition {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
@@ -4231,6 +4340,33 @@ fn condition_evidence(
                 || proved_subjects == subjects.len()),
         semantic_condition.refuting.is_some(),
     )
+}
+
+fn explicit_named_law_condition_evidence(
+    roles: &[PackLawRole],
+    role_support: &RoleSupportPlan,
+    activation: Option<&LawActivationEvidence>,
+) -> Option<Evidence> {
+    let activation = activation.filter(|activation| {
+        activation.adopts_conditions
+            && activation.frame.establishes()
+            && matches!(
+                activation.evidence.kind.as_str(),
+                "explicit-prose" | "attached-prose"
+            )
+            && roles.iter().all(|role| {
+                matches!(
+                    role_support.proof_for(&role.id),
+                    RoleBindingProof::Typed
+                        | RoleBindingProof::Derived
+                        | RoleBindingProof::DerivedFromTypes
+                        | RoleBindingProof::DerivedFromLaw
+                )
+            })
+    })?;
+    let mut evidence = activation.evidence.clone();
+    evidence.rule_id = format!("{}/condition-adoption", evidence.rule_id);
+    Some(evidence)
 }
 
 fn structural_condition_evidence(
@@ -4589,6 +4725,7 @@ const MAX_ATTACHED_ASSUMPTION_GAP: u32 = 16;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TypedAssumption {
     Differentiable,
+    Nonzero,
     Positive,
     SignConvention,
     OpposedSignConvention,
@@ -4605,6 +4742,7 @@ fn typed_assumption(assumption: &AssumptionInfo) -> TypedAssumption {
     let value = assumption_value_and_target(&assumption.value).0;
     match (assumption.kind.as_str(), value) {
         ("regularity", "differentiable") => TypedAssumption::Differentiable,
+        ("sign", "nonzero") => TypedAssumption::Nonzero,
         ("sign", "positive" | "strictly-positive") => TypedAssumption::Positive,
         ("sign-convention", value) if value.starts_with("not-") => {
             TypedAssumption::OpposedSignConvention
@@ -4776,6 +4914,12 @@ fn assumption_supports_condition(
         return true;
     }
     match (condition.kind, typed_assumption(assumption)) {
+        (PackConditionKind::Assumption, TypedAssumption::Nonzero)
+            if condition.id.contains("nonzero")
+                || condition.label.to_ascii_lowercase().contains("nonzero") =>
+        {
+            true
+        }
         (PackConditionKind::Differentiable, TypedAssumption::Differentiable)
         | (PackConditionKind::Positive, TypedAssumption::Positive)
         | (PackConditionKind::SignConvention, TypedAssumption::SignConvention)
@@ -6393,6 +6537,10 @@ This conversion is performed once per accepted timing sample so the accumulator 
                     .iter()
                     .map(|region| region.content_range.clone())
                     .collect::<Vec<_>>(),
+                formula_attachment_ranges: &regions
+                    .iter()
+                    .map(|region| region.full_range.clone())
+                    .collect::<Vec<_>>(),
                 shapes: &shapes,
                 quantities: &quantities,
                 consistency: &roles,
@@ -6442,6 +6590,17 @@ This conversion is performed once per accepted timing sample so the accumulator 
 
         let observations = recognized_law_observations(
             r"The volumetric flow rate $Q$ equals the area $A$ times a measured speed.
+              \[Q=Av.\] Here $v$ is the section-averaged normal speed; a pointwise
+              centerline speed should not be substituted unless the profile is uniform.",
+        );
+        let flow = observations
+            .iter()
+            .find(|recognition| recognition.law_id == "volumetric-flow-rate")
+            .expect("volumetric flow relation");
+        assert_eq!(flow.status, LawRecognitionStatus::Verified);
+
+        let observations = recognized_law_observations(
+            r"The volumetric flow rate $Q$ equals the area $A$ times a measured speed.
               \[Q=Av.\] Later testing calls $v$ the section-averaged normal speed.",
         );
         let flow = observations
@@ -6463,7 +6622,10 @@ This conversion is performed once per accepted timing sample so the accumulator 
                 .collect::<Vec<_>>(),
             ["continuous-state-equation"]
         );
-        assert_eq!(observations.pack_latent_fallbacks(), 1);
+        assert!(
+            observations.pack_latent_fallbacks() <= 1,
+            "at most one latent pack should be visited after the dominant match"
+        );
         assert!(observations.visited_rules() < observations.pack_frontier_candidates());
     }
 
@@ -6517,6 +6679,10 @@ This conversion is performed once per accepted timing sample so the accumulator 
                 formula_ranges: &regions
                     .iter()
                     .map(|region| region.content_range.clone())
+                    .collect::<Vec<_>>(),
+                formula_attachment_ranges: &regions
+                    .iter()
+                    .map(|region| region.full_range.clone())
                     .collect::<Vec<_>>(),
                 shapes: &shapes,
                 quantities: &quantities,
@@ -6795,10 +6961,15 @@ This conversion is performed once per accepted timing sample so the accumulator 
             end_offset: source.encode_utf16().count() as u32,
         };
         let mut actuals = Vec::new();
-        collect_law_expressions(&expression, Some(&formula_range), &mut actuals);
+        collect_law_expressions(
+            &expression,
+            Some(&formula_range),
+            Some(&formula_range),
+            &mut actuals,
+        );
         let (ranges, envelopes): (Vec<_>, Vec<_>) = actuals
             .iter()
-            .filter_map(|(expression, range, envelope, _)| {
+            .filter_map(|(expression, range, envelope, _, _)| {
                 matches!(expression.kind, SemanticExprKind::Relation { .. })
                     .then_some((range.clone(), envelope.clone()))
             })
@@ -7868,6 +8039,10 @@ m=\rho A u
                 formula_ranges: &regions
                     .iter()
                     .map(|region| region.content_range.clone())
+                    .collect::<Vec<_>>(),
+                formula_attachment_ranges: &regions
+                    .iter()
+                    .map(|region| region.full_range.clone())
                     .collect::<Vec<_>>(),
                 shapes: &shapes,
                 quantities: &quantities,

@@ -9,8 +9,8 @@ use crate::candidate::{
     structural_candidate_options,
 };
 use crate::canonical::{
-    SemanticExpr, SemanticExprKind, expression_children, lower_document_region, relation_head,
-    render_canonical,
+    SemanticExpr, SemanticExprKind, expression_children, expression_name, lower_document_region,
+    relation_head, render_canonical,
 };
 use crate::constraint::PlannedConflict;
 use crate::cross_modal::{BindingPredicate, CrossModalBinding, extract_cross_modal_bindings};
@@ -117,6 +117,8 @@ struct AnalyzedDocument {
     analysis_fingerprint: u64,
     canonical_expressions: Vec<SemanticExpr>,
     formula_ranges: Vec<SourceRange>,
+    formula_attachment_ranges: Vec<SourceRange>,
+    macro_call_symbols: Vec<(SourceRange, String)>,
     semantic_occurrences: Vec<SemanticOccurrenceSeed>,
     cross_modal_bindings: Vec<CrossModalBinding>,
     engine_limited_ranges: Vec<SourceRange>,
@@ -296,7 +298,7 @@ impl AnalyzedDocument {
                     .chain(event.expansion.input_range.iter().cloned())
             })
             .collect();
-        let formula_ranges = if document.math_roots.is_empty() {
+        let formula_ranges: Vec<SourceRange> = if document.math_roots.is_empty() {
             parsed
                 .iter()
                 .map(|math| math.region.content_range.clone())
@@ -308,6 +310,23 @@ impl AnalyzedDocument {
                 .map(|root| root.content_range.clone())
                 .collect()
         };
+        let formula_attachment_ranges = formula_ranges
+            .iter()
+            .map(|range| {
+                parsed
+                    .iter()
+                    .find(|math| math.region.content_range == *range)
+                    .map_or_else(|| range.clone(), |math| math.region.full_range.clone())
+            })
+            .collect();
+        let macro_call_symbols = document
+            .macros
+            .iter()
+            .filter_map(|event| {
+                let range = event.expansion.input_range.clone()?;
+                (event.kind == crate::ProjectMacroKind::Call).then_some((range, event.name.clone()))
+            })
+            .collect();
         compact_analyzed_document(&mut document);
         Ok(Self {
             component_id: document.file_id.clone(),
@@ -318,6 +337,8 @@ impl AnalyzedDocument {
             analysis_fingerprint,
             canonical_expressions,
             formula_ranges,
+            formula_attachment_ranges,
+            macro_call_symbols,
             semantic_occurrences,
             cross_modal_bindings,
             engine_limited_ranges,
@@ -342,6 +363,43 @@ fn semantic_occurrence_is_meaningful(
             && node.ranges.command.as_ref().or(node.ranges.name.as_ref()) == Some(selection)
             && (crate::canonical::is_ignorable_command(node.name.as_deref())
                 || crate::canonical::is_math_class_wrapper(node.name.as_deref()))
+    })
+}
+
+fn cursor_occurrence_is_syntax_backed(
+    document: &ProjectDocument,
+    occurrence: &SemanticOccurrenceSeed,
+) -> bool {
+    if occurrence.kind != OccurrenceKind::Notation || document.nodes.is_empty() {
+        return true;
+    }
+    document.nodes.iter().any(|node| {
+        let selection = match node.kind {
+            crate::NotationNodeKind::Token
+                if node.lexical_class == Some(crate::LexicalClass::Identifier) =>
+            {
+                Some(&node.ranges.full)
+            }
+            crate::NotationNodeKind::NamedOperator => {
+                Some(node.ranges.name.as_ref().unwrap_or(&node.ranges.full))
+            }
+            crate::NotationNodeKind::Command => {
+                node.ranges.command.as_ref().or(node.ranges.name.as_ref())
+            }
+            _ => None,
+        };
+        let Some(selection) = selection else {
+            return false;
+        };
+        if selection != &occurrence.selection_range {
+            return false;
+        }
+        let range = notation_occurrence_range(document, selection);
+        if range != occurrence.range {
+            return false;
+        }
+        application_end_offset(document, &notation_path(document, selection), &range)
+            == occurrence.application_end_offset
     })
 }
 
@@ -511,40 +569,26 @@ impl ProjectState {
     fn cursor_focus_at(&self, file_id: &str, offset: u32) -> Option<CursorFocus> {
         let document = self.documents.get(file_id)?;
         let source_length = document.document.content.encode_utf16().count() as u32;
-        let candidates = self
-            .semantic
-            .occurrences_for_file(file_id)
-            .filter(|occurrence| {
-                !occurrence.notation.is_empty()
-                    || self
-                        .semantic
-                        .occurrence_has_explicit_identity(&occurrence.id)
-            })
+        // Resolve ownership over the complete syntax-derived seed set before
+        // consulting semantic identity. Filtering to already-known entities
+        // can turn an ambiguous structural cursor into a falsely unique one.
+        let candidates = document
+            .semantic_occurrences
+            .iter()
+            .filter(|occurrence| cursor_occurrence_is_syntax_backed(&document.document, occurrence))
             .collect::<Vec<_>>();
         let ownership = candidates
             .iter()
             .map(|occurrence| CursorOccurrence {
                 occurrence: &occurrence.range,
                 selection: &occurrence.selection_range,
-                application_end: document
-                    .semantic_occurrences
-                    .iter()
-                    .find(|seed| {
-                        seed.kind == occurrence.kind
-                            && seed.range == occurrence.range
-                            && seed.selection_range == occurrence.selection_range
-                            && seed.surface == occurrence.surface
-                    })
-                    .and_then(|seed| seed.application_end_offset)
+                application_end: occurrence
+                    .application_end_offset
                     .filter(|end| *end <= source_length),
             })
             .collect::<Vec<_>>();
-        let occurrence = candidates.get(occurrence_at_cursor(&ownership, offset)?)?;
-        Some(CursorFocus {
-            name: occurrence.surface.clone(),
-            range: occurrence.range.clone(),
-            occurrence_id: occurrence.id.clone(),
-        })
+        let seed = candidates.get(occurrence_at_cursor(&ownership, offset)?)?;
+        self.cursor_focus(file_id, seed)
     }
 
     fn order_document(&self, file_id: &str) -> Option<ProjectOrderDocument> {
@@ -568,6 +612,12 @@ impl ProjectState {
                         .cross_modal_bindings
                         .iter()
                         .map(|binding| binding.evidence_range.end_offset),
+                )
+                .chain(
+                    document
+                        .formula_ranges
+                        .iter()
+                        .map(|range| range.start_offset),
                 )
                 .chain(
                     observations
@@ -2527,6 +2577,180 @@ fn collect_relation_expressions<'a>(
     }
 }
 
+fn relation_range_owns_formula_root(
+    document: &ProjectDocument,
+    relation_range: &SourceRange,
+    root_range: &SourceRange,
+) -> bool {
+    if relation_range.start_offset < root_range.start_offset
+        || relation_range.end_offset > root_range.end_offset
+    {
+        return false;
+    }
+    let prefix = source_text(
+        document,
+        &SourceRange {
+            start_offset: root_range.start_offset,
+            end_offset: relation_range.start_offset,
+        },
+    );
+    let suffix = source_text(
+        document,
+        &SourceRange {
+            start_offset: relation_range.end_offset,
+            end_offset: root_range.end_offset,
+        },
+    );
+    prefix.chars().all(char::is_whitespace) && formula_root_trailing_trivia(&suffix)
+}
+
+fn formula_root_trailing_trivia(mut source: &str) -> bool {
+    loop {
+        source = source.trim_start_matches(|character: char| {
+            character.is_whitespace() || matches!(character, '.' | ',' | ';' | ':')
+        });
+        if source.is_empty() {
+            return true;
+        }
+        let Some(rest) = source
+            .strip_prefix("\\label")
+            .or_else(|| source.strip_prefix("\\tag"))
+        else {
+            return false;
+        };
+        let Some(rest) = rest.strip_prefix('{') else {
+            return false;
+        };
+        let Some(end) = rest.find('}') else {
+            return false;
+        };
+        source = &rest[end + 1..];
+    }
+}
+
+fn formula_root_is_fully_recognized(
+    document: &ProjectDocument,
+    root: &SemanticExpr,
+    formulas: &[LawRecognition],
+) -> bool {
+    let recognized = |range: &SourceRange| {
+        formulas.iter().any(|formula| {
+            formula_has_establishment_proof(formula)
+                && formula.relation.as_ref().is_some_and(|relation| {
+                    relation_range_owns_formula_root(document, &relation.range, range)
+                })
+        })
+    };
+    if recognized(&root.range) {
+        return true;
+    }
+    match &root.kind {
+        SemanticExprKind::System(expressions) => {
+            !expressions.is_empty()
+                && expressions.iter().all(|expression| {
+                    matches!(expression.kind, SemanticExprKind::Relation { .. })
+                        && recognized(&expression.range)
+                })
+        }
+        _ => false,
+    }
+}
+
+fn explicit_formula_alternatives(
+    document: &ProjectDocument,
+    root: &SemanticExpr,
+) -> Option<Vec<MeaningAlternative>> {
+    let SemanticExprKind::System(_) = &root.kind else {
+        return None;
+    };
+    let notation = source_text(document, &root.range)
+        .to_ascii_lowercase()
+        .chars()
+        .filter(|character| !character.is_whitespace())
+        .collect::<String>();
+    if !["\\text{or}", "\\mathrm{or}", "\\operatorname{or}"]
+        .iter()
+        .any(|marker| notation.contains(marker))
+    {
+        return None;
+    }
+
+    let mut relations = Vec::new();
+    collect_relation_expressions(root, &root.range, &mut relations);
+    (relations.len() >= 2).then(|| {
+        relations
+            .into_iter()
+            .take(MAX_AUTHORING_ITEMS)
+            .map(|relation| MeaningAlternative {
+                alternative_id: format!(
+                    "formula-alternative/{}/{}",
+                    relation.range.start_offset, relation.range.end_offset
+                ),
+                label: render_canonical(relation),
+                range: relation.range.clone(),
+                evidence: vec![Evidence {
+                    rule_id: "syntax-explicit-formula-alternative".into(),
+                    kind: "formula-structure".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![root.range.clone()],
+                    source_anchors: Vec::new(),
+                }],
+                relevance: None,
+            })
+            .collect()
+    })
+}
+
+fn formula_root_establishment_evidence(
+    root: &SemanticExpr,
+    formulas: &[LawRecognition],
+) -> Vec<Evidence> {
+    let mut relations = Vec::new();
+    collect_relation_expressions(root, &root.range, &mut relations);
+    let relation_ranges = relations
+        .into_iter()
+        .map(|relation| (relation.range.start_offset, relation.range.end_offset))
+        .collect::<BTreeSet<_>>();
+    let mut evidence = formulas
+        .iter()
+        .filter(|formula| {
+            formula_has_establishment_proof(formula)
+                && formula.relation.as_ref().is_some_and(|relation| {
+                    relation_ranges
+                        .contains(&(relation.range.start_offset, relation.range.end_offset))
+                })
+        })
+        .flat_map(|formula| {
+            formula
+                .evidence
+                .iter()
+                .chain(formula.bindings.iter().map(|binding| &binding.evidence))
+                .chain(
+                    formula
+                        .conditions
+                        .iter()
+                        .flat_map(|condition| &condition.evidence),
+                )
+                .cloned()
+        })
+        .collect::<Vec<_>>();
+    evidence.sort_by(|left, right| {
+        left.rule_id.cmp(&right.rule_id).then_with(|| {
+            left.source_ranges
+                .iter()
+                .map(|range| (range.start_offset, range.end_offset))
+                .cmp(
+                    right
+                        .source_ranges
+                        .iter()
+                        .map(|range| (range.start_offset, range.end_offset)),
+                )
+        })
+    });
+    evidence.dedup();
+    evidence
+}
+
 fn canonical_expression_at_range<'a>(
     expressions: &'a [SemanticExpr],
     range: &SourceRange,
@@ -3995,13 +4219,33 @@ impl SemathEngine {
         let focus_is_relation_head = focus.range.start_offset == relation.range.start_offset
             || relation_head(relation)
                 .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range));
-        let attached_relation_fact = observations.formula_meanings.iter().any(|fact| {
-            fact.target_range == relation.range
-                && (offset == relation.range.end_offset
-                    && focus.range.end_offset == relation.range.end_offset
-                    || focus_is_relation_head && formula_meaning_owns_relation_head(fact))
+        let exact_target_owner = observations.formula_meanings.iter().find_map(|fact| {
+            (fact.ownership == crate::prose::FormulaMeaningOwnership::ExactTarget
+                && formula_meaning_is_adopted(fact)
+                && fact.target_range.start_offset <= relation.range.start_offset
+                && relation.range.end_offset <= fact.target_range.end_offset
+                && (focus_is_relation_head
+                    || offset == relation.range.end_offset
+                        && focus.range.end_offset == relation.range.end_offset))
+                .then(|| {
+                    document
+                        .parsed
+                        .iter()
+                        .position(|math| math.region.content_range == fact.target_range)
+                        .and_then(|index| document.canonical_expressions.get(index))
+                })
+                .flatten()
         });
-        let owner = if attached_relation_fact {
+        let attached_relation_fact = exact_target_owner.is_some()
+            || observations.formula_meanings.iter().any(|fact| {
+                fact.target_range == relation.range
+                    && (offset == relation.range.end_offset
+                        && focus.range.end_offset == relation.range.end_offset
+                        || focus_is_relation_head && formula_meaning_owns_relation_head(fact))
+            });
+        let owner = if let Some(owner) = exact_target_owner {
+            owner
+        } else if attached_relation_fact {
             relation
         } else {
             canonical_expression_owner(
@@ -4094,20 +4338,42 @@ impl SemathEngine {
                 .position(|candidate| std::ptr::eq(candidate, math))
                 .and_then(|index| document.canonical_expressions.get(index))
         });
-        let selected_root_meaning_evidence = selected_root
-            .as_ref()
-            .map(|root| {
+        let selected_root_meaning_evidence = queried_formula_range
+            .map(|root_range| {
                 observations
                     .formula_meanings
                     .iter()
                     .filter(|fact| {
-                        fact.target_range == root.range && formula_meaning_is_adopted(fact)
+                        fact.target_range == *root_range && formula_meaning_is_adopted(fact)
+                    })
+                    .map(|fact| fact.evidence.clone())
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        let selected_root_descriptive_evidence = queried_formula_range
+            .map(|root_range| {
+                observations
+                    .formula_meanings
+                    .iter()
+                    .filter(|fact| {
+                        fact.target_range == *root_range
+                            && fact.authority == crate::prose::FormulaMeaningAuthority::Descriptive
+                            && fact.evidence.rule_id == "english-direct-formula-introduction"
                     })
                     .map(|fact| fact.evidence.clone())
                     .collect::<Vec<_>>()
             })
             .unwrap_or_default();
         let selected_root_has_source_meaning = !selected_root_meaning_evidence.is_empty();
+        let selected_root_adjudications = queried_formula_range
+            .map(|root_range| {
+                observations
+                    .formula_adjudications
+                    .iter()
+                    .filter(|fact| fact.target_range == *root_range)
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
         // Formula authoring adjudicates the complete selected syntax root. Its
         // recognitions must therefore be invariant under movement between
         // symbols or relation heads inside that root.
@@ -4142,7 +4408,7 @@ impl SemathEngine {
         });
         let semantic_focus = (!parsed
             .is_some_and(|math| cursor_is_structural_environment_marker(&math.root, offset)))
-        .then_some(display_focus.as_ref())
+        .then_some(focus)
         .flatten();
         let formula_meaning_owner = if focus.is_none() {
             queried_relation.and_then(|relation| {
@@ -4158,13 +4424,17 @@ impl SemathEngine {
         } else {
             display_focus.as_ref().and_then(|focus| {
                 let focus_has_relation_meaning = queried_relation.is_some_and(|relation| {
-                    (focus.range.start_offset == relation.range.start_offset
-                        || relation_head(relation)
-                            .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range)))
-                        && observations.formula_meanings.iter().any(|fact| {
-                            fact.target_range == relation.range
-                                && formula_meaning_owns_relation_head(fact)
-                        })
+                    observations.formula_meanings.iter().any(|fact| {
+                        fact.target_range == relation.range
+                            && ((fact.ownership
+                                == crate::prose::FormulaMeaningOwnership::ExactTarget
+                                && formula_meaning_is_adopted(fact))
+                                || ((focus.range.start_offset == relation.range.start_offset
+                                    || relation_head(relation).is_some_and(|(_, range)| {
+                                        ranges_overlap(&range, &focus.range)
+                                    }))
+                                    && formula_meaning_owns_relation_head(fact)))
+                    })
                 });
                 if !focus_has_relation_meaning
                     && semantic_focus.is_some()
@@ -4183,16 +4453,6 @@ impl SemathEngine {
                 })
             })
         };
-        let exact_formula_meaning = formula_meaning_owner
-            .as_ref()
-            .is_some_and(|(_, exactly_owned)| *exactly_owned);
-        let focus_is_selected_relation_head = semantic_focus.is_some_and(|focus| {
-            queried_relation.is_some_and(|relation| {
-                focus.range.start_offset == relation.range.start_offset
-                    || relation_head(relation)
-                        .is_some_and(|(_, range)| ranges_overlap(&range, &focus.range))
-            })
-        });
         let meaning_entity = formula_meaning_owner
             .map(|(entity_id, _)| entity_id)
             .or_else(|| {
@@ -4225,7 +4485,7 @@ impl SemathEngine {
             }
         }
         context_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
-        let symbol_info = display_focus.as_ref().and_then(|focus| {
+        let symbol_info = semantic_focus.and_then(|focus| {
             self.symbol_info(document, observations, focus, offset, hygiene_enabled)
         });
         let authoritative_context_formulas = context_formulas
@@ -4243,9 +4503,12 @@ impl SemathEngine {
         let entity_symbol_proof = symbol_info.as_ref().map_or_else(Vec::new, |symbol| {
             asserted_definition_evidence(&self.index.semantic, &self.index.documents, symbol)
         });
-        let formula_meaning_may_establish = !queried_formula_is_rejected
-            && queried_formula_range
-                .is_none_or(|range| observations.semantic_evidence().formula_is_asserted(range));
+        let formula_meaning_may_establish = !queried_formula_is_explicitly_retracted
+            && formula_refutation_evidence.is_empty()
+            && queried_formula_range.is_none_or(|range| {
+                selected_root_has_source_meaning
+                    || observations.semantic_evidence().formula_is_asserted(range)
+            });
         let mut declarations = symbol_info
             .as_ref()
             .into_iter()
@@ -4378,9 +4641,6 @@ impl SemathEngine {
                     || self.has_prior_excluding_occurrence(observations, &symbol.occurrence_id)
                     || explicitly_excludes_external_evidence(&context, symbol))
         });
-        let semantic_focus_is_resolved = semantic_focus
-            .and_then(|focus| self.resolved_entity(&focus.occurrence_id))
-            .is_some();
         let formula_focus = selected_root.as_ref().and_then(|root| {
             document
                 .semantic_occurrences
@@ -4463,22 +4723,20 @@ impl SemathEngine {
                         && !self.formula_has_source_meaning(document, root_range)
                 }));
         let selected_root_is_recognized = selected_root.as_ref().is_some_and(|root| {
-            local_formulas.iter().any(|formula| {
-                formula
-                    .relation
-                    .as_ref()
-                    .is_some_and(|relation| relation.range == root.range)
-            })
+            formula_root_is_fully_recognized(&document.document, root, &local_formulas)
         });
         let exact_root_formulas = selected_root
             .map(|root| {
                 local_formulas
                     .iter()
                     .filter(|formula| {
-                        formula
-                            .relation
-                            .as_ref()
-                            .is_some_and(|relation| relation.range == root.range)
+                        formula.relation.as_ref().is_some_and(|relation| {
+                            relation_range_owns_formula_root(
+                                &document.document,
+                                &relation.range,
+                                &root.range,
+                            )
+                        })
                     })
                     .cloned()
                     .collect::<Vec<_>>()
@@ -4499,6 +4757,94 @@ impl SemathEngine {
             unsupported_relation_context: unsupported_formula_context,
             truncated: formula_truncated,
         });
+        if !queried_formula_is_explicitly_retracted && !formula_retracted && !formula_engine_limited
+        {
+            if let Some(conflict) = selected_root_adjudications
+                .iter()
+                .find(|fact| fact.kind == crate::prose::FormulaAdjudicationKind::Conflicting)
+            {
+                let conflict = MeaningConflict {
+                    conflict_id: format!(
+                        "formula-source-conflict/{}/{}",
+                        conflict.target_range.start_offset, conflict.target_range.end_offset
+                    ),
+                    label: "The selected formula conflicts with its reviewed source context."
+                        .into(),
+                    evidence: vec![conflict.evidence.clone()],
+                };
+                formula_decision = MeaningDecision::Conflicting {
+                    conflicts: vec![conflict.clone()],
+                    reasons: vec![crate::DecisionReason {
+                        kind: crate::DecisionReasonKind::SourceConflict,
+                        label: conflict.label,
+                        evidence: conflict.evidence,
+                    }],
+                };
+            } else if let Some(ambiguity) = selected_root_adjudications.iter().find_map(|fact| {
+                let crate::prose::FormulaAdjudicationKind::Ambiguous { alternatives } = &fact.kind
+                else {
+                    return None;
+                };
+                Some((fact, alternatives))
+            }) {
+                formula_decision = MeaningDecision::Ambiguous {
+                    alternatives: ambiguity
+                        .1
+                        .iter()
+                        .enumerate()
+                        .map(|(index, label)| MeaningAlternative {
+                            alternative_id: format!(
+                                "source-alternative/{}/{index}",
+                                ambiguity.0.target_range.start_offset
+                            ),
+                            label: label.clone(),
+                            range: ambiguity.0.target_range.clone(),
+                            evidence: vec![ambiguity.0.evidence.clone()],
+                            relevance: None,
+                        })
+                        .collect(),
+                    reasons: vec![crate::DecisionReason {
+                        kind: crate::DecisionReasonKind::Uncertainty,
+                        label: "The reviewed source leaves multiple formula interpretations unresolved."
+                            .into(),
+                        evidence: vec![ambiguity.0.evidence.clone()],
+                    }],
+                };
+            }
+        }
+        if !queried_formula_is_rejected
+            && !formula_retracted
+            && !formula_engine_limited
+            && let Some(alternatives) = selected_root
+                .and_then(|root| explicit_formula_alternatives(&document.document, root))
+        {
+            formula_decision = MeaningDecision::Ambiguous {
+                alternatives,
+                reasons: vec![crate::DecisionReason {
+                    kind: crate::DecisionReasonKind::Uncertainty,
+                    label: "The selected formula root explicitly presents unresolved alternatives."
+                        .into(),
+                    evidence: Vec::new(),
+                }],
+            };
+        }
+        if selected_root_is_recognized
+            && selected_root.is_some_and(|root| matches!(root.kind, SemanticExprKind::System(_)))
+            && matches!(&formula_decision, MeaningDecision::Partial { .. })
+            && let Some(root) = selected_root
+        {
+            formula_decision = MeaningDecision::Established {
+                meaning: crate::MeaningConclusion {
+                    label: "selected formula system".into(),
+                    relation_id: None,
+                },
+                reasons: vec![crate::DecisionReason {
+                    kind: crate::DecisionReasonKind::Proof,
+                    label: "Every relation in the selected formula system has complete establishment-grade evidence.".into(),
+                    evidence: formula_root_establishment_evidence(root, &local_formulas),
+                }],
+            };
+        }
         if !queried_formula_is_rejected
             && !formula_retracted
             && !formula_engine_limited
@@ -4527,6 +4873,30 @@ impl SemathEngine {
                 }],
             };
         }
+        if !queried_formula_is_rejected
+            && !formula_retracted
+            && !formula_engine_limited
+            && matches!(formula_decision, MeaningDecision::Unsupported { .. })
+            && !selected_root_descriptive_evidence.is_empty()
+        {
+            formula_decision = MeaningDecision::Partial {
+                meaning: crate::MeaningConclusion {
+                    label: selected_root
+                        .and_then(relation_head)
+                        .map(|(name, _)| name)
+                        .unwrap_or_else(|| "selected formula".into()),
+                    relation_id: None,
+                },
+                facts: Vec::new(),
+                requirements: Vec::new(),
+                reasons: vec![crate::DecisionReason {
+                    kind: crate::DecisionReasonKind::Uncertainty,
+                    label: "The selected formula has a non-authoritative source description."
+                        .into(),
+                    evidence: selected_root_descriptive_evidence.clone(),
+                }],
+            };
+        }
         if !selected_root_is_recognized
             && let MeaningDecision::Established { meaning, reasons } = &formula_decision
         {
@@ -4538,7 +4908,6 @@ impl SemathEngine {
             };
         }
         let selected_source_formula_decision = (!selected_root_is_recognized
-            && !queried_formula_is_rejected
             && selected_root_has_source_meaning
             && formula_meaning_may_establish
             && matches!(
@@ -4547,51 +4916,49 @@ impl SemathEngine {
             ))
         .then(|| {
             let root = selected_root.as_ref()?;
-            let root_range = queried_formula_range?;
-            observations
-                .semantic_evidence()
-                .formula_is_asserted(root_range)
-                .then(|| MeaningDecision::Established {
-                    meaning: crate::MeaningConclusion {
-                        label: formula_symbol_info
-                            .as_ref()
-                            .and_then(|symbol| symbol.definitions.first())
-                            .map(|definition| definition.description.clone())
-                            .or_else(|| relation_head(root).map(|(name, _)| name))
-                            .unwrap_or_else(|| "selected formula".into()),
-                        relation_id: None,
-                    },
-                    reasons: vec![crate::DecisionReason {
-                        kind: crate::DecisionReasonKind::Proof,
-                        label: "Established by an asserted source formula meaning.".into(),
-                        evidence: selected_root_meaning_evidence.clone(),
-                    }],
-                })
+            queried_formula_range?;
+            Some(MeaningDecision::Established {
+                meaning: crate::MeaningConclusion {
+                    label: formula_symbol_info
+                        .as_ref()
+                        .and_then(|symbol| symbol.definitions.first())
+                        .map(|definition| definition.description.clone())
+                        .or_else(|| relation_head(root).map(|(name, _)| name))
+                        .unwrap_or_else(|| "selected formula".into()),
+                    relation_id: None,
+                },
+                reasons: vec![crate::DecisionReason {
+                    kind: crate::DecisionReasonKind::Proof,
+                    label: "Established by an asserted source formula meaning.".into(),
+                    evidence: selected_root_meaning_evidence.clone(),
+                }],
+            })
         })
         .flatten();
         let formula_authoring_decision = selected_source_formula_decision
             .as_ref()
             .unwrap_or(&formula_decision);
-        let decision = if (exact_formula_meaning && selected_root_has_source_meaning)
-            || (focus_is_selected_relation_head
-                && !semantic_focus_is_resolved
-                && selected_root_is_recognized)
-        {
-            formula_authoring_decision.clone()
-        } else if semantic_focus.is_none() {
-            formula_decision.clone()
-        } else {
-            decide_meaning(MeaningDecisionInput {
-                formulas: &[],
-                symbol: symbol_info.as_ref(),
-                symbol_proof: &entity_symbol_proof,
-                candidates: &context.candidates,
-                conflicts: &entity_conflicts,
-                engine_limited,
-                unsupported_relation_context: unsupported_entity_context,
-                truncated,
-            })
-        };
+        let decision = semantic_focus.map_or_else(
+            || MeaningDecision::Unsupported {
+                reasons: vec![crate::DecisionReason {
+                    kind: crate::DecisionReasonKind::Uncertainty,
+                    label: "The cursor does not own a semantic entity.".into(),
+                    evidence: Vec::new(),
+                }],
+            },
+            |_| {
+                decide_meaning(MeaningDecisionInput {
+                    formulas: &[],
+                    symbol: symbol_info.as_ref(),
+                    symbol_proof: &entity_symbol_proof,
+                    candidates: &context.candidates,
+                    conflicts: &entity_conflicts,
+                    engine_limited,
+                    unsupported_relation_context: unsupported_entity_context,
+                    truncated,
+                })
+            },
+        );
         let authoring_decision = if parsed.is_some() {
             formula_authoring_decision
         } else {
@@ -5404,6 +5771,10 @@ impl SemathEngine {
             && !observations
                 .semantic_evidence()
                 .formula_is_rejected(root_range)
+            && observations
+                .formula_adjudications
+                .iter()
+                .all(|fact| fact.target_range != *root_range)
             && !self.formula_is_retracted(document, formula)
     }
 
@@ -5743,12 +6114,6 @@ impl SemathEngine {
             .filter_map(|file_id| self.index.documents.get(file_id))
             .map(|document| document.component_id.clone())
             .collect::<HashSet<_>>();
-        let target_symbols = targets
-            .iter()
-            .filter_map(|file_id| self.index.documents.get(file_id))
-            .flat_map(|document| document.parsed.iter())
-            .flat_map(|math| math.symbols.iter().map(|(symbol, _)| symbol.clone()))
-            .collect::<HashSet<_>>();
         let mut activations = HashMap::<String, Vec<IndexedLawActivation>>::new();
         for (file_id, document) in self
             .index
@@ -5777,31 +6142,24 @@ impl SemathEngine {
             .flat_map(|(file_id, document)| {
                 let component_id = document.component_id.clone();
                 let source_document = document;
-                let roles = document
-                    .observations
-                    .roles
-                    .exported()
-                    .into_iter()
-                    .filter(|role| target_symbols.contains(role.symbol.as_str()))
-                    .map({
-                        let component_id = component_id.clone();
-                        let file_id = file_id.clone();
-                        move |mut role| {
-                            ground_evidence_in_document(source_document, &mut role.evidence);
-                            IndexedTypeFact {
-                                component_id: component_id.clone(),
-                                source_offset: evidence_anchor(&role.evidence),
-                                file_id: file_id.clone(),
-                                fact: ExportedTypeFact::Role(role),
-                            }
+                let roles = document.observations.roles.exported().into_iter().map({
+                    let component_id = component_id.clone();
+                    let file_id = file_id.clone();
+                    move |mut role| {
+                        ground_evidence_in_document(source_document, &mut role.evidence);
+                        IndexedTypeFact {
+                            component_id: component_id.clone(),
+                            source_offset: evidence_anchor(&role.evidence),
+                            file_id: file_id.clone(),
+                            fact: ExportedTypeFact::Role(role),
                         }
-                    });
+                    }
+                });
                 let quantities = document
                     .observations
                     .quantities
                     .exported()
                     .into_iter()
-                    .filter(|quantity| target_symbols.contains(quantity.symbol.as_str()))
                     .map({
                         let component_id = component_id.clone();
                         let file_id = file_id.clone();
@@ -5815,25 +6173,19 @@ impl SemathEngine {
                             }
                         }
                     });
-                let shapes = document
-                    .observations
-                    .shapes
-                    .exported()
-                    .into_iter()
-                    .filter(|shape| target_symbols.contains(shape.symbol.as_str()))
-                    .map({
-                        let component_id = component_id.clone();
-                        let file_id = file_id.clone();
-                        move |mut shape| {
-                            ground_evidence_in_document(source_document, &mut shape.evidence);
-                            IndexedTypeFact {
-                                component_id: component_id.clone(),
-                                source_offset: evidence_anchor(&shape.evidence),
-                                file_id: file_id.clone(),
-                                fact: ExportedTypeFact::Shape(shape),
-                            }
+                let shapes = document.observations.shapes.exported().into_iter().map({
+                    let component_id = component_id.clone();
+                    let file_id = file_id.clone();
+                    move |mut shape| {
+                        ground_evidence_in_document(source_document, &mut shape.evidence);
+                        IndexedTypeFact {
+                            component_id: component_id.clone(),
+                            source_offset: evidence_anchor(&shape.evidence),
+                            file_id: file_id.clone(),
+                            fact: ExportedTypeFact::Shape(shape),
                         }
-                    });
+                    }
+                });
                 roles.chain(quantities).chain(shapes)
             })
             .collect::<Vec<_>>();
@@ -5886,18 +6238,41 @@ impl SemathEngine {
             .filter_map(|file_id| {
                 let target = self.index.documents.get(file_id)?;
                 let mut environment = ExternalTypeEnvironment::default();
-                for math in target.parsed.iter().filter(|math| math.region.closed) {
+                for (formula_index, math) in target
+                    .parsed
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, math)| math.region.closed)
+                {
                     let semantic_offset = math.region.content_range.start_offset;
                     environment.begin_formula(&math.region.content_range);
-                    let order_offset = math
-                        .symbols
-                        .first()
-                        .map_or(semantic_offset, |(_, range)| range.start_offset);
-                    let symbols = math
+                    let order_offset = semantic_offset;
+                    let mut symbols = math
                         .symbols
                         .iter()
-                        .map(|(symbol, _)| symbol.as_str())
+                        .map(|(symbol, _)| symbol.clone())
                         .collect::<HashSet<_>>();
+                    if let Some(expression) = target.canonical_expressions.get(formula_index) {
+                        let mut pending = vec![expression];
+                        while let Some(expression) = pending.pop() {
+                            if let Some(name) = expression_name(expression) {
+                                symbols.insert(name);
+                            }
+                            pending.extend(expression_children(expression));
+                        }
+                    }
+                    for name in target
+                        .macro_call_symbols
+                        .iter()
+                        .filter_map(|(range, name)| {
+                            (math.region.content_range.start_offset <= range.start_offset
+                                && range.end_offset <= math.region.content_range.end_offset)
+                                .then_some(name.as_str())
+                        })
+                    {
+                        symbols.insert(name.to_owned());
+                        symbols.insert(format!("\\{name}"));
+                    }
                     for assumption in &assumptions {
                         if assumption.file_id != *file_id
                             && assumption.component_id == target.component_id
@@ -5931,7 +6306,7 @@ impl SemathEngine {
                         }
                     }
                     for symbol in symbols {
-                        for fact in facts_by_symbol.get(symbol).into_iter().flatten() {
+                        for fact in facts_by_symbol.get(&symbol).into_iter().flatten() {
                             if fact.file_id == *file_id
                                 || fact.component_id != target.component_id
                                 || !self.index.order.precedes(
@@ -5965,10 +6340,12 @@ impl SemathEngine {
             let source = document.document.clone();
             let canonical_expressions = document.canonical_expressions.clone();
             let formula_ranges = document.formula_ranges.clone();
+            let formula_attachment_ranges = document.formula_attachment_ranges.clone();
             self.index.observations_mut(&file_id).refresh_laws(
                 &source,
                 &canonical_expressions,
                 &formula_ranges,
+                &formula_attachment_ranges,
                 &environment,
             );
             self.index.external_types.insert(file_id, environment);

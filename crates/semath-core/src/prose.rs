@@ -90,10 +90,24 @@ pub(crate) struct ProseObservations {
     pub semantic_role_definitions: Vec<DefinitionInfo>,
     pub project_references: Vec<ProjectInclude>,
     pub formula_meanings: Vec<FormulaMeaningFact>,
+    pub formula_adjudications: Vec<FormulaAdjudicationFact>,
     pub shapes: Vec<ProseShapeClaim>,
     pub assumptions: Vec<AssumptionInfo>,
     pub semantic_evidence: ScientificSemanticEvidence,
     pub match_stats: ProseMatchStats,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct FormulaAdjudicationFact {
+    pub target_range: SourceRange,
+    pub kind: FormulaAdjudicationKind,
+    pub evidence: Evidence,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum FormulaAdjudicationKind {
+    Ambiguous { alternatives: Vec<String> },
+    Conflicting,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -188,6 +202,7 @@ pub(crate) struct LawActivationEvidence {
     pub clause_range: SourceRange,
     pub attached_formula_ranges: Vec<SourceRange>,
     pub identifies_attached_formula: bool,
+    pub adopts_conditions: bool,
     pub frame: DiscourseFrame,
     pub evidence: Evidence,
 }
@@ -438,6 +453,15 @@ pub(crate) fn observe_prose(
         canonical_expressions,
         &construction_targets,
     );
+    analysis.formula_adjudications = collect_formula_adjudications(
+        document,
+        source,
+        &index,
+        &clauses,
+        parsed,
+        canonical_expressions,
+        &analysis.semantic_evidence,
+    );
     analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
     collect_assumptions(
         source,
@@ -491,10 +515,28 @@ pub(crate) fn observe_prose(
         parsed,
         canonical_expressions,
         &index,
+        EquationFlowDiscourse {
+            clauses: &clauses,
+            mentions: &mentions,
+            events: &events,
+            constructions: &discourse_constructions,
+        },
+        &mut analysis,
+    );
+    collect_formula_introduction_meanings(
+        document,
+        source,
+        parsed,
+        canonical_expressions,
+        &index,
         &clauses,
-        &mentions,
-        &events,
-        &discourse_constructions,
+        &mut analysis,
+    );
+    collect_coordinated_formula_meanings(
+        document,
+        &index,
+        parsed,
+        canonical_expressions,
         &mut analysis,
     );
     collect_clause_definitions(
@@ -548,6 +590,46 @@ pub(crate) fn observe_prose(
         let before = &source[before_start..start_byte];
         let after = &source[end_byte..after_end];
         let trimmed_after = after.trim_start().to_ascii_lowercase();
+        if contains_assignment(&math.root)
+            && let Some(action) = events.last_definition_action(before_start, start_byte)
+            && matches!(
+                action.kind,
+                ProseEventKind::DefinitionAction(
+                    DefinitionAction::Define
+                        | DefinitionAction::Denote
+                        | DefinitionAction::Represent
+                        | DefinitionAction::Mean
+                )
+            )
+            && !source[action.end..start_byte]
+                .chars()
+                .any(|character| matches!(character, '.' | ';' | '!' | '?'))
+            && let Some(expression) = canonical_expressions.get(math_index)
+            && matches!(
+                expression.kind,
+                SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+            )
+            && !analysis
+                .formula_meanings
+                .iter()
+                .any(|fact| fact.target_range == math.region.content_range)
+        {
+            analysis.formula_meanings.push(FormulaMeaningFact {
+                target_range: math.region.content_range.clone(),
+                ownership: FormulaMeaningOwnership::ExactTarget,
+                authority: FormulaMeaningAuthority::Adopted,
+                evidence: Evidence {
+                    rule_id: "english-assignment-formula-definition".into(),
+                    kind: "attached-prose".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![SourceRange {
+                        start_offset: index.utf16_for_byte(action.start),
+                        end_offset: math.region.content_range.end_offset,
+                    }],
+                    source_anchors: Vec::new(),
+                },
+            });
+        }
         if let Some(captures) = INLINE_VECTOR_SUFFIX.captures(after) {
             let evidence_end = end_byte + captures.get(0).unwrap().end();
             if let Some((owner, owner_range)) = &nominal_owner {
@@ -617,6 +699,7 @@ pub(crate) fn observe_prose(
                     &mut analysis,
                     &index,
                     canonical_expressions.get(math_index),
+                    &math.region.content_range,
                     passive.description,
                     before_start + passive.prefix_start,
                     end_byte + passive.suffix_end,
@@ -836,8 +919,375 @@ pub(crate) fn observe_prose(
         &clauses,
         &mut analysis.shapes,
     );
-    attach_formula_occurrence_roles(parsed, canonical_expressions, &mut analysis);
+    attach_formula_occurrence_roles(document, parsed, canonical_expressions, &mut analysis);
     analysis
+}
+
+fn collect_formula_adjudications(
+    document: &ProjectDocument,
+    source: &str,
+    index: &SourceIndex,
+    clauses: &[ScientificClause<'_>],
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    semantic_evidence: &ScientificSemanticEvidence,
+) -> Vec<FormulaAdjudicationFact> {
+    let attachment = AttachmentGraph::new(document);
+    let scopes = ScopeGraph::new(document);
+    let formula_roots = parsed
+        .iter()
+        .enumerate()
+        .filter(|(math_index, _)| {
+            canonical_expressions
+                .get(*math_index)
+                .is_some_and(|expression| {
+                    matches!(
+                        expression.kind,
+                        SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                    )
+                })
+        })
+        .map(|(_, math)| math.region.content_range.clone())
+        .collect::<Vec<_>>();
+    let mut facts = Vec::new();
+
+    for clause in clauses {
+        let clause_text = &source[clause.start..clause.end];
+        let kind = bounded_formula_ambiguity(clause_text)
+            .map(|alternatives| FormulaAdjudicationKind::Ambiguous { alternatives })
+            .or_else(|| {
+                bounded_formula_conflict(clause_text)
+                    .then_some(FormulaAdjudicationKind::Conflicting)
+            });
+        let Some(kind) = kind else {
+            continue;
+        };
+        let clause_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        let clause_scope = scopes.path_at(clause_range.start_offset);
+        let mut candidates = formula_roots
+            .iter()
+            .filter(|formula| {
+                !matches!(kind, FormulaAdjudicationKind::Conflicting)
+                    || formula.end_offset <= clause_range.start_offset
+            })
+            .filter(|formula| {
+                scope_visible(&clause_scope, &scopes.path_at(formula.start_offset))
+                    && attachment.permits(&clause_range, formula)
+            })
+            .filter_map(|formula| {
+                let distance = if formula.end_offset <= clause_range.start_offset {
+                    clause_range.start_offset - formula.end_offset
+                } else if clause_range.end_offset <= formula.start_offset {
+                    formula.start_offset.saturating_sub(clause_range.end_offset)
+                } else {
+                    0
+                };
+                (distance <= MAX_ATTACHMENT_DISTANCE_BYTES as u32)
+                    .then_some((distance, formula.clone()))
+            })
+            .collect::<Vec<_>>();
+        candidates.sort_by_key(|(distance, formula)| {
+            (*distance, formula.start_offset, formula.end_offset)
+        });
+        let Some((distance, target_range)) = candidates.first().cloned() else {
+            continue;
+        };
+        if candidates.get(1).is_some_and(|next| next.0 == distance) {
+            continue;
+        }
+        if semantic_evidence.formula_is_explicitly_retracted(&target_range)
+            && !matches!(kind, FormulaAdjudicationKind::Conflicting)
+        {
+            continue;
+        }
+        facts.push(FormulaAdjudicationFact {
+            target_range,
+            kind: kind.clone(),
+            evidence: Evidence {
+                rule_id: match kind {
+                    FormulaAdjudicationKind::Ambiguous { .. } => {
+                        "scientific-prose/formula-ambiguity"
+                    }
+                    FormulaAdjudicationKind::Conflicting => "scientific-prose/formula-conflict",
+                }
+                .into(),
+                kind: "explicit-prose".into(),
+                strength: "hard".into(),
+                source_ranges: vec![clause_range],
+                source_anchors: Vec::new(),
+            },
+        });
+    }
+    facts.sort_by_key(|fact| {
+        (
+            fact.target_range.start_offset,
+            fact.target_range.end_offset,
+            fact.evidence.source_ranges[0].start_offset,
+        )
+    });
+    facts.dedup();
+    facts
+}
+
+fn bounded_formula_ambiguity(value: &str) -> Option<Vec<String>> {
+    let lower = value.to_ascii_lowercase();
+    for (marker, separator) in [
+        ("unresolved between ", " and "),
+        ("may represent ", " rather than "),
+    ] {
+        let Some(start) = lower.find(marker).map(|start| start + marker.len()) else {
+            continue;
+        };
+        let tail = lower[start..]
+            .split(['.', ';', ':'])
+            .next()
+            .unwrap_or("")
+            .trim();
+        let (left, right) = tail.split_once(separator)?;
+        let alternatives = [left.trim(), right.trim()]
+            .into_iter()
+            .filter(|item| {
+                !item.is_empty() && item.len() <= 80 && item.split_whitespace().count() <= 12
+            })
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        if alternatives.len() == 2 {
+            return Some(alternatives);
+        }
+    }
+    None
+}
+
+fn bounded_formula_conflict(value: &str) -> bool {
+    let lower = value.to_ascii_lowercase();
+    let has_formula_target = [
+        "calculation",
+        "equation",
+        "formula",
+        "assertion",
+        "line",
+        "model",
+        "proposal",
+        "relation",
+        "statement",
+        "value",
+    ]
+    .iter()
+    .any(|word| {
+        lower
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .any(|item| item == *word)
+    });
+    has_formula_target
+        && (lower.contains(" incorrect")
+            || lower.contains("conflicting with")
+            || lower.contains("incompatible with")
+            || lower.contains("does not describe")
+            || ((lower.contains("reject") || lower.contains("rejected"))
+                && (lower.contains(" that ") || lower.contains(" this "))))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn collect_formula_introduction_meanings(
+    _document: &ProjectDocument,
+    source: &str,
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    index: &SourceIndex,
+    _clauses: &[ScientificClause<'_>],
+    output: &mut ProseObservations,
+) {
+    for (math_index, math) in parsed.iter().enumerate() {
+        let Some(expression) = canonical_expressions.get(math_index) else {
+            continue;
+        };
+        if !matches!(
+            expression.kind,
+            SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+        ) || output
+            .semantic_evidence
+            .formula_is_explicitly_retracted(&math.region.content_range)
+        {
+            continue;
+        }
+
+        let formula_start = index.byte_for_utf16(math.region.full_range.start_offset);
+        let bounded_start = formula_start.saturating_sub(MAX_ATTACHMENT_DISTANCE_BYTES);
+        let paragraph_start = source[bounded_start..formula_start]
+            .rfind("\n\n")
+            .map_or(bounded_start, |offset| bounded_start + offset + 2);
+        let prefix = &source[paragraph_start..formula_start];
+        let local_prefix = local_formula_introduction_prefix(prefix);
+        let sentence_start = prefix
+            .rfind(['.', '!', '?'])
+            .map_or(paragraph_start, |offset| paragraph_start + offset + 1);
+        let mention = ScientificMention {
+            symbol: String::new(),
+            start: formula_start,
+            end: formula_start,
+            math_index,
+        };
+        let indirect = indirect_adoption_targets_formula(source, sentence_start, &mention);
+        let bare_scoped_assertion = bounded_bare_formula_assertion(prefix);
+        let descriptive = descriptive_formula_introduction(local_prefix);
+        let authority = if indirect || bare_scoped_assertion {
+            Some(FormulaMeaningAuthority::Adopted)
+        } else if descriptive {
+            Some(FormulaMeaningAuthority::Descriptive)
+        } else {
+            None
+        };
+        let Some(authority) = authority else {
+            continue;
+        };
+        let existing_meanings = output
+            .formula_meanings
+            .iter()
+            .filter(|fact| fact.target_range == math.region.content_range)
+            .collect::<Vec<_>>();
+        if existing_meanings
+            .iter()
+            .any(|fact| fact.authority == FormulaMeaningAuthority::Adopted)
+            || authority == FormulaMeaningAuthority::Descriptive && !existing_meanings.is_empty()
+        {
+            continue;
+        }
+        if !formula_introduction_is_positive(local_prefix, authority) {
+            continue;
+        }
+
+        output.formula_meanings.push(FormulaMeaningFact {
+            target_range: math.region.content_range.clone(),
+            ownership: FormulaMeaningOwnership::ExactTarget,
+            authority,
+            evidence: Evidence {
+                rule_id: "english-direct-formula-introduction".into(),
+                kind: "attached-prose".into(),
+                strength: "strong".into(),
+                source_ranges: vec![SourceRange {
+                    start_offset: index.utf16_for_byte(paragraph_start),
+                    end_offset: math.region.content_range.end_offset,
+                }],
+                source_anchors: Vec::new(),
+            },
+        });
+    }
+}
+
+fn local_formula_introduction_prefix(prefix: &str) -> &str {
+    [", and ", "; and ", " and "]
+        .into_iter()
+        .filter_map(|marker| prefix.rfind(marker).map(|offset| offset + marker.len()))
+        .max()
+        .map_or(prefix, |start| &prefix[start..])
+}
+
+fn bounded_bare_formula_assertion(prefix: &str) -> bool {
+    let words = prefix
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .map(str::to_ascii_lowercase)
+        .collect::<Vec<_>>();
+    let excluded = words.iter().any(|word| {
+        matches!(
+            word.as_str(),
+            "candidate"
+                | "asserted"
+                | "cited"
+                | "comparison"
+                | "example"
+                | "hypothetical"
+                | "illustration"
+                | "proposed"
+                | "prospective"
+        )
+    });
+    let scoped_lead = words.first().is_some_and(|word| word == "for");
+    (prefix.trim_end().ends_with(',') && words.len() <= 8 && scoped_lead && !excluded)
+        || (scoped_lead
+            && words.len() <= 40
+            && !excluded
+            && words.iter().any(|word| word == "local")
+            && words
+                .last()
+                .is_some_and(|word| matches!(word.as_str(), "is" | "are"))
+            && words.iter().any(|word| {
+                matches!(
+                    word.as_str(),
+                    "equation" | "formula" | "identity" | "model" | "relation"
+                )
+            }))
+}
+
+fn descriptive_formula_introduction(prefix: &str) -> bool {
+    let words = prefix
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .map(str::to_ascii_lowercase)
+        .collect::<Vec<_>>();
+    words.iter().any(|word| word == "prospective")
+        || words
+            .windows(2)
+            .any(|window| window == ["checked", "against"])
+        || words
+            .iter()
+            .any(|word| matches!(word.as_str(), "propose" | "proposed" | "proposes"))
+            && words.iter().any(|word| word == "condition")
+}
+
+fn formula_introduction_is_positive(prefix: &str, authority: FormulaMeaningAuthority) -> bool {
+    let words = prefix
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .map(str::to_ascii_lowercase)
+        .collect::<Vec<_>>();
+    if (authority == FormulaMeaningAuthority::Adopted
+        && (words.first().is_some_and(|word| word == "if")
+            || words.iter().any(|word| word == "unless")))
+        || words.iter().any(|word| {
+            matches!(
+                word.as_str(),
+                "according" | "attributed" | "cited" | "quoted"
+            )
+        })
+    {
+        return false;
+    }
+    let Some(action) = words.iter().rposition(|word| {
+        matches!(
+            word.as_str(),
+            "accepted"
+                | "adopted"
+                | "applied"
+                | "applies"
+                | "checked"
+                | "estimated"
+                | "estimates"
+                | "has"
+                | "have"
+                | "implemented"
+                | "implements"
+                | "imposed"
+                | "imposes"
+                | "is"
+                | "are"
+                | "propose"
+                | "proposed"
+                | "proposes"
+                | "recorded"
+                | "records"
+                | "used"
+                | "uses"
+        )
+    }) else {
+        return bounded_bare_formula_assertion(prefix);
+    };
+    !words[action.saturating_sub(3)..action]
+        .iter()
+        .any(|word| matches!(word.as_str(), "cannot" | "never" | "no" | "not" | "without"))
 }
 
 fn mark_explicitly_unselected_shape_roots(
@@ -1586,18 +2036,98 @@ fn strip_description_article(value: &str) -> &str {
 }
 
 #[allow(clippy::too_many_arguments)]
+fn collect_coordinated_formula_meanings(
+    document: &ProjectDocument,
+    index: &SourceIndex,
+    parsed: &[ParsedMath],
+    canonical_expressions: &[SemanticExpr],
+    output: &mut ProseObservations,
+) {
+    let source = document.content.as_str();
+    for current_index in 1..parsed.len() {
+        let previous_index = current_index - 1;
+        let previous_math = &parsed[previous_index];
+        let current_math = &parsed[current_index];
+        let Some((previous_expression, current_expression)) = canonical_expressions
+            .get(previous_index)
+            .zip(canonical_expressions.get(current_index))
+        else {
+            continue;
+        };
+        if !matches!(
+            previous_expression.kind,
+            SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+        ) || !matches!(
+            current_expression.kind,
+            SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+        ) || !output.formula_meanings.iter().any(|fact| {
+            fact.target_range == previous_math.region.content_range
+                && fact.authority == FormulaMeaningAuthority::Adopted
+        }) || output
+            .formula_meanings
+            .iter()
+            .any(|fact| fact.target_range == current_math.region.content_range)
+        {
+            continue;
+        }
+
+        let previous_content_start =
+            index.byte_for_utf16(previous_math.region.content_range.start_offset);
+        let previous_content_end =
+            index.byte_for_utf16(previous_math.region.content_range.end_offset);
+        let previous_full_end = index.byte_for_utf16(previous_math.region.full_range.end_offset);
+        let current_full_start = index.byte_for_utf16(current_math.region.full_range.start_offset);
+        if previous_full_end > current_full_start
+            || !source[previous_full_end..current_full_start]
+                .chars()
+                .all(char::is_whitespace)
+            || !source[previous_content_start..previous_content_end]
+                .trim_end()
+                .ends_with(',')
+        {
+            continue;
+        }
+
+        output.formula_meanings.push(FormulaMeaningFact {
+            target_range: current_math.region.content_range.clone(),
+            ownership: FormulaMeaningOwnership::ExactTarget,
+            authority: FormulaMeaningAuthority::Adopted,
+            evidence: Evidence {
+                rule_id: "english-coordinated-formula-adoption".into(),
+                kind: "attached-prose".into(),
+                strength: "strong".into(),
+                source_ranges: vec![SourceRange {
+                    start_offset: previous_math.region.content_range.start_offset,
+                    end_offset: current_math.region.content_range.end_offset,
+                }],
+                source_anchors: Vec::new(),
+            },
+        });
+    }
+}
+
+struct EquationFlowDiscourse<'a, 'source> {
+    clauses: &'a [ScientificClause<'source>],
+    mentions: &'a [ScientificMention],
+    events: &'a ProseEventStream,
+    constructions: &'a [DiscourseConstruction],
+}
+
 fn collect_equation_flow_definitions(
     document: &ProjectDocument,
     source: &str,
     parsed: &[ParsedMath],
     canonical_expressions: &[SemanticExpr],
     index: &SourceIndex,
-    clauses: &[ScientificClause<'_>],
-    mentions: &[ScientificMention],
-    events: &ProseEventStream,
-    constructions: &[DiscourseConstruction],
+    discourse: EquationFlowDiscourse<'_, '_>,
     output: &mut ProseObservations,
 ) {
+    let EquationFlowDiscourse {
+        clauses,
+        mentions,
+        events,
+        constructions,
+    } = discourse;
     let scopes = ScopeGraph::new(document);
     let document_index = SourceIndex::new(&document.content);
     let mut resolved_mentions = std::collections::BTreeSet::new();
@@ -1701,16 +2231,82 @@ fn collect_equation_flow_definitions(
         }
         debug_assert_eq!(candidate.mention_indices, [*mention_index]);
         let window = &source[*prose_start..*prose_end];
+        let paragraph_start = source[..*prose_start]
+            .rfind("\n\n")
+            .map_or(0, |boundary| boundary + 2);
+        let paragraph_window = &source[paragraph_start..*prose_end];
         let action = events.last_definition_action(*prose_start, *prose_end);
         let description = equation_flow_description(window)
-            .map(|description| (description, false))
-            .or_else(|| precedes_formula.then(|| equation_flow_nominal_description(window))?)
+            .map(|description| {
+                (
+                    description,
+                    false,
+                    formula_meaning_authority_for_action(description, action),
+                )
+            })
+            .or_else(|| {
+                let (description, semantic_only) =
+                    precedes_formula.then(|| equation_flow_nominal_description(window))??;
+                Some((
+                    description,
+                    semantic_only,
+                    nominal_formula_meaning_authority(description, paragraph_window),
+                ))
+            })
             .or_else(|| {
                 precedes_formula.then_some(())?;
-                action_equation_flow_description(source, *prose_start, *prose_end, action?)
-                    .map(|description| (description, false))
+                let action = action?;
+                action_equation_flow_description(source, *prose_start, *prose_end, action).map(
+                    |description| {
+                        (
+                            description,
+                            false,
+                            formula_meaning_authority_for_action(description, Some(action)),
+                        )
+                    },
+                )
             });
-        let Some((description, semantic_only)) = description else {
+        if description.is_none()
+            && output.semantic_evidence.formula_is_asserted(&formula_range)
+            && (action
+                .is_some_and(|action| direct_definition_targets_formula(source, action, mention))
+                || direct_adoption_targets_formula(source, *prose_start, mention)
+                || indirect_adoption_targets_formula(source, *prose_start, mention))
+        {
+            let target = canonical_expressions
+                .iter()
+                .filter(|expression| {
+                    formula_range.start_offset <= expression.range.start_offset
+                        && expression.range.end_offset <= formula_range.end_offset
+                        && matches!(
+                            expression.kind,
+                            SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                        )
+                })
+                .max_by_key(|expression| {
+                    expression.range.end_offset - expression.range.start_offset
+                });
+            if target.is_some() {
+                output.formula_meanings.push(FormulaMeaningFact {
+                    target_range: math.region.content_range.clone(),
+                    ownership: FormulaMeaningOwnership::ExactTarget,
+                    authority: FormulaMeaningAuthority::Adopted,
+                    evidence: Evidence {
+                        rule_id: "english-direct-formula-definition".into(),
+                        kind: "attached-prose".into(),
+                        strength: "strong".into(),
+                        source_ranges: vec![SourceRange {
+                            start_offset: index.utf16_for_byte(candidate.evidence_start),
+                            end_offset: index.utf16_for_byte(candidate.evidence_end),
+                        }],
+                        source_anchors: Vec::new(),
+                    },
+                });
+                resolved_mentions.insert(*mention_index);
+            }
+            continue;
+        }
+        let Some((description, semantic_only, meaning_authority)) = description else {
             continue;
         };
         let description_start = description.as_ptr() as usize - source.as_ptr() as usize;
@@ -1724,6 +2320,82 @@ fn collect_equation_flow_definitions(
             continue;
         }
         let description = description.split_whitespace().collect::<Vec<_>>().join(" ");
+        if *precedes_formula
+            && output.semantic_evidence.formula_is_asserted(&formula_range)
+            && meaning_authority == FormulaMeaningAuthority::Adopted
+            && !is_formula_metadescription(&description)
+            && canonical_expressions.iter().any(|expression| {
+                formula_range.start_offset <= expression.range.start_offset
+                    && expression.range.end_offset <= formula_range.end_offset
+                    && matches!(
+                        expression.kind,
+                        SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                    )
+            })
+            && !output.formula_meanings.iter().any(|fact| {
+                fact.target_range == math.region.content_range
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            })
+        {
+            output.formula_meanings.push(FormulaMeaningFact {
+                target_range: math.region.content_range.clone(),
+                ownership: FormulaMeaningOwnership::ExactTarget,
+                authority: meaning_authority,
+                evidence: Evidence {
+                    rule_id: "english-equation-flow-formula-adoption".into(),
+                    kind: "attached-prose".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![SourceRange {
+                        start_offset: index.utf16_for_byte(candidate.evidence_start),
+                        end_offset: index.utf16_for_byte(candidate.evidence_end),
+                    }],
+                    source_anchors: Vec::new(),
+                },
+            });
+        }
+        if contains_assignment(&math.root)
+            && action.is_some_and(|action| {
+                matches!(
+                    action.kind,
+                    ProseEventKind::DefinitionAction(
+                        DefinitionAction::Define
+                            | DefinitionAction::Denote
+                            | DefinitionAction::Represent
+                            | DefinitionAction::Mean
+                    )
+                )
+            })
+            && canonical_expressions
+                .iter()
+                .filter(|expression| {
+                    formula_range.start_offset <= expression.range.start_offset
+                        && expression.range.end_offset <= formula_range.end_offset
+                        && matches!(
+                            expression.kind,
+                            SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                        )
+                })
+                .max_by_key(|expression| {
+                    expression.range.end_offset - expression.range.start_offset
+                })
+                .is_some()
+        {
+            output.formula_meanings.push(FormulaMeaningFact {
+                target_range: math.region.content_range.clone(),
+                ownership: FormulaMeaningOwnership::ExactTarget,
+                authority: FormulaMeaningAuthority::Adopted,
+                evidence: Evidence {
+                    rule_id: "english-assignment-formula-definition".into(),
+                    kind: "attached-prose".into(),
+                    strength: "strong".into(),
+                    source_ranges: vec![SourceRange {
+                        start_offset: index.utf16_for_byte(candidate.evidence_start),
+                        end_offset: index.utf16_for_byte(candidate.evidence_end),
+                    }],
+                    source_anchors: Vec::new(),
+                },
+            });
+        }
         if is_formula_metadescription(&description) {
             let target = canonical_expressions
                 .iter()
@@ -1739,10 +2411,15 @@ fn collect_equation_flow_definitions(
                     expression.range.end_offset - expression.range.start_offset
                 });
             if let Some(target) = target {
+                let ownership = formula_meaning_ownership(&description);
                 output.formula_meanings.push(FormulaMeaningFact {
-                    target_range: target.range.clone(),
-                    ownership: formula_meaning_ownership(&description),
-                    authority: formula_meaning_authority(&description),
+                    target_range: if ownership == FormulaMeaningOwnership::ExactTarget {
+                        math.region.content_range.clone()
+                    } else {
+                        target.range.clone()
+                    },
+                    ownership,
+                    authority: meaning_authority,
                     evidence: Evidence {
                         rule_id: formula_meaning_rule_id(&description).into(),
                         kind: "attached-prose".into(),
@@ -1785,9 +2462,9 @@ fn collect_equation_flow_definitions(
         }
         if classify_role(&description).is_none() {
             output.formula_meanings.push(FormulaMeaningFact {
-                target_range: symbol_range,
-                ownership: formula_meaning_ownership(&description),
-                authority: formula_meaning_authority(&description),
+                target_range: expression.range.clone(),
+                ownership: FormulaMeaningOwnership::RelationHead,
+                authority: meaning_authority,
                 evidence: Evidence {
                     rule_id: formula_meaning_rule_id(&description).into(),
                     kind: "attached-prose".into(),
@@ -2037,6 +2714,238 @@ fn formula_meaning_authority(description: &str) -> FormulaMeaningAuthority {
     } else {
         FormulaMeaningAuthority::Descriptive
     }
+}
+
+fn formula_meaning_authority_for_action(
+    description: &str,
+    action: Option<&ProseEvent>,
+) -> FormulaMeaningAuthority {
+    if action.is_some_and(|action| {
+        action.kind == ProseEventKind::DefinitionAction(DefinitionAction::Define)
+    }) {
+        FormulaMeaningAuthority::Adopted
+    } else {
+        formula_meaning_authority(description)
+    }
+}
+
+fn nominal_formula_meaning_authority(
+    description: &str,
+    evidence_window: &str,
+) -> FormulaMeaningAuthority {
+    let local_paragraph = evidence_window
+        .rsplit_once("\n\n")
+        .map_or(evidence_window, |(_, paragraph)| paragraph);
+    let words = formula_description_words(description)
+        .chain(formula_description_words(local_paragraph))
+        .collect::<Vec<_>>();
+    let excluded = words.iter().any(|word| {
+        matches!(
+            word.as_str(),
+            "candidate"
+                | "comparison"
+                | "example"
+                | "hypothetical"
+                | "illustration"
+                | "planned"
+                | "proposal"
+                | "proposed"
+                | "prospective"
+                | "asserted"
+        )
+    });
+    let explicitly_adopted = (local_paragraph
+        .trim_start()
+        .to_ascii_lowercase()
+        .starts_with("for ")
+        && words.iter().any(|word| word == "local"))
+        || formula_description_words(description)
+            .last()
+            .is_some_and(|word| word == "notation")
+        || words.iter().any(|word| {
+            matches!(
+                word.as_str(),
+                "accepted" | "adopted" | "approved" | "chosen" | "selected"
+            )
+        })
+        || (!is_formula_metadescription(description)
+            && (classify_role(description).is_some()
+                || formula_description_words(description)
+                    .last()
+                    .is_some_and(|word| word == "flux")));
+    if !excluded && explicitly_adopted {
+        FormulaMeaningAuthority::Adopted
+    } else {
+        FormulaMeaningAuthority::Descriptive
+    }
+}
+
+fn direct_definition_targets_formula(
+    source: &str,
+    action: &ProseEvent,
+    mention: &crate::scientific_prose::ScientificMention,
+) -> bool {
+    if action.kind != ProseEventKind::DefinitionAction(DefinitionAction::Define)
+        || action.end > mention.start
+    {
+        return false;
+    }
+    let bridge = &source[action.end..mention.start];
+    if bridge
+        .chars()
+        .any(|character| matches!(character, '.' | ';' | '!' | '?'))
+    {
+        return false;
+    }
+    let words = bridge
+        .split(|character: char| !character.is_ascii_alphabetic())
+        .filter(|word| !word.is_empty())
+        .map(str::to_ascii_lowercase)
+        .collect::<Vec<_>>();
+    words.is_empty()
+        || matches!(words.as_slice(), [word] if word == "as")
+        || matches!(
+            words.as_slice(),
+            [as_word, follows] if as_word == "as" && follows == "follows"
+        )
+        || matches!(
+            words.as_slice(),
+            [by, article, following, noun]
+                if by == "by"
+                    && article == "the"
+                    && following == "following"
+                    && matches!(noun.as_str(), "equation" | "formula" | "relation")
+        )
+}
+
+fn direct_adoption_targets_formula(
+    source: &str,
+    prose_start: usize,
+    mention: &crate::scientific_prose::ScientificMention,
+) -> bool {
+    if prose_start > mention.start {
+        return false;
+    }
+    let prefix = &source[prose_start..mention.start];
+    let Some((action_start, action_end)) = ascii_word_ranges(prefix).last().copied() else {
+        return false;
+    };
+    let action = &prefix[action_start..action_end];
+    let action = action.to_ascii_lowercase();
+    if !matches!(
+        action.as_str(),
+        "accepted"
+            | "adopted"
+            | "adopts"
+            | "applied"
+            | "applies"
+            | "approved"
+            | "implemented"
+            | "implements"
+            | "imposed"
+            | "imposes"
+            | "has"
+            | "have"
+            | "recorded"
+            | "records"
+            | "use"
+            | "used"
+            | "uses"
+    ) {
+        return false;
+    }
+    if matches!(
+        action.as_str(),
+        "has" | "have" | "recorded" | "records" | "use" | "used" | "uses"
+    ) && ascii_word_ranges(&prefix[..action_start])
+        .into_iter()
+        .map(|(start, end)| prefix[start..end].to_ascii_lowercase())
+        .any(|word| {
+            matches!(
+                word.as_str(),
+                "candidate"
+                    | "cited"
+                    | "comparison"
+                    | "example"
+                    | "illustration"
+                    | "proposed"
+                    | "quoted"
+            )
+        })
+    {
+        return false;
+    }
+    let bridge_start = prose_start + action_end;
+    let bridge = &source[bridge_start..mention.start];
+    !bridge.chars().any(|character| {
+        character.is_ascii_alphabetic() || matches!(character, '.' | ';' | '!' | '?')
+    })
+}
+
+fn indirect_adoption_targets_formula(
+    source: &str,
+    prose_start: usize,
+    mention: &crate::scientific_prose::ScientificMention,
+) -> bool {
+    if prose_start > mention.start {
+        return false;
+    }
+    let prefix = &source[prose_start..mention.start];
+    let ranges = ascii_word_ranges(prefix);
+    let words = ranges
+        .iter()
+        .map(|(start, end)| prefix[*start..*end].to_ascii_lowercase())
+        .collect::<Vec<_>>();
+    let Some(action_index) = words.iter().rposition(|word| {
+        matches!(
+            word.as_str(),
+            "advanced"
+                | "advances"
+                | "estimated"
+                | "estimates"
+                | "modeled"
+                | "models"
+                | "represented"
+                | "represents"
+        )
+    }) else {
+        return false;
+    };
+    let tail = &words[action_index + 1..];
+    if tail.is_empty()
+        || tail.len() > 10
+        || tail.iter().any(|word| {
+            matches!(
+                word.as_str(),
+                "candidate"
+                    | "cited"
+                    | "comparison"
+                    | "example"
+                    | "illustration"
+                    | "proposed"
+                    | "quoted"
+            )
+        })
+        || !tail.last().is_some_and(|word| {
+            matches!(
+                word.as_str(),
+                "as" | "balance"
+                    | "by"
+                    | "equation"
+                    | "formula"
+                    | "in"
+                    | "model"
+                    | "objective"
+                    | "relation"
+            )
+        })
+    {
+        return false;
+    }
+    let action_end = ranges[action_index].1;
+    !prefix[action_end..]
+        .chars()
+        .any(|character| matches!(character, '.' | ';' | '!' | '?'))
 }
 
 fn relation_description_is_formula_metadescription(description: &str) -> bool {
@@ -2301,6 +3210,7 @@ fn collect_semantic_evidence(
                     | "estimate"
                     | "calculation"
                     | "proposal"
+                    | "statement"
             )
         };
         let is_target_tail = |word: &str| {
@@ -2420,6 +3330,7 @@ fn collect_semantic_evidence(
                     | "unusable"
                     | "unavailable"
                     | "inapplicable"
+                    | "incorrect"
                     | "ignore"
                     | "ignores"
                     | "ignored"
@@ -2677,6 +3588,7 @@ fn collect_semantic_evidence(
                         | "estimate"
                         | "calculation"
                         | "proposal"
+                        | "statement"
                 )
         })
     };
@@ -2941,6 +3853,18 @@ fn collect_semantic_evidence(
                         attached_formula_ranges
                             .sort_by_key(|range| (range.start_offset, range.end_offset));
                         attached_formula_ranges.dedup();
+                        let identifies_attached_formula = !reference_targets
+                            .get(&clause.start)
+                            .map(Vec::is_empty)
+                            .unwrap_or(true)
+                            || !identified_construction_targets.is_empty()
+                            || activation_identifies_formula(
+                                source,
+                                index,
+                                clause,
+                                &range,
+                                canonical_expressions,
+                            );
                         law_activations.push(LawActivationEvidence {
                             pack_id: pack.pack_id.clone(),
                             law_id: law.id.clone(),
@@ -2948,18 +3872,10 @@ fn collect_semantic_evidence(
                                 start_offset: index.utf16_for_byte(clause.start),
                                 end_offset: index.utf16_for_byte(clause.end),
                             },
-                            identifies_attached_formula: !reference_targets
-                                .get(&clause.start)
-                                .map(Vec::is_empty)
-                                .unwrap_or(true)
-                                || !identified_construction_targets.is_empty()
-                                || activation_identifies_formula(
-                                    source,
-                                    index,
-                                    clause,
-                                    &range,
-                                    canonical_expressions,
-                                ),
+                            identifies_attached_formula,
+                            adopts_conditions: clause_adopts_named_law(
+                                &source[clause.start..clause.end],
+                            ),
                             attached_formula_ranges,
                             frame: clause.frame.clone(),
                             evidence: Evidence {
@@ -3440,6 +4356,29 @@ fn activation_target_identifies_formula(
             )
         });
     !switches_context
+}
+
+fn clause_adopts_named_law(source: &str) -> bool {
+    let words = source
+        .split(|character: char| !character.is_alphanumeric())
+        .filter(|word| !word.is_empty())
+        .map(str::to_ascii_lowercase)
+        .collect::<Vec<_>>();
+    let names_a_semantic_artifact = words.iter().any(|word| {
+        matches!(
+            word.as_str(),
+            "law" | "relation" | "equation" | "identity" | "model" | "definition"
+        )
+    });
+    let adopts = words.iter().any(|word| {
+        word.starts_with("adopt")
+            || word.starts_with("accept")
+            || word.starts_with("approv")
+            || word.starts_with("declar")
+            || word.starts_with("impos")
+            || word.starts_with("stat")
+    });
+    names_a_semantic_artifact && adopts
 }
 
 fn formula_identification_bridge(value: &str) -> bool {
@@ -4086,13 +5025,28 @@ fn collect_assumptions(
                 start_offset: index.utf16_for_byte(assumption.phrase_start),
                 end_offset: index.utf16_for_byte(assumption.phrase_end),
             };
-            let typed_targets = clause_targets
+            let mut typed_targets = clause_targets
                 .iter()
                 .filter(|target| {
                     activation_target_identifies_formula(source, index, &phrase_range, target)
                 })
                 .map(|target| target.range.clone())
                 .collect::<Vec<_>>();
+            if assumption.target_relation_id.is_some()
+                && typed_targets.is_empty()
+                && let Some(target) = mentions
+                    .iter()
+                    .filter(|mention| {
+                        assumption.phrase_end <= mention.start
+                            && mention.start - assumption.phrase_end <= 160
+                    })
+                    .min_by_key(|mention| mention.start)
+            {
+                typed_targets.push(SourceRange {
+                    start_offset: index.utf16_for_byte(target.start),
+                    end_offset: index.utf16_for_byte(target.end),
+                });
+            }
             if assumption.target_relation_id.is_some() && typed_targets.is_empty() {
                 continue;
             }
@@ -4776,6 +5730,7 @@ fn push_formula_metadescription(
     analysis: &mut ProseObservations,
     index: &SourceIndex,
     expression: Option<&SemanticExpr>,
+    formula_range: &SourceRange,
     description: &str,
     evidence_start: usize,
     evidence_end: usize,
@@ -4788,9 +5743,14 @@ fn push_formula_metadescription(
     }) else {
         return;
     };
+    let ownership = formula_meaning_ownership(description);
     analysis.formula_meanings.push(FormulaMeaningFact {
-        target_range: expression.range.clone(),
-        ownership: formula_meaning_ownership(description),
+        target_range: if ownership == FormulaMeaningOwnership::ExactTarget {
+            formula_range.clone()
+        } else {
+            expression.range.clone()
+        },
+        ownership,
         authority: formula_meaning_authority(description),
         evidence: Evidence {
             rule_id: formula_meaning_rule_id(description).into(),
@@ -5175,6 +6135,7 @@ fn push_semantic_role_claim(
 }
 
 fn attach_formula_occurrence_roles(
+    document: &ProjectDocument,
     parsed: &[ParsedMath],
     canonical_expressions: &[SemanticExpr],
     analysis: &mut ProseObservations,
@@ -5205,7 +6166,7 @@ fn attach_formula_occurrence_roles(
                         expression.kind,
                         SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
                     )
-                    && expression_contains_symbol(expression, &definition.symbol)
+                    && expression_contains_symbol(document, expression, &definition.symbol)
             })
             .min_by_key(|(math, _)| math.region.content_range.start_offset);
         let Some((math, expression)) = target else {
@@ -5221,7 +6182,13 @@ fn attach_formula_occurrence_roles(
         }) {
             continue;
         }
-        collect_matching_symbol_ranges(expression, &definition.symbol, &mut attached, &definition);
+        collect_matching_symbol_ranges(
+            document,
+            expression,
+            &definition.symbol,
+            &mut attached,
+            &definition,
+        );
     }
     attached.sort_by_key(|definition| definition.location.range.start_offset);
     attached.dedup_by(|left, right| {
@@ -5232,28 +6199,62 @@ fn attach_formula_occurrence_roles(
     analysis.semantic_role_definitions = attached;
 }
 
-fn expression_contains_symbol(expression: &SemanticExpr, symbol: &str) -> bool {
-    expression_name(expression).as_deref() == Some(symbol)
+fn expression_contains_symbol(
+    document: &ProjectDocument,
+    expression: &SemanticExpr,
+    symbol: &str,
+) -> bool {
+    expression_matches_source_symbol(document, expression, symbol)
         || expression_children(expression)
             .iter()
-            .any(|child| expression_contains_symbol(child, symbol))
+            .any(|child| expression_contains_symbol(document, child, symbol))
+}
+
+fn expression_matches_source_symbol(
+    document: &ProjectDocument,
+    expression: &SemanticExpr,
+    symbol: &str,
+) -> bool {
+    if expression_name(expression).as_deref() == Some(symbol) {
+        return true;
+    }
+    authored_expression_symbol(document, expression)
+        .is_some_and(|source| source == symbol || source.strip_prefix('\\') == Some(symbol))
+}
+
+fn authored_expression_symbol<'a>(
+    document: &'a ProjectDocument,
+    expression: &SemanticExpr,
+) -> Option<&'a str> {
+    let index = SourceIndex::new(&document.content);
+    let start = index.byte_for_utf16(expression.range.start_offset);
+    let end = index.byte_for_utf16(expression.range.end_offset);
+    (start < end)
+        .then(|| document.content.get(start..end).map(str::trim))
+        .flatten()
 }
 
 fn collect_matching_symbol_ranges(
+    document: &ProjectDocument,
     expression: &SemanticExpr,
     symbol: &str,
     output: &mut Vec<DefinitionInfo>,
     definition: &DefinitionInfo,
 ) {
-    if expression_name(expression).as_deref() == Some(symbol) {
+    if expression_matches_source_symbol(document, expression, symbol) {
         let mut occurrence = definition.clone();
         occurrence.location.range = expression.range.clone();
+        if let Some(authored) = authored_expression_symbol(document, expression)
+            && (authored == symbol || authored.strip_prefix('\\') == Some(symbol))
+        {
+            occurrence.symbol = authored.into();
+        }
         occurrence.evidence.rule_id =
             format!("formula-occurrence-role/{}", definition.evidence.rule_id);
         output.push(occurrence);
     }
     for child in expression_children(expression) {
-        collect_matching_symbol_ranges(child, symbol, output, definition);
+        collect_matching_symbol_ranges(document, child, symbol, output, definition);
     }
 }
 
@@ -5483,10 +6484,10 @@ fn definition_priority(definition: &DefinitionInfo) -> u8 {
 #[cfg(test)]
 mod tests {
     use super::{
-        ProseShape, expand_shared_shape_head, formula_identification_bridge, observe_prose,
-        shape_claim,
+        FormulaMeaningAuthority, FormulaMeaningOwnership, ProseShape, expand_shared_shape_head,
+        expression_contains_symbol, formula_identification_bridge, observe_prose, shape_claim,
     };
-    use crate::canonical::lower_document_region;
+    use crate::canonical::{SemanticExpr, SemanticExprKind, lower_document_region};
     use crate::concept::classify_role;
     use crate::parser::{parse_regions, test_math_regions};
     use crate::{
@@ -5630,6 +6631,65 @@ mod tests {
             .map(|math| lower_document_region(document, &math.region.content_range))
             .collect::<Vec<_>>();
         observe_prose(document, &parsed, &canonical)
+    }
+
+    #[test]
+    fn transparent_macro_calls_retain_their_exact_authored_role_surface() {
+        let source = r"$\Efield$";
+        let regions = test_math_regions(source, DocumentLanguage::Latex);
+        let document = ProjectDocument {
+            prose_annotations: vec![],
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            language: DocumentLanguage::Latex,
+            content: source.into(),
+            document_version: 1,
+            schema_version: 8,
+            nodes: Vec::new(),
+            math_roots: Vec::new(),
+            visible_prose: Vec::new(),
+            scopes: Vec::new(),
+            blocks: Vec::new(),
+            declarations: Vec::new(),
+            math_regions: regions.clone(),
+            macros: Vec::new(),
+            includes: Vec::new(),
+        };
+        let expression = SemanticExpr {
+            kind: SemanticExprKind::Symbol("expanded-electric-field".into()),
+            range: regions[0].content_range.clone(),
+            provenance: Vec::new(),
+        };
+
+        assert!(expression_contains_symbol(&document, &expression, "Efield"));
+    }
+
+    #[test]
+    fn coordinated_copular_macro_roles_keep_each_declared_subject() {
+        let analysis = analyze(
+            r"In this manuscript, \(\Efield\) is the electric field, \(\freecharge\) is the free-charge density, and \(\permit\) is the homogeneous background permittivity.",
+        );
+        let roles = analysis
+            .definitions
+            .iter()
+            .filter_map(|definition| {
+                classify_role(&definition.description)
+                    .map(|role| (definition.symbol.as_str(), role))
+            })
+            .collect::<Vec<_>>();
+
+        assert!(
+            roles.contains(&("Efield", "quantities-units:electric-field".into())),
+            "{roles:#?}"
+        );
+        assert!(
+            roles.contains(&("freecharge", "electromagnetism:charge-density".into())),
+            "{roles:#?}"
+        );
+        assert!(
+            roles.contains(&("permit", "electromagnetism:permittivity".into())),
+            "{roles:#?}"
+        );
     }
 
     #[test]
@@ -6003,10 +7063,12 @@ mod tests {
                 .all(|definition| definition.symbol != "Q_o")
         );
         assert!(
-            asserted
-                .formula_meanings
-                .iter()
-                .any(|fact| { fact.evidence.rule_id == "english-equation-flow-meaning" }),
+            asserted.formula_meanings.iter().any(|fact| {
+                fact.evidence.rule_id == "english-equation-flow-meaning"
+                    && fact.authority == FormulaMeaningAuthority::Descriptive
+                    && fact.ownership == FormulaMeaningOwnership::RelationHead
+                    && fact.target_range.start_offset < fact.target_range.end_offset
+            }),
             "{:?}",
             asserted.formula_meanings
         );
@@ -6015,6 +7077,296 @@ mod tests {
             "The review says that this optical quality factor does not apply:\n\\[Q_o=\\omega_0/\\kappa.\\]",
         );
         assert!(rejected.formula_meanings.is_empty());
+
+        let comparison = analyze("The comparison formula is\n\\[Q_o=\\omega_0/\\kappa.\\]");
+        assert!(
+            comparison
+                .formula_meanings
+                .iter()
+                .all(|fact| { fact.authority == FormulaMeaningAuthority::Descriptive }),
+            "{:#?}",
+            comparison.formula_meanings
+        );
+
+        let prospective = analyze(
+            "For the prospective resonator, $\\kappa$ is its linewidth. Its optical quality factor is\n\\[Q_o=\\omega_0/\\kappa.\\]",
+        );
+        assert!(
+            prospective
+                .formula_meanings
+                .iter()
+                .all(|fact| { fact.authority == FormulaMeaningAuthority::Descriptive }),
+            "{:#?}",
+            prospective.formula_meanings
+        );
+
+        let scoped_heading = analyze(
+            "\\subsection{Proposed local assay}\n\nFor steady flow, the local pressure-gradient model is\n\\[p_x=-8\\mu Q/(\\pi R^4).\\]",
+        );
+        assert!(
+            scoped_heading
+                .formula_meanings
+                .iter()
+                .any(|fact| { fact.authority == FormulaMeaningAuthority::Adopted }),
+            "{:#?}",
+            scoped_heading.formula_meanings
+        );
+
+        let scoped_with_prior_citation = analyze(
+            "\\subsection{Cited contamination screen}\n\nChen and Malik report \\(R_0=\\beta/\\gamma\\) for their culture screen. That attributed ratio is not adopted as a geometric quantity here.\n\n\\subsection{Proposed local assay}\n\nFor steady, laminar flow of a Newtonian fluid through an axisymmetric slender tube with no slip, \\(R(x,t)\\) denotes the lumen radius and the local pressure-gradient model is\n\\[\\partial_x p=-\\frac{8\\mu Q}{\\pi R(x,t)^4}.\\]",
+        );
+        assert!(
+            scoped_with_prior_citation
+                .formula_meanings
+                .iter()
+                .any(|fact| {
+                    fact.authority == FormulaMeaningAuthority::Adopted
+                        && fact.ownership == FormulaMeaningOwnership::ExactTarget
+                }),
+            "{:#?}",
+            scoped_with_prior_citation.formula_meanings
+        );
+    }
+
+    #[test]
+    fn explicit_definition_adopts_a_formula_but_computation_only_describes_it() {
+        let defined =
+            analyze("We define the constitutive model by the following equation.\n$J=-D\\nabla c$");
+        assert!(
+            defined.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            defined.formula_meanings
+        );
+
+        let computed = analyze(
+            "We compute the constitutive model by the following equation.\n$J=-D\\nabla c$",
+        );
+        assert!(
+            computed.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Descriptive
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            computed.formula_meanings
+        );
+        assert!(
+            computed
+                .formula_meanings
+                .iter()
+                .all(|fact| fact.authority != FormulaMeaningAuthority::Adopted)
+        );
+
+        let direct =
+            analyze("For this specialization, define\n\\[g(x):=\\nabla f(x),\\qquad x\\in M.\\]");
+        assert!(
+            direct.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            direct.formula_meanings
+        );
+
+        let separated =
+            analyze("For this specialization, define.\n\\[g(x):=\\nabla f(x),\\qquad x\\in M.\\]");
+        assert!(
+            separated.formula_meanings.is_empty(),
+            "{:#?}",
+            separated.formula_meanings
+        );
+
+        let imposed = analyze(
+            "In the retained material regime we imposed\n\\[D=\\epsilon E,\\qquad \\epsilon=3.21\\epsilon_0.\\]",
+        );
+        assert!(
+            imposed.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            imposed.formula_meanings
+        );
+
+        let implemented =
+            analyze("The firmware implements\n\\[u_k=K_p e_k+K_i\\sum_j e_j\\Delta t.\\]");
+        assert!(
+            implemented.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            implemented.formula_meanings
+        );
+
+        let applied = analyze("The observing log applies\n\\[F=L/(4\\pi d^2).\\]");
+        assert!(
+            applied.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            applied.formula_meanings
+        );
+
+        let rejected_application =
+            analyze("The observing log does not apply\n\\[F=L/(4\\pi d^2).\\]");
+        assert!(
+            rejected_application.formula_meanings.is_empty(),
+            "{:#?}",
+            rejected_application.formula_meanings
+        );
+        let deferred_application =
+            analyze("We cannot yet apply \\( |A\\cup B|=|A|+|B|-|A\\cap B| \\) here.");
+        assert!(
+            deferred_application.formula_meanings.is_empty(),
+            "{:#?}",
+            deferred_application.formula_meanings
+        );
+
+        let used = analyze("The discharge budget uses\n\\[C(t)=C_0-\\int_0^t I(s)\\,ds.\\]");
+        assert!(
+            used.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            used.formula_meanings
+        );
+        let comparison =
+            analyze("For comparison, the report uses\n\\[C(t)=C_0-\\int_0^t I(s)\\,ds.\\]");
+        assert!(
+            comparison.formula_meanings.is_empty(),
+            "{:#?}",
+            comparison.formula_meanings
+        );
+
+        let coordinated_source = "The notebook records\n\\[dT/dV=(dT/dR)(dR/dV),\\]\n\\[\\sigma_T^2\\approx(dT/dV)^2\\sigma_V^2+(dT/dR)^2\\sigma_R^2.\\]";
+        let coordinated = analyze(coordinated_source);
+        assert_eq!(
+            coordinated
+                .formula_meanings
+                .iter()
+                .filter(|fact| fact.authority == FormulaMeaningAuthority::Adopted)
+                .count(),
+            2,
+            "{:#?}",
+            coordinated.formula_meanings
+        );
+        let second_start = coordinated_source.rfind("\\sigma_T^2").unwrap() as u32;
+        let second_end = coordinated_source.rfind(".\\]").unwrap() as u32 + 1;
+        assert!(
+            coordinated.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+                    && fact.target_range
+                        == SourceRange {
+                            start_offset: second_start,
+                            end_offset: second_end,
+                        }
+            }),
+            "{:#?}",
+            coordinated.formula_meanings
+        );
+
+        let stated = analyze("For the two finite sets, we have\n\\[|A|=15,\\quad |B|=10.\\]");
+        assert!(
+            stated
+                .formula_meanings
+                .iter()
+                .any(|fact| { fact.authority == FormulaMeaningAuthority::Adopted }),
+            "{:#?}",
+            stated.formula_meanings
+        );
+        let candidate_statement =
+            analyze("The proposed candidate has\n\\[|A|=15,\\quad |B|=10.\\]");
+        assert!(
+            candidate_statement
+                .formula_meanings
+                .iter()
+                .all(|fact| { fact.authority == FormulaMeaningAuthority::Descriptive }),
+            "{:#?}",
+            candidate_statement.formula_meanings
+        );
+
+        for source in [
+            "The draft proposes the necessary condition\n\\[\\nabla f(x^\\star)=0.\\]\nIts hypotheses remain to be supplied.",
+            "If the optional least-squares backend is selected, its output can be checked against\n\\[A^\\top A\\theta=A^\\top b.\\]\nThe run manifest does not record whether that backend was used.",
+        ] {
+            let analysis = analyze(source);
+            assert!(
+                analysis.formula_meanings.iter().any(|fact| {
+                    fact.authority == FormulaMeaningAuthority::Descriptive
+                        && fact.ownership == FormulaMeaningOwnership::ExactTarget
+                }),
+                "{source}: {:#?}",
+                analysis.formula_meanings
+            );
+        }
+
+        let estimated = analyze(
+            "Our fitted model estimates a neutral loss coefficient in\n\\[dC/dt=S(t)-kC.\\]",
+        );
+        assert!(
+            estimated
+                .formula_meanings
+                .iter()
+                .any(|fact| { fact.authority == FormulaMeaningAuthority::Adopted }),
+            "{:#?}",
+            estimated.formula_meanings
+        );
+        let estimated_after_proposal = analyze(
+            "\\subsection{Reviewer proposal}\n\nThe reviewer proposed interpreting a fitted coefficient as microbial mortality, citing \\(k_m=-(1/N)(dN/dt)\\).\n\n\\subsection{Authors' fitted model}\n\nOur tracer analysis instead estimates a neutral effective loss coefficient \\(k\\) in\n\\[\\frac{dC}{dt}=S(t)-kC.\\]",
+        );
+        assert!(
+            estimated_after_proposal
+                .formula_meanings
+                .iter()
+                .any(|fact| {
+                    fact.authority == FormulaMeaningAuthority::Adopted
+                        && fact.ownership == FormulaMeaningOwnership::ExactTarget
+                }),
+            "{:#?}",
+            estimated_after_proposal.formula_meanings
+        );
+        let cited_estimate = analyze(
+            "The cited model estimates a proposed loss coefficient in\n\\[dC/dt=S(t)-kC.\\]",
+        );
+        assert!(
+            cited_estimate.formula_meanings.is_empty(),
+            "{:#?}",
+            cited_estimate.formula_meanings
+        );
+
+        let unrelated = analyze("The report accepted the estimate.\n\\[D=\\epsilon E.\\]");
+        assert!(
+            unrelated.formula_meanings.is_empty(),
+            "{:#?}",
+            unrelated.formula_meanings
+        );
+
+        let assignment = analyze(
+            "The notation $y'(x)$ denotes its derivative value at $x$:\n\\[y'(x):=\\frac{dy}{dx}(x)=\\partial_xY(x).\\]",
+        );
+        assert!(
+            assignment.formula_meanings.iter().any(|fact| {
+                fact.authority == FormulaMeaningAuthority::Adopted
+                    && fact.ownership == FormulaMeaningOwnership::ExactTarget
+            }),
+            "{:#?}",
+            assignment.formula_meanings
+        );
+
+        let unintroduced_assignment = analyze(
+            "The report compares these expressions:\n\\[y'(x):=\\frac{dy}{dx}(x)=\\partial_xY(x).\\]",
+        );
+        assert!(
+            unintroduced_assignment.formula_meanings.is_empty(),
+            "{:#?}",
+            unintroduced_assignment.formula_meanings
+        );
     }
 
     #[test]
@@ -6695,6 +8047,23 @@ gain.";
                 .semantic_evidence
                 .formula_is_rejected(&formulas[1].content_range)
         );
+
+        let source = "The earlier draft used\n\\[\\sum_v d(v)=2|E|.\\]\nThat statement is incorrect. The corrected relation is\n\\[\\sum_v d(v)=|E|.\\]";
+        let analysis = analyze(source);
+        let formulas = test_math_regions(source, DocumentLanguage::Latex);
+        assert_eq!(formulas.len(), 2);
+        assert!(
+            analysis
+                .semantic_evidence
+                .formula_is_explicitly_retracted(&formulas[0].content_range),
+            "{:#?}",
+            analysis.semantic_evidence.clauses
+        );
+        assert!(
+            !analysis
+                .semantic_evidence
+                .formula_is_rejected(&formulas[1].content_range)
+        );
     }
 
     #[test]
@@ -7246,6 +8615,50 @@ Define the mean axial speed by the flow relation
                 .iter()
                 .any(|(symbol, _)| ["i", "j", "k"].contains(symbol))
         );
+    }
+
+    #[test]
+    fn maps_elided_possessive_coordinated_role_declarations() {
+        let analysis = analyze(
+            "Let $u_h$ denote an approximate value and $u$ its exact value in the same numerical comparison.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        assert!(
+            definitions.contains(&("u_h", "approximate value")),
+            "{definitions:?}"
+        );
+        assert!(
+            definitions.contains(&("u", "its exact value in the same numerical comparison")),
+            "{definitions:?}"
+        );
+        assert_eq!(
+            classify_role("approximate value").as_deref(),
+            Some("numerical-analysis:approximate-value")
+        );
+
+        let analysis = analyze(
+            "Let $y_1$, $y_0$, $h_t$, and $g_0$ denote ODE state, ODE state, positive step size scalar, and evolution source.",
+        );
+        let definitions = analysis
+            .definitions
+            .iter()
+            .map(|definition| (definition.symbol.as_str(), definition.description.as_str()))
+            .collect::<Vec<_>>();
+        for expected in [
+            ("y_1", "ODE state"),
+            ("y_0", "ODE state"),
+            ("h_t", "positive step size scalar"),
+            ("g_0", "evolution source"),
+        ] {
+            assert!(
+                definitions.contains(&expected),
+                "{expected:?}: {definitions:?}"
+            );
+        }
     }
 
     #[test]

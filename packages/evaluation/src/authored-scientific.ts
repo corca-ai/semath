@@ -97,6 +97,11 @@ export interface AuthoredSourceAnchor {
 export interface AuthoredLocationExpectation {
   /** Exhaustive source locations authorized by fixture schema 2. */
   readonly allowed?: readonly AuthoredSourceAnchor[];
+  /**
+   * Explicit entity-surface authorization when result availability alone is
+   * insufficient (for example, go-to-definition at the declaration itself).
+   */
+  readonly authorization?: "authorized" | "refused";
   readonly excluded: readonly AuthoredSourceAnchor[];
   readonly minimum: number;
   readonly required: readonly AuthoredSourceAnchor[];
@@ -180,11 +185,12 @@ export interface AuthoredScientificProbe {
     readonly formulaDecision?: {
       readonly anchor: AuthoredSourceAnchor;
       readonly status: MathAuthoringDisposition;
-    };
+    } | null;
     readonly proofGrounded: boolean;
     readonly navigation: {
       readonly definition: AuthoredLocationExpectation;
       readonly prepareRename: {
+        readonly authorization?: "authorized" | "refused";
         readonly placeholder?: string;
         readonly range?: AuthoredSourceAnchor;
         readonly status: "available" | "unavailable";
@@ -579,7 +585,15 @@ export function scoreAuthoredScientificFixture(
         !falseEstablishmentCauses.has("decision") && !caseFalseConflict;
     }
     const expectedFormula = probe.expected.formulaDecision;
-    if (expectedFormula) {
+    if (expectedFormula === null) {
+      if (
+        observed.formulaDecision === undefined ||
+        observed.formulaDecision.location !== null
+      ) {
+        caseFailures.push("selected formula must be absent");
+        caseMissedCoverage = true;
+      }
+    } else if (expectedFormula) {
       const actualFormula = observed.formulaDecision;
       if (!actualFormula) {
         caseFailures.push("selected formula decision is missing");
@@ -884,7 +898,7 @@ export function observeAuthoredScientificProbe(
       range: diagnostic.range,
       severity: diagnostic.severity,
     })),
-    ...(probe.expected.formulaDecision
+    ...(probe.expected.formulaDecision !== undefined
       ? {
           formulaDecision: {
             location: view.authoringContext.formula?.location ?? null,
@@ -902,6 +916,7 @@ export function observeAuthoredScientificProbe(
         : {}),
     },
     proofGrounded:
+      view.symbol?.entityId !== undefined &&
       proofEvidence.length > 0 &&
       proofEvidence.every((evidence) => evidence.sourceRanges.length > 0),
     references: results.references.value.locations,
@@ -1211,9 +1226,18 @@ function parseExpected(
   );
   exact(
     prepareRename,
-    ["status", "range", "placeholder"],
+    [
+      "status",
+      "range",
+      "placeholder",
+      ...(schemaVersion === 2 ? ["authorization"] : []),
+    ],
     `${path}.navigation.prepareRename`,
-    ["range", "placeholder"],
+    [
+      "range",
+      "placeholder",
+      ...(schemaVersion === 2 ? ["authorization"] : []),
+    ],
   );
   const rename = record(navigation.rename, `${path}.navigation.rename`);
   exact(
@@ -1223,7 +1247,7 @@ function parseExpected(
       "minimum",
       "required",
       "excluded",
-      ...(schemaVersion === 2 ? ["allowed"] : []),
+      ...(schemaVersion === 2 ? ["allowed", "authorization"] : []),
       "expectedText",
       "newName",
       "replacementText",
@@ -1231,7 +1255,7 @@ function parseExpected(
     ],
     `${path}.navigation.rename`,
     [
-      ...(schemaVersion === 2 ? ["allowed"] : []),
+      ...(schemaVersion === 2 ? ["allowed", "authorization"] : []),
       "expectedText",
       "newName",
       "replacementText",
@@ -1291,10 +1315,13 @@ function parseExpected(
     ...(schemaVersion === 1
       ? {}
       : {
-          formulaDecision: parseFormulaDecisionExpectation(
-            item.formulaDecision,
-            `${path}.formulaDecision`,
-          ),
+          formulaDecision:
+            item.formulaDecision === null
+              ? null
+              : parseFormulaDecisionExpectation(
+                  item.formulaDecision,
+                  `${path}.formulaDecision`,
+                ),
         }),
     proofGrounded: boolean(item.proofGrounded, `${path}.proofGrounded`),
     navigation: {
@@ -1304,6 +1331,15 @@ function parseExpected(
         schemaVersion,
       ),
       prepareRename: {
+        ...(prepareRename.authorization === undefined
+          ? {}
+          : {
+              authorization: oneOf(
+                prepareRename.authorization,
+                ["authorized", "refused"] as const,
+                `${path}.navigation.prepareRename.authorization`,
+              ),
+            }),
         ...(prepareRename.placeholder === undefined
           ? {}
           : { placeholder: text(prepareRename.placeholder, `${path}.navigation.prepareRename.placeholder`) }),
@@ -1414,12 +1450,12 @@ function parseLocationExpectation(
   extensions: readonly string[] = [],
 ): AuthoredLocationExpectation {
   const item = record(value, path);
-  const allowedField = schemaVersion === 2 ? ["allowed"] : [];
+  const schemaTwoFields = schemaVersion === 2 ? ["allowed", "authorization"] : [];
   exact(
     item,
-    ["status", "minimum", "required", "excluded", ...allowedField, ...extensions],
+    ["status", "minimum", "required", "excluded", ...schemaTwoFields, ...extensions],
     path,
-    [...allowedField, ...extensions],
+    [...schemaTwoFields, ...extensions],
   );
   const result = {
     ...(item.allowed === undefined
@@ -1427,6 +1463,15 @@ function parseLocationExpectation(
       : {
           allowed: array(item.allowed, `${path}.allowed`).map((value, index) =>
             parseAnchor(value, `${path}.allowed[${index}]`)
+          ),
+        }),
+    ...(item.authorization === undefined
+      ? {}
+      : {
+          authorization: oneOf(
+            item.authorization,
+            ["authorized", "refused"] as const,
+            `${path}.authorization`,
           ),
         }),
     excluded: array(item.excluded, `${path}.excluded`).map((value, index) =>
@@ -1530,9 +1575,28 @@ function validateProbe(
     resolveAuthoredAnchor(snapshot, probe.expected.formulaDecision.anchor);
   }
   if (schemaVersion === 2) {
+    if (probe.expected.cursorOccurrence === null) {
+      if (
+        probe.expected.decision !== "unsupported" ||
+        probe.expected.proofGrounded ||
+        probe.expected.navigation.definition.status !== "unavailable" ||
+        probe.expected.navigation.definition.authorization === "authorized" ||
+        probe.expected.navigation.references.status !== "unavailable" ||
+        probe.expected.navigation.references.authorization === "authorized" ||
+        probe.expected.navigation.prepareRename.status !== "unavailable" ||
+        probe.expected.navigation.prepareRename.authorization === "authorized" ||
+        probe.expected.navigation.rename.status !== "unavailable"
+        || probe.expected.navigation.rename.authorization === "authorized"
+      ) {
+        throw new Error(
+          `${probe.id}: a missing cursor occurrence must refuse cursor-entity authority`,
+        );
+      }
+    }
     const rename = probe.expected.navigation.rename;
     if (
       rename.status === "unavailable" &&
+      probe.expected.cursorOccurrence !== null &&
       (!rename.newName || !probe.expected.symbol ||
         !authoredRenameNotationFamilyMatches(
           probe.expected.symbol,
@@ -1749,6 +1813,9 @@ export function authoredProbeIdentityFailures(
       basis: `symbol ${observation.symbol ?? "null"}; expected ${probe.expected.symbol}`,
     });
   }
+  if (fixture.schemaVersion === 2) {
+    checkSurfaceAuthorizations(probe, observation, snapshot, failures);
+  }
   if (probe.expected.formulaDecision) {
     const expectedFormula = resolveAuthoredAnchor(
       snapshot,
@@ -1838,6 +1905,65 @@ export function authoredProbeIdentityFailures(
     });
   }
   return failures;
+}
+
+function checkSurfaceAuthorizations(
+  probe: AuthoredScientificProbe,
+  observation: AuthoredScientificObservation,
+  snapshot: AuthoredScientificSnapshot,
+  failures: AuthoredIdentityFailure[],
+): void {
+  const observed = observation.surfaceAuthorizations;
+  if (!observed) {
+    failures.push({
+      area: "cursor-symbol",
+      basis: "entity-surface authorizations are missing",
+    });
+    return;
+  }
+  const expected = probe.expected.navigation;
+  const surfaces = [
+    ["definition", observed.definition, expected.definition],
+    ["references", observed.references, expected.references],
+    ["prepareRename", observed.prepareRename, expected.prepareRename],
+    ["rename", observed.rename, expected.rename],
+  ] as const;
+  for (const [name, authorization, expectation] of surfaces) {
+    const expectedStatus = expectation.authorization ??
+      (expectation.status === "available" ? "authorized" : "refused");
+    if (authorization.status !== expectedStatus) {
+      failures.push({
+        area: name === "prepareRename" ? "prepare-rename" : name,
+        basis: `${name} authorization ${authorization.status}; expected ${expectedStatus}`,
+      });
+    }
+  }
+  const authorized = surfaces.flatMap(([, authorization]) =>
+    authorization.status === "authorized" ? [authorization] : []
+  );
+  if (authorized.length === 0) return;
+  const expectedOccurrence = probe.expected.cursorOccurrence;
+  const expectedLocation = expectedOccurrence === undefined || expectedOccurrence === null
+    ? undefined
+    : resolveAuthoredAnchor(snapshot, expectedOccurrence);
+  const identity = observation.cursorSurfaceIdentity;
+  if (
+    !expectedLocation || !identity?.entityId ||
+    identity.location.fileId !== expectedLocation.fileId ||
+    identity.location.path !== expectedLocation.path ||
+    !sameRange(identity.location.range, expectedLocation.range) ||
+    identity.occurrenceId.fileId !== expectedLocation.fileId ||
+    authorized.some((authorization) =>
+      stableJson(authorization.focusOccurrenceId) !==
+          stableJson(identity.occurrenceId) ||
+      stableJson(authorization.entityId) !== stableJson(identity.entityId)
+    )
+  ) {
+    failures.push({
+      area: "cursor-symbol",
+      basis: "authorized entity surfaces do not match the reviewed cursor identity",
+    });
+  }
 }
 
 function checkLocationExpectation(

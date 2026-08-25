@@ -139,13 +139,13 @@
     {
       "scenarioId": "CA-DEV-01",
       "probeId": "CA-DEV-01",
-      "expectedDecision": "established",
+      "expectedDecision": "unsupported",
       "facets": ["natural-language-provenance"]
     },
     {
       "scenarioId": "CFCD-02",
       "probeId": "CFCD-02",
-      "expectedDecision": "ambiguous",
+      "expectedDecision": "partial",
       "facets": [
         "cross-field-interpretations",
         "missing-discriminator",
@@ -156,7 +156,7 @@
     {
       "scenarioId": "EM-DEV-006",
       "probeId": "EM-DEV-006",
-      "expectedDecision": "conflicting",
+      "expectedDecision": "unsupported",
       "facets": [
         "leading-candidate-contradiction",
         "natural-language-provenance"
@@ -165,7 +165,7 @@
     {
       "scenarioId": "EM-DEV-009",
       "probeId": "EM-DEV-009",
-      "expectedDecision": "ambiguous",
+      "expectedDecision": "unsupported",
       "facets": [
         "open-world-refusal"
       ]

@@ -4,8 +4,8 @@ use crate::domain::{DomainObservations, observe_domains};
 use crate::law::{ExternalTypeEnvironment, LawAnalysisContext, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
 use crate::prose::{
-    FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence, assumption_formula_targets,
-    observe_prose, public_assumption,
+    FormulaAdjudicationFact, FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence,
+    assumption_formula_targets, observe_prose, public_assumption,
 };
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
@@ -90,6 +90,7 @@ pub(crate) struct DocumentSemanticObservations {
     pub definitions: Vec<DefinitionInfo>,
     pub project_references: Vec<crate::ProjectInclude>,
     pub formula_meanings: Vec<FormulaMeaningFact>,
+    pub formula_adjudications: Vec<FormulaAdjudicationFact>,
     pub shapes: ShapeObservations,
     pub quantities: QuantityObservations,
     pub roles: RoleObservations,
@@ -145,6 +146,7 @@ impl DocumentSemanticObservations {
             definitions: prose.definitions,
             project_references: prose.project_references,
             formula_meanings: prose.formula_meanings,
+            formula_adjudications: prose.formula_adjudications,
             shapes,
             quantities,
             roles,
@@ -162,6 +164,7 @@ impl DocumentSemanticObservations {
         document: &ProjectDocument,
         canonical_expressions: &[SemanticExpr],
         formula_ranges: &[crate::SourceRange],
+        formula_attachment_ranges: &[crate::SourceRange],
         external: &ExternalTypeEnvironment,
     ) {
         // Equation-derived domain relevance belongs to the previous law pass.
@@ -181,6 +184,7 @@ impl DocumentSemanticObservations {
                 &LawAnalysisContext {
                     source: &document.content,
                     formula_ranges,
+                    formula_attachment_ranges,
                     shapes: &self.shapes,
                     quantities: &self.quantities,
                     consistency: &self.roles,
