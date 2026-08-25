@@ -344,4 +344,46 @@ describe("selected-formula challenge observation", () => {
     expect(overlapOnly.decision.problemCount).toBe(0);
     expect(overlapOnly.decision.sourceGrounded).toBe(false);
   });
+
+  test("requires binding evidence to reconcile with current supporting anchors", () => {
+    const orphanRange = hypothesis("test:law", "explicit", { formula });
+    expect(
+      observeSelectedFormulaDecision({
+        disposition: "partial",
+        formula,
+        hypotheses: [
+          {
+            ...orphanRange,
+            bindings: orphanRange.bindings.map((binding) => ({
+              ...binding,
+              evidence: {
+                ...binding.evidence,
+                sourceRanges: [{ endOffset: 31, startOffset: 30 }],
+              },
+            })),
+          },
+        ],
+      }).recognizedRelations[0]?.authority,
+    ).toBe("candidate");
+
+    const staleAnchor = hypothesis("test:law", "explicit", { formula });
+    expect(
+      observeSelectedFormulaDecision({
+        disposition: "partial",
+        formula,
+        hypotheses: [
+          {
+            ...staleAnchor,
+            evidence: staleAnchor.evidence.map((item) => ({
+              ...item,
+              sourceAnchors: item.sourceAnchors.map((anchor) => ({
+                ...anchor,
+                lifecycle: "retracted" as const,
+              })),
+            })),
+          },
+        ],
+      }).recognizedRelations[0]?.authority,
+    ).toBe("candidate");
+  });
 });

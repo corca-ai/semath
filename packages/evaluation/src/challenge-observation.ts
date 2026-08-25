@@ -122,10 +122,64 @@ function hypothesisIsEstablishmentGrade(
     bindings.every(
       (binding) =>
         (binding.proof === "typed" || binding.proof === "derived") &&
-        binding.evidence.sourceRanges.length > 0 &&
-        binding.evidence.sourceRanges.every(validSourceRange),
+        bindingEvidenceIsGrounded(hypothesis, binding.evidence),
     ) &&
     hypothesis.conditions.every((condition) => condition.status === "verified")
+  );
+}
+
+function bindingEvidenceIsGrounded(
+  hypothesis: FormulaRelationHypothesis,
+  bindingEvidence: MathInterpretationEvidenceInfo["evidence"],
+): boolean {
+  return hypothesis.evidence.some(
+    (item) =>
+      item.role === "supporting" &&
+      sameEvidenceRecord(bindingEvidence, item.evidence) &&
+      interpretationEvidenceIsGrounded(item) &&
+      item.sourceAnchors.every(
+        (anchor) =>
+          anchor.documentVersion === hypothesis.formula.documentVersion &&
+          anchor.location.fileId === hypothesis.formula.location.fileId &&
+          anchor.location.path === hypothesis.formula.location.path &&
+          scopeOwns(anchor.scopePath, hypothesis.formula.scopePath),
+      ),
+  );
+}
+
+function sameEvidenceRecord(
+  left: MathInterpretationEvidenceInfo["evidence"],
+  right: MathInterpretationEvidenceInfo["evidence"],
+): boolean {
+  return (
+    left.kind === right.kind &&
+    left.ruleId === right.ruleId &&
+    left.strength === right.strength &&
+    sameRangeSet(left.sourceRanges, right.sourceRanges)
+  );
+}
+
+function sameRangeSet(
+  left: readonly SourceRange[],
+  right: readonly SourceRange[],
+): boolean {
+  const rangeKey = (range: SourceRange): string =>
+    `${range.startOffset}:${range.endOffset}`;
+  const leftKeys = left.map(rangeKey).sort();
+  const rightKeys = right.map(rangeKey).sort();
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every((key, index) => key === rightKeys[index])
+  );
+}
+
+function scopeOwns(
+  owner: readonly number[],
+  nested: readonly number[],
+): boolean {
+  return (
+    owner.length <= nested.length &&
+    owner.every((value, index) => value === nested[index])
   );
 }
 
