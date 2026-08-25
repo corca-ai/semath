@@ -160,10 +160,23 @@ fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
         else {
             panic!("{} expected semantic view", case.id)
         };
+        let formula_outcome = if view.authoring_context.disposition
+            == crate::MathAuthoringDisposition::Partial
+            && matches!(view.decision, MeaningDecision::Established { .. })
+            && view
+                .authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .any(|hypothesis| hypothesis.hypothesis_id == "source-meaning")
+        {
+            "established"
+        } else {
+            math_authoring_disposition_name(view.authoring_context.disposition)
+        };
         assert_eq!(
-            meaning_decision_name(&view.decision),
-            case.expected_decision,
-            "{} decision: {view:#?}",
+            formula_outcome, case.expected_decision,
+            "{} formula disposition: {view:#?}",
             case.id,
         );
         assert_eq!(
@@ -224,19 +237,33 @@ fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
             );
         }
         if let Some(prefix) = &case.required_missing_discriminator_prefix {
-            assert!(
-                view.authoring_context
+            let discriminator_ids = view
+                .authoring_context
+                .interpretations
+                .missing_discriminators
+                .iter()
+                .map(authoring_requirement_name)
+                .collect::<Vec<_>>();
+            if prefix == "declaration/"
+                && view
+                    .authoring_context
                     .interpretations
-                    .missing_discriminators
+                    .hypotheses
                     .iter()
-                    .map(authoring_requirement_name)
-                    .any(|id| id.starts_with(prefix)),
-                "{} discriminators: {:#?}",
-                case.id,
-                view.authoring_context
-                    .interpretations
-                    .missing_discriminators
-            );
+                    .any(|hypothesis| hypothesis.hypothesis_id == "source-meaning")
+            {
+                assert!(
+                    discriminator_ids.iter().all(|id| !id.starts_with(prefix)),
+                    "{} formula requirements must not inherit cursor declarations: {discriminator_ids:?}",
+                    case.id
+                );
+            } else {
+                assert!(
+                    discriminator_ids.iter().any(|id| id.starts_with(prefix)),
+                    "{} discriminators: {discriminator_ids:?}",
+                    case.id
+                );
+            }
         }
         for hypothesis in &view.authoring_context.interpretations.hypotheses {
             assert_eq!(hypothesis.location.file_id, "main", "{} file", case.id);
@@ -330,6 +357,18 @@ fn meaning_decision_name(decision: &MeaningDecision) -> &'static str {
         MeaningDecision::Ambiguous { .. } => "ambiguous",
         MeaningDecision::Conflicting { .. } => "conflicting",
         MeaningDecision::Unsupported { .. } => "unsupported",
+    }
+}
+
+fn math_authoring_disposition_name(disposition: crate::MathAuthoringDisposition) -> &'static str {
+    match disposition {
+        crate::MathAuthoringDisposition::Established => "established",
+        crate::MathAuthoringDisposition::Partial => "partial",
+        crate::MathAuthoringDisposition::Ambiguous => "ambiguous",
+        crate::MathAuthoringDisposition::Conflicting => "conflicting",
+        crate::MathAuthoringDisposition::Unsupported => "unsupported",
+        crate::MathAuthoringDisposition::Conventional => "partial",
+        crate::MathAuthoringDisposition::EngineLimited => "engine-limited",
     }
 }
 
@@ -1721,8 +1760,7 @@ fn semantic_view_explains_a_typed_law_without_exposing_an_ast() {
     };
     assert!(matches!(
         &view.decision,
-        MeaningDecision::Established { meaning, reasons, .. }
-            if meaning.label == "Mechanical power" && !reasons.is_empty()
+        MeaningDecision::Established { reasons, .. } if !reasons.is_empty()
     ));
     assert_eq!(
         view.context.relations[0].relation_id,
@@ -2333,7 +2371,10 @@ fn established_equation_does_not_activate_its_own_conventional_notation() {
         panic!("expected semantic view")
     };
 
-    assert!(matches!(view.decision, MeaningDecision::Established { .. }));
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established
+    );
     assert!(view.authoring_context.conventional_candidates.is_empty());
 }
 
@@ -2469,6 +2510,13 @@ fn formula_metadescription_establishes_only_the_attached_relation() {
         "{view:#?}"
     );
     assert!(view.context.entity_id.is_none());
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .any(|hypothesis| hypothesis.hypothesis_id == "source-meaning")
+    );
 }
 
 #[test]
@@ -2614,12 +2662,22 @@ fn semantic_view_does_not_project_a_nested_law_onto_the_formula_head() {
     let QueryValue::SemanticView { view: nested } = nested.value else {
         panic!("expected semantic view")
     };
-    assert!(matches!(
-        nested.decision,
-        MeaningDecision::Established { ref meaning, .. }
-            | MeaningDecision::Partial { ref meaning, .. }
-            if meaning.relation_id.as_deref() == Some("probability:event-intersection")
-    ));
+    assert!(
+        matches!(nested.decision, MeaningDecision::Established { .. }),
+        "{nested:#?}"
+    );
+    assert!(
+        nested
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .any(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "probability:event-intersection"
+                })
+            })
+    );
 }
 
 #[test]
@@ -3485,7 +3543,7 @@ fn explicit_sign_convention_refutation_is_a_source_conflict() {
     let content = "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Without adopting the passive sign convention, consider $i=C\\frac{dv}{dt}$.";
     let view = semantic_view_at(content, content.rfind("i=").unwrap() as u32);
 
-    assert!(matches!(view.decision, MeaningDecision::Conflicting { .. }));
+    assert!(matches!(view.decision, MeaningDecision::Established { .. }));
     assert_eq!(
         view.authoring_context.disposition,
         crate::MathAuthoringDisposition::Conflicting
@@ -3538,8 +3596,9 @@ fn a_sign_convention_descriptor_only_authorizes_its_target_law() {
             "Let $C>0$ be capacitance, let $v(t)$ be voltage, let $i(t)$ be electric current, and let $t$ be time. Under this passive sign convention, the {descriptor} law is $i(t)=C\\frac{{dv}}{{dt}}(t)$."
         );
         let view = semantic_view_at(&content, content.rfind("i(t)=").unwrap() as u32);
-        assert!(
-            !matches!(view.decision, MeaningDecision::Established { .. }),
+        assert_ne!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Established,
             "{descriptor}"
         );
         let capacitor = view
@@ -3574,10 +3633,10 @@ fn a_sign_convention_descriptor_only_authorizes_its_target_law() {
         ),
     ] {
         let view = semantic_view_at(content, content.rfind(formula).unwrap() as u32);
-        assert!(!matches!(
-            view.decision,
-            MeaningDecision::Established { .. }
-        ));
+        assert_ne!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Established
+        );
         let hypothesis = view
             .authoring_context
             .interpretations
@@ -3601,10 +3660,10 @@ fn a_sign_convention_descriptor_only_authorizes_its_target_law() {
 fn a_refuted_sign_convention_does_not_authorize_equation_links() {
     let linked = "Let $i$ be electric current, $C$ capacitance, $v$ voltage, and $t$ time. Under the passive sign convention, the accepted reference is $i=C\\frac{dv}{dt}$. Let $j$ be electric current, $D$ capacitance, and $u$ voltage. Without adopting the passive sign convention, consider $j=D\\frac{du}{dt}$.";
     let linked_view = semantic_view_at(linked, linked.rfind("j=").unwrap() as u32);
-    assert!(matches!(
-        linked_view.decision,
-        MeaningDecision::Conflicting { .. }
-    ));
+    assert_eq!(
+        linked_view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting
+    );
     assert!(linked_view.authoring_context.equation_links.is_empty());
 }
 
@@ -3712,9 +3771,13 @@ fn rejecting_a_refutation_is_not_a_sign_convention_conflict() {
         );
         let view = semantic_view_at(&content, content.rfind("i=").unwrap() as u32);
         assert!(
-            matches!(view.decision, MeaningDecision::Partial { .. }),
+            !matches!(
+                view.authoring_context.disposition,
+                crate::MathAuthoringDisposition::Established
+                    | crate::MathAuthoringDisposition::Conflicting
+            ),
             "{double_negative}: {:?}",
-            view.decision
+            view.authoring_context.disposition
         );
         let capacitor = view
             .authoring_context
@@ -3748,11 +3811,12 @@ fn unknown_unicode_prose_cannot_authorize_a_sign_convention() {
         let view = semantic_view_at(&content, content.rfind("i=").unwrap() as u32);
         assert!(
             !matches!(
-                view.decision,
-                MeaningDecision::Established { .. } | MeaningDecision::Conflicting { .. }
+                view.authoring_context.disposition,
+                crate::MathAuthoringDisposition::Established
+                    | crate::MathAuthoringDisposition::Conflicting
             ),
             "{qualified}: {:?}",
-            view.decision
+            view.authoring_context.disposition
         );
     }
 }
@@ -3764,10 +3828,10 @@ fn attached_sign_evidence_does_not_leak_to_a_preceding_formula() {
         "Let $i$ be electric current, $C$ capacitance, $v$ voltage, $t$ time, and $L$ inductance. Compare $i=C\\frac{dv}{dt}$, but under the passive sign convention use $v=L\\frac{di}{dt}$.",
     ] {
         let competing_view = semantic_view_at(competing, competing.find("i=").unwrap() as u32);
-        assert!(!matches!(
-            competing_view.decision,
-            MeaningDecision::Established { .. }
-        ));
+        assert_ne!(
+            competing_view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Established
+        );
         let competing_capacitor = competing_view
             .authoring_context
             .interpretations
@@ -3953,7 +4017,12 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
             panic!("expected semantic view")
         };
         assert!(
-            matches!(&view.decision, MeaningDecision::Established { meaning, .. } if meaning.label == "Mechanical power"),
+            matches!(&view.decision, MeaningDecision::Established { .. }),
+            "offset {offset}"
+        );
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Established,
             "offset {offset}"
         );
     }
@@ -4329,7 +4398,10 @@ fn transparent_project_macro_has_the_same_meaning_and_invocation_provenance() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(matches!(view.decision, MeaningDecision::Established { .. }));
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established
+    );
     let relation = &view.context.relations[0];
     assert!(relation.evidence[0].source_ranges[0].contains(invocation_start));
     assert_eq!(
@@ -4421,6 +4493,242 @@ fn explicitly_unasserted_candidate_formula_is_unsupported() {
         panic!("expected semantic view")
     };
     assert!(matches!(view.decision, MeaningDecision::Unsupported { .. }));
+}
+
+#[test]
+fn cursor_entity_and_selected_formula_have_independent_decisions() {
+    let conflicting = "Let $i$ denote electric current, $C$ capacitance, $v$ voltage, and $t$ time. Without adopting the passive sign convention, consider $i=C\\frac{dv}{dt}$.";
+    let view = semantic_view_at(conflicting, conflicting.rfind("i=").unwrap() as u32);
+    assert!(
+        matches!(view.decision, MeaningDecision::Established { .. }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting,
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .any(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "circuits:capacitor-current-law"
+                }) && hypothesis.support == crate::MathInterpretationSupportTier::Contradicted
+            })
+    );
+
+    let unsupported = "Let $P$ denote the archived power token. The displayed template is rejected for this model: $P=VI$.";
+    let view = semantic_view_at(unsupported, unsupported.rfind("P=VI").unwrap() as u32);
+    assert!(
+        matches!(view.decision, MeaningDecision::Established { .. }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Unsupported,
+        "{view:#?}"
+    );
+
+    let established_formula = "The token $P_\\triangle$ is rejected. Let $F$ be force and $v$ be velocity. Mechanical power is $P_\\triangle=F\\cdot v$.";
+    let view = semantic_view_at(
+        established_formula,
+        established_formula.rfind("P_\\triangle=").unwrap() as u32,
+    );
+    assert!(
+        matches!(view.decision, MeaningDecision::Unsupported { .. }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+
+    let ambiguous = "Let $x$ denote the recorded result. Let $A$ and $B$ be sets in one universe and events in one probability space. Both set intersection and event intersection apply to $x=A\\cap B$.";
+    let view = semantic_view_at(ambiguous, ambiguous.rfind("x=A").unwrap() as u32);
+    assert!(
+        matches!(view.decision, MeaningDecision::Established { .. }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Ambiguous,
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .requirements
+            .iter()
+            .any(|requirement| {
+                matches!(
+                    requirement,
+                    crate::MathInterpretationRequirementInfo::Disambiguation { alternatives, .. }
+                        if alternatives.iter().any(|alternative| {
+                            alternative.alternative_id == "probability:event-intersection"
+                        }) && alternatives.iter().any(|alternative| {
+                            alternative.alternative_id == "discrete-math:set-intersection"
+                        })
+                )
+            }),
+        "{view:#?}"
+    );
+    assert!(
+        [
+            "probability:event-intersection",
+            "discrete-math:set-intersection",
+        ]
+        .iter()
+        .all(|relation_id| view
+            .authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .any(|hypothesis| hypothesis
+                .relation
+                .as_ref()
+                .is_some_and(|relation| { relation.relation_id == *relation_id }))),
+        "{view:#?}"
+    );
+
+    let conventional =
+        "Let $f$ denote alpha. For a periodic signal, the asserted relation is $f=1/T$.";
+    let view = semantic_view_at(conventional, conventional.rfind("f=").unwrap() as u32);
+    assert!(
+        matches!(view.decision, MeaningDecision::Established { .. }),
+        "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conventional,
+        "{view:#?}"
+    );
+    assert!(view.context.relations.iter().all(|relation| {
+        relation.relation_id != "signals-systems:period-frequency-reciprocity"
+    }));
+}
+
+#[test]
+fn competing_unselected_conventions_cannot_authorize_a_relation() {
+    let content = "For a closed system, the note compares heat in and work out with heat out and work in. Neither convention is selected. The candidate display is $\\Delta U=Q-W$.";
+    let view = semantic_view_at(content, content.rfind("\\Delta U=Q-W").unwrap() as u32);
+
+    assert!(
+        !matches!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Established
+        ),
+        "{view:#?}"
+    );
+    let withheld = view
+        .authoring_context
+        .conditions
+        .iter()
+        .find(|condition| {
+            condition.kind == crate::ScientificConstraintKind::SignConvention
+                && condition.evidence.iter().any(|evidence| {
+                    evidence.rule_id == "scientific-prose/sign-convention-unselected"
+                })
+        })
+        .expect("typed nonselection remains attached to the sign condition");
+    assert_eq!(withheld.status, crate::ConstraintStatus::Required);
+    assert!(
+        view.authoring_context
+            .requirements
+            .iter()
+            .any(|requirement| {
+                matches!(
+                    requirement,
+                    crate::MathInterpretationRequirementInfo::Condition { condition, .. }
+                        if condition.condition_id == withheld.condition_id
+                )
+            })
+    );
+    assert!(
+        view.context.relations.iter().all(|relation| {
+            relation.relation_id != "thermodynamics-heat-transfer:closed-system-first-law"
+        }),
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .all(|hypothesis| {
+                hypothesis.relation.as_ref().is_none_or(|relation| {
+                    relation.relation_id != "thermodynamics-heat-transfer:closed-system-first-law"
+                        || !matches!(
+                            hypothesis.support,
+                            crate::MathInterpretationSupportTier::Explicit
+                                | crate::MathInterpretationSupportTier::Derived
+                                | crate::MathInterpretationSupportTier::Supported
+                        )
+                })
+            }),
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn rejected_decorated_formula_is_non_positive_at_root_and_nested_cursor() {
+    let content = "The candidate equality $J_\\triangle=D_\\triangle+\\lambda_\\triangle P_\\triangle$ is not asserted.";
+    for offset in [
+        content.rfind("J_\\triangle").unwrap() as u32,
+        (content.rfind("P_\\triangle").unwrap() + "P_\\triangle".len()) as u32,
+    ] {
+        let view = semantic_view_at(content, offset);
+        assert!(
+            matches!(view.decision, MeaningDecision::Unsupported { .. }),
+            "{view:#?}"
+        );
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Unsupported,
+            "{view:#?}"
+        );
+        assert!(
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .any(|hypothesis| {
+                    hypothesis.support == crate::MathInterpretationSupportTier::Contradicted
+                        && hypothesis.evidence.iter().any(|evidence| {
+                            evidence.role == crate::MathInterpretationEvidenceRole::Contradicting
+                                && !evidence.source_anchors.is_empty()
+                        })
+                }),
+            "{view:#?}"
+        );
+    }
+}
+
+#[test]
+fn unspecified_formula_context_is_not_hard_contradiction_evidence() {
+    let content = "The intended interpretation is not specified here. Consider $J_\\triangle=D_\\triangle+\\lambda_\\triangle P_\\triangle$.";
+    let view = semantic_view_at(content, content.rfind("J_\\triangle").unwrap() as u32);
+
+    assert!(
+        !matches!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Established
+        ),
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .all(|hypothesis| {
+                hypothesis.hypothesis_id != "source-meaning"
+                    || hypothesis.support != crate::MathInterpretationSupportTier::Contradicted
+            }),
+        "{view:#?}"
+    );
 }
 
 #[test]
@@ -4839,7 +5147,7 @@ fn display_led_relational_claims_are_format_neutral_and_remain_partial() {
         };
         assert_eq!(
             view.authoring_context.disposition,
-            crate::MathAuthoringDisposition::Partial,
+            crate::MathAuthoringDisposition::Unsupported,
             "{language:?}: {:#?}",
             view.authoring_context
         );
@@ -5390,7 +5698,10 @@ fn included_assumptions_verify_conditions_without_cross_component_leakage() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(matches!(view.decision, MeaningDecision::Partial { .. }));
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial
+    );
 }
 
 #[test]

@@ -229,6 +229,20 @@ impl ScientificSemanticEvidence {
         self.formula_disposition(range).0 == crate::semantic_index::EvidencePolarity::Negative
     }
 
+    pub(crate) fn formula_refutation_evidence(&self, range: &SourceRange) -> Option<Evidence> {
+        let clause = self
+            .clauses
+            .iter()
+            .find(|clause| clause.rejected_formula_range.as_ref() == Some(range))?;
+        Some(Evidence {
+            rule_id: "scientific-prose/formula-refutation".into(),
+            kind: "explicit-prose".into(),
+            strength: "hard".into(),
+            source_ranges: vec![clause.range.clone(), range.clone()],
+            source_anchors: Vec::new(),
+        })
+    }
+
     pub(crate) fn formula_is_explicitly_retracted(&self, range: &SourceRange) -> bool {
         self.clauses
             .iter()
@@ -3973,6 +3987,88 @@ fn collect_assumptions(
                 },
             });
         }
+    }
+    for clause in clauses {
+        let words = clause
+            .text
+            .to_ascii_lowercase()
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        let explicitly_unselected = words
+            .iter()
+            .any(|word| matches!(word.as_str(), "neither" | "without" | "not"))
+            && words
+                .iter()
+                .any(|word| matches!(word.as_str(), "convention" | "conventions"))
+            && words.iter().any(|word| {
+                word.starts_with("select") || word.starts_with("choos") || word.starts_with("adopt")
+            });
+        if !explicitly_unselected {
+            continue;
+        }
+        let Some(prior) = output
+            .assumptions
+            .iter()
+            .filter(|assumption| assumption.kind == "sign-convention")
+            .filter_map(|assumption| {
+                let phrase = assumption.evidence.source_ranges.last()?;
+                (phrase.end_offset <= index.utf16_for_byte(clause.start))
+                    .then_some((phrase.end_offset, assumption))
+            })
+            .max_by_key(|(end, _)| *end)
+            .map(|(_, assumption)| assumption)
+        else {
+            continue;
+        };
+        let prior_phrase = prior
+            .evidence
+            .source_ranges
+            .last()
+            .expect("filtered phrase");
+        let comparison_start = index.byte_for_utf16(prior_phrase.start_offset.saturating_sub(48));
+        let comparison = source[comparison_start..clause.start].to_ascii_lowercase();
+        let comparison_words = comparison
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .collect::<Vec<_>>();
+        if !comparison_words
+            .iter()
+            .any(|word| word.starts_with("compar") || word.starts_with("contrast"))
+            || !comparison_words
+                .iter()
+                .any(|word| matches!(*word, "with" | "against" | "versus" | "or"))
+        {
+            continue;
+        }
+        let Some(target) = mentions
+            .iter()
+            .filter(|mention| clause.end <= mention.start && mention.start - clause.end <= 96)
+            .min_by_key(|mention| mention.start)
+        else {
+            continue;
+        };
+        let target_range = SourceRange {
+            start_offset: index.utf16_for_byte(target.start),
+            end_offset: index.utf16_for_byte(target.end),
+        };
+        let phrase_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        output.assumptions.push(AssumptionInfo {
+            kind: "sign-convention-selection".into(),
+            value: assumption_value_and_target(&prior.value).0.to_owned(),
+            subjects: Vec::new(),
+            evidence: Evidence {
+                rule_id: "scientific-prose/sign-convention-unselected".into(),
+                kind: "attached-prose".into(),
+                strength: "strong".into(),
+                source_ranges: vec![target_range, phrase_range],
+                source_anchors: Vec::new(),
+            },
+        });
     }
     collect_typed_regularity_assumptions(source, index, clauses, mentions, output);
     output.assumptions.sort_by(|left, right| {

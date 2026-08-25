@@ -1119,7 +1119,10 @@ pub(crate) fn observe_laws(
             recognized.conventional_candidate = context_only_admission
                 || (activation.is_none()
                     && role_context_activated
-                    && !attached_role_support
+                    && (!attached_role_support
+                        || relevance.as_ref().is_some_and(|relevance| {
+                            relevance.support == DomainSupportTier::Tentative
+                        }))
                     && recognized.bindings.iter().any(|binding| {
                         binding.proof == LawBindingProof::Asserted
                             && compiled.law.roles.iter().any(|role| {
@@ -4101,6 +4104,9 @@ fn condition_evidence(
     if let Some(condition_evidence) = &semantic_condition.refuting {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
+    if let Some(condition_evidence) = &semantic_condition.withheld {
+        push_evidence(&mut evidence, condition_evidence.clone());
+    }
     let structural_condition =
         structural_condition_evidence(condition, roles, bindings, actual, role_support);
     if let Some(condition_evidence) = &structural_condition {
@@ -4182,10 +4188,11 @@ fn condition_evidence(
     }
     (
         evidence,
-        semantic_condition.supporting.is_some()
-            || structural_condition.is_some()
-            || formula_fact.is_some()
-            || proved_subjects == subjects.len(),
+        semantic_condition.withheld.is_none()
+            && (semantic_condition.supporting.is_some()
+                || structural_condition.is_some()
+                || formula_fact.is_some()
+                || proved_subjects == subjects.len()),
         semantic_condition.refuting.is_some(),
     )
 }
@@ -4604,6 +4611,7 @@ fn typed_assumption(assumption: &AssumptionInfo) -> TypedAssumption {
 struct AssumptionConditionEvidence {
     supporting: Option<Evidence>,
     refuting: Option<Evidence>,
+    withheld: Option<Evidence>,
 }
 
 fn assumption_condition_evidence(
@@ -4707,7 +4715,17 @@ fn assumption_condition_evidence(
         {
             resolution.refuting = Some(assumption_public_evidence(assumption));
         }
-        if resolution.supporting.is_some() && resolution.refuting.is_some() {
+        if resolution.withheld.is_none()
+            && condition.kind == PackConditionKind::SignConvention
+            && assumption.kind == "sign-convention-selection"
+            && assumption_value_and_target(&assumption.value).0 == condition.id
+        {
+            resolution.withheld = Some(assumption_public_evidence(assumption));
+        }
+        if resolution.supporting.is_some()
+            && resolution.refuting.is_some()
+            && resolution.withheld.is_some()
+        {
             break;
         }
     }

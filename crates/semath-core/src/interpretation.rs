@@ -73,6 +73,7 @@ pub(crate) struct MathInterpretationInput<'a> {
     pub lifecycle: &'a MathSourceLifecycleInfo,
     pub discriminator_set_capped: bool,
     pub resolve_evidence: &'a dyn Fn(&Evidence) -> ResolvedInterpretationEvidence,
+    pub refutation_evidence: &'a [Evidence],
 }
 
 pub(crate) fn project_math_interpretations(
@@ -196,8 +197,11 @@ pub(crate) fn project_math_interpretations(
         }
     }
 
-    if hypotheses.is_empty()
+    if (!input.refutation_evidence.is_empty() || hypotheses.is_empty())
         && let Some(hypothesis) = source_meaning_hypothesis(&input)
+        && !hypotheses
+            .iter()
+            .any(|existing| existing.hypothesis_id == hypothesis.hypothesis_id)
     {
         hypotheses.push(hypothesis);
     }
@@ -378,6 +382,16 @@ fn formula_support(
         || matches!(decision, MeaningDecision::Conflicting { .. })
     {
         return MathInterpretationSupportTier::Contradicted;
+    }
+    if formula.conditions.iter().any(|condition| {
+        condition.kind == crate::ScientificConstraintKind::SignConvention
+            && condition.status != ConstraintStatus::Verified
+            && condition
+                .evidence
+                .iter()
+                .any(|evidence| evidence.rule_id == "scientific-prose/sign-convention-unselected")
+    }) {
+        return MathInterpretationSupportTier::Tentative;
     }
     match decision {
         MeaningDecision::Established { meaning, .. }
@@ -714,16 +728,17 @@ fn alternative_hypothesis(
 fn source_meaning_hypothesis(
     input: &MathInterpretationInput<'_>,
 ) -> Option<MathInterpretationHypothesisInfo> {
-    let (label, established, evidence) = match input.decision {
+    let (label, support, supporting, contradicting) = match input.decision {
         MeaningDecision::Established {
             meaning, reasons, ..
         } => (
             meaning.label.clone(),
-            true,
+            MathInterpretationSupportTier::Explicit,
             reasons
                 .iter()
                 .flat_map(|reason| reason.evidence.clone())
                 .collect(),
+            Vec::new(),
         ),
         MeaningDecision::Partial {
             meaning,
@@ -736,17 +751,39 @@ fn source_meaning_hypothesis(
                 .flat_map(|fact| fact.evidence.clone())
                 .collect::<Vec<_>>();
             evidence.extend(reasons.iter().flat_map(|reason| reason.evidence.clone()));
-            (meaning.label.clone(), false, evidence)
+            (
+                meaning.label.clone(),
+                MathInterpretationSupportTier::Tentative,
+                evidence,
+                Vec::new(),
+            )
         }
+        MeaningDecision::Unsupported { .. } if !input.refutation_evidence.is_empty() => (
+            "Rejected source meaning".into(),
+            MathInterpretationSupportTier::Contradicted,
+            Vec::new(),
+            input.refutation_evidence.to_vec(),
+        ),
         _ => return None,
     };
     let range = input
         .formula
         .map(|formula| formula.location.range.clone())
         .or_else(|| input.focus_range.cloned())?;
-    let projected_evidence = graded_evidence(input, evidence.clone(), Vec::new(), false);
-    let support = source_meaning_support(input, established, &projected_evidence);
-    let ordering_reasons = ordering_reasons(input, support, &evidence, None, false);
+    let projected_evidence =
+        graded_evidence(input, supporting.clone(), contradicting.clone(), false);
+    let support = if support == MathInterpretationSupportTier::Contradicted {
+        support
+    } else {
+        source_meaning_support(
+            input,
+            support == MathInterpretationSupportTier::Explicit,
+            &projected_evidence,
+        )
+    };
+    let mut ordering_evidence = supporting;
+    ordering_evidence.extend(contradicting);
+    let ordering_reasons = ordering_reasons(input, support, &ordering_evidence, None, false);
     Some(MathInterpretationHypothesisInfo {
         hypothesis_id: "source-meaning".into(),
         kind: MathInterpretationKind::SourceMeaning,
@@ -1352,6 +1389,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         });
 
         assert_eq!(
@@ -1473,6 +1511,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         });
         let wire = serde_json::to_value(projected).unwrap();
         let requirements = wire["missingDiscriminators"].as_array().unwrap();
@@ -1547,6 +1586,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         });
 
         let hypothesis = &projected.hypotheses[0];
@@ -1596,6 +1636,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         });
 
         let hypothesis = &projected.hypotheses[0];
@@ -1664,6 +1705,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         });
 
         let hypothesis = &projected.hypotheses[0];
@@ -1721,6 +1763,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         });
 
         assert_eq!(projected.hypotheses.len(), 2);
@@ -1809,6 +1852,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: true,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         });
 
         let hypothesis = &projected.hypotheses[0];
@@ -1874,6 +1918,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         })
     }
 
@@ -1961,6 +2006,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         })
     }
 
@@ -2086,6 +2132,7 @@ mod tests {
             lifecycle: &lifecycle,
             discriminator_set_capped: false,
             resolve_evidence: &resolve_test_evidence,
+            refutation_evidence: &[],
         })
     }
 
@@ -2134,6 +2181,7 @@ mod tests {
                 lifecycle: &lifecycle,
                 discriminator_set_capped,
                 resolve_evidence: &resolve_test_evidence,
+                refutation_evidence: &[],
             })
         };
         let unrelated_view_cap = project(false);
@@ -2173,6 +2221,7 @@ mod tests {
                 lifecycle: &lifecycle,
                 discriminator_set_capped: capped,
                 resolve_evidence: &resolve_test_evidence,
+                refutation_evidence: &[],
             })
         };
         let boundary = project_count(MAX_INTERPRETATION_DISCRIMINATORS);
