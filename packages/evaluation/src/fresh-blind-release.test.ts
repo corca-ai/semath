@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, test } from "bun:test";
+import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   authoredFixtureSealPayload,
   authoredScenarioReviewPayload,
@@ -15,6 +16,7 @@ import {
   freshBlindSealPayload,
   parseFreshBlindReleaseFixture,
   planFreshBlindSnapshotTransitions,
+  selectFreshBlindCompositeOccurrence,
   validateFreshBlindProfileIsolation,
   validateFreshBlindRelease,
 } from "./fresh-blind-release";
@@ -213,13 +215,41 @@ describe("fresh blind release evidence", () => {
     const value = fixtureValue();
     addDecisionDomains(value);
     const release = finalize(value);
-    expect(validateFreshBlindRelease(release, validation(release)).scenarios)
-      .toBe(48);
+    const summary = validateFreshBlindRelease(release, validation(release));
+    expect(summary.scenarios).toBe(48);
     expect(release).toMatchObject({
       fixture: { schemaVersion: 2 },
       release: { id: "v0.42" },
       schemaVersion: 3,
     });
+    expect(summary.entityDecisions).toEqual({
+      ambiguous: 10,
+      conflicting: 9,
+      established: 10,
+      partial: 10,
+      unsupported: 9,
+    });
+    expect(summary.formulaDecisions).toEqual({
+      ambiguous: 10,
+      conflicting: 10,
+      established: 10,
+      partial: 10,
+      unsupported: 8,
+    });
+
+    const wrongAllocation = fixtureValue();
+    addDecisionDomains(wrongAllocation);
+    const wrongProbe = wrongAllocation.fixture.probes[0]!.expected as {
+      formulaDecision: { status: string };
+    };
+    wrongProbe.formulaDecision.status = "partial";
+    const wrongAllocationRelease = finalize(wrongAllocation);
+    expect(() =>
+      validateFreshBlindRelease(
+        wrongAllocationRelease,
+        validation(wrongAllocationRelease),
+      )
+    ).toThrow("requires exactly");
 
     const legacyInner = fixtureValue();
     addAuthoringSafety(legacyInner);
@@ -262,6 +292,203 @@ describe("fresh blind release evidence", () => {
       .mathRootContentRanges[0]!.startOffset = -1;
     expect(() => validateFreshBlindRelease(release, invalidFacts))
       .toThrow("invalid formula math-root fact");
+
+    for (const [formula, composite] of [
+      ["x_0=1", "x_0"],
+      ["\\hat{x}=1", "\\hat{x}"],
+      ["\\mathbf{x}=1", "\\mathbf{x}"],
+    ] as const) {
+      const baseFocused = fixtureValue();
+      addDecisionDomains(baseFocused);
+      replaceFirstFormula(baseFocused, formula, composite);
+      const baseExpected = baseFocused.fixture.probes[0]!.expected as {
+        cursorOccurrence: {
+          needle: string;
+          selection: { length: number; offset: number };
+        };
+        symbol: string;
+      };
+      baseExpected.cursorOccurrence.selection = {
+        length: 1,
+        offset: baseExpected.cursorOccurrence.needle.indexOf("x"),
+      };
+      baseExpected.symbol = "x";
+      const baseNavigation = baseExpected as typeof baseExpected & {
+        navigation: { rename: { newName: string } };
+      };
+      baseNavigation.navigation.rename.newName = "y";
+      const baseRelease = finalize(baseFocused);
+      expect(() =>
+        validateFreshBlindRelease(baseRelease, validation(baseRelease))
+      ).toThrow("must equal the exact syntax composite occurrence");
+    }
+  });
+
+  test("selects script nuclei and narrower nested composite occurrences", () => {
+    const outerScript = {
+      kind: "script" as const,
+      range: { startOffset: 0, endOffset: 12 },
+      selectionRange: { startOffset: 0, endOffset: 8 },
+    };
+    const styleContainer = {
+      kind: "style" as const,
+      range: { startOffset: 0, endOffset: 8 },
+      selectionRange: { startOffset: 0, endOffset: 8 },
+    };
+    const nestedModifier = {
+      kind: "modifier" as const,
+      range: { startOffset: 3, endOffset: 7 },
+      selectionRange: { startOffset: 3, endOffset: 7 },
+    };
+
+    expect(
+      selectFreshBlindCompositeOccurrence(
+        [styleContainer, nestedModifier, outerScript],
+        5,
+      ),
+    ).toEqual(outerScript);
+    expect(
+      selectFreshBlindCompositeOccurrence([styleContainer, nestedModifier], 5),
+    ).toEqual(nestedModifier);
+    expect(selectFreshBlindCompositeOccurrence([outerScript], 10)).toBeUndefined();
+  });
+
+  test("uses an explicit navigation envelope without treating required as exhaustive", () => {
+    const value = fixtureValue();
+    addDecisionDomains(value);
+    const expected = value.fixture.probes[0]!.expected as unknown as {
+      navigation: {
+        definition: Record<string, unknown>;
+        references: Record<string, unknown>;
+      };
+    };
+    const allowed = {
+      fileId: "main",
+      needle: "$x_0=1$",
+      selection: { length: 3, offset: 1 },
+    };
+    const locationEnvelope = {
+      allowed: [allowed],
+      excluded: [],
+      minimum: 0,
+      required: [],
+      status: "available",
+    };
+    expected.navigation.definition = structuredClone(locationEnvelope);
+    expected.navigation.references = structuredClone(locationEnvelope);
+    const release = finalize(value);
+    expect(() => validateFreshBlindRelease(release, validation(release)))
+      .not.toThrow();
+    const document = release.fixture.scenarios[0]!.snapshots[0]!.documents[0]!;
+    const startOffset = document.content.indexOf("x_0");
+    const observation = {
+      caseId: "probe-00",
+      decision: "partial" as const,
+      definitions: [],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: false,
+      references: [{
+        fileId: document.fileId,
+        path: document.path,
+        range: { startOffset, endOffset: startOffset + 3 },
+      }],
+      relations: [],
+      renameEdits: [],
+      symbol: "x_0",
+    };
+    expect(freshBlindSafetySummary(release.fixture, [observation]))
+      .toMatchObject({ unsafeNavigationOrEditLocations: 0 });
+    expect(freshBlindSafetySummary(release.fixture, [{
+      ...observation,
+      references: [{
+        ...observation.references[0]!,
+        range: { startOffset: startOffset + 1, endOffset: startOffset + 2 },
+      }],
+    }])).toMatchObject({ unsafeNavigationOrEditLocations: 1 });
+  });
+
+  test("rejects authorized-empty unavailable surfaces and divergent authorizations", () => {
+    const value = fixtureValue();
+    addDecisionDomains(value);
+    const release = finalize(value);
+    const probe = release.fixture.probes[0]!;
+    const refused = { refusalKind: "unsupported" as const, status: "refused" as const };
+    const focusOccurrenceId = {
+      documentVersion: 1,
+      fileId: "main",
+      localId: 1,
+    };
+    const authorized = {
+      entityId: {
+        anchor: focusOccurrenceId,
+        componentId: "component:a",
+        kind: "symbol",
+        scopePath: [],
+      },
+      focusOccurrenceId,
+      status: "authorized" as const,
+    };
+    const observation: AuthoredScientificObservation = {
+      caseId: probe.id,
+      decision: probe.expected.decision,
+      definitions: [],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: probe.expected.proofGrounded,
+      references: [],
+      relations: [],
+      renameEdits: [],
+      surfaceAuthorizations: {
+        definition: authorized,
+        prepareRename: refused,
+        references: refused,
+        rename: refused,
+      },
+      symbol: null,
+    };
+    expect(freshBlindSafetySummary(release.fixture, [observation]))
+      .toMatchObject({
+        unsafeNavigationOrEditCaseIds: [probe.id],
+        unsafeNavigationOrEditLocations: 1,
+      });
+
+    const navigation = probe.expected.navigation as unknown as {
+      definition: { status: "available" | "unavailable" };
+      prepareRename: { status: "available" | "unavailable" };
+      references: { status: "available" | "unavailable" };
+      rename: { status: "available" | "unavailable" };
+    };
+    navigation.definition.status = "available";
+    navigation.references.status = "available";
+    navigation.prepareRename.status = "available";
+    navigation.rename.status = "available";
+    const consistent = {
+      ...observation,
+      surfaceAuthorizations: {
+        definition: authorized,
+        prepareRename: authorized,
+        references: authorized,
+        rename: authorized,
+      },
+    };
+    expect(freshBlindSafetySummary(release.fixture, [consistent]))
+      .toMatchObject({ unsafeNavigationOrEditLocations: 0 });
+    expect(freshBlindSafetySummary(release.fixture, [{
+      ...consistent,
+      surfaceAuthorizations: {
+        definition: authorized,
+        prepareRename: authorized,
+        references: {
+          ...authorized,
+          focusOccurrenceId: { ...focusOccurrenceId, localId: 2 },
+        },
+        rename: authorized,
+      },
+    }])).toMatchObject({
+      unsafeNavigationOrEditCaseIds: [probe.id],
+      unsafeNavigationOrEditLocations: 1,
+    });
   });
 
   test("gates only reviewed authoring authority, contradiction, and lifecycle boundaries", () => {
@@ -958,17 +1185,38 @@ function validation(release: ReturnType<typeof fixture>) {
     authoredSealDigest: sha256(authoredFixtureSealPayload(release.fixture)),
     authoringSyntaxFacts: release.fixture.scenarios.map((scenario) => {
       const snapshot = scenario.snapshots[0]!;
+      const service = new LatexSyntaxService();
+      service.reset({
+        documents: snapshot.documents.map((document) => ({
+          ...document,
+          documentVersion: 1,
+          language: document.path.endsWith(".md") ? "markdown" : "latex",
+        })),
+      });
       return {
         documents: snapshot.documents.map((document) => {
-          const needle = document.content.match(/x_\d+=1/u)?.[0];
-          if (!needle) throw new Error("test fixture is missing its math root");
-          const startOffset = document.content.indexOf(needle);
+          const syntax = service.getFile(document.fileId);
+          if (!syntax) throw new Error("test fixture is missing syntax facts");
           return {
+            compositeOccurrences: syntax.nodes.flatMap((node) => {
+              if (
+                node.kind !== "modifier" && node.kind !== "named-operator" &&
+                node.kind !== "script" && node.kind !== "style"
+              ) return [];
+              return [{
+                kind: node.kind,
+                range: { ...node.ranges.full },
+                selectionRange: {
+                  ...(node.kind === "script"
+                    ? node.ranges.nucleus ?? node.ranges.full
+                    : node.ranges.full),
+                },
+              }];
+            }),
             fileId: document.fileId,
-            mathRootContentRanges: [{
-              endOffset: startOffset + needle.length,
-              startOffset,
-            }],
+            mathRootContentRanges: syntax.mathRoots.map((root) => ({
+              ...root.contentRange,
+            })),
           };
         }),
         scenarioId: scenario.id,
@@ -999,11 +1247,64 @@ function validation(release: ReturnType<typeof fixture>) {
   };
 }
 
+function replaceFirstFormula(
+  value: FixtureValue,
+  formula: string,
+  composite: string,
+): void {
+  const scenario = value.fixture.scenarios[0]!;
+  const document = scenario.snapshots[0]!.documents[0]!;
+  document.content = document.content.replace("x_0=1", formula);
+  const probe = value.fixture.probes[0]!;
+  const cursor = probe.cursor as { needle: string; offset: number };
+  cursor.needle = `$${formula}$`;
+  cursor.offset = cursor.needle.indexOf("x");
+  const expected = probe.expected as {
+    cursorOccurrence: {
+      fileId: string;
+      needle: string;
+      selection: { length: number; offset: number };
+    };
+    formulaDecision: {
+      anchor: {
+        fileId: string;
+        needle: string;
+        selection: { length: number; offset: number };
+      };
+    };
+    symbol: string;
+  };
+  expected.cursorOccurrence = {
+    fileId: "main",
+    needle: cursor.needle,
+    selection: {
+      length: composite.length,
+      offset: cursor.needle.indexOf(composite),
+    },
+  };
+  expected.formulaDecision.anchor = {
+    fileId: "main",
+    needle: cursor.needle,
+    selection: { length: formula.length, offset: 1 },
+  };
+  expected.symbol = composite;
+  const navigation = expected as typeof expected & {
+    navigation: { rename: { newName: string } };
+  };
+  navigation.navigation.rename.newName = composite.replace("x", "y");
+  for (const selector of [
+    ...value.authoringSafety![0]!.allowedAuthority,
+    ...value.authoringSafety![0]!.requiredAuthority,
+  ] as Array<{ anchor: unknown }>) {
+    selector.anchor = structuredClone(expected.formulaDecision.anchor);
+  }
+}
+
 function addAuthoringExpectations(value: FixtureValue): void {
   value.fixture.probes.forEach((probe, index) => {
     const scenario = value.fixture.scenarios[index]!;
     const document = scenario.snapshots[0]!.documents[0]!;
-    const sourceNotation = `x_${index}=1`;
+    const sourceNotation = `${testSymbol(index)}=1`;
     const startOffset = document.content.indexOf(sourceNotation);
     const range = {
       endOffset: startOffset + sourceNotation.length,
@@ -1076,15 +1377,20 @@ function addDecisionDomains(value: FixtureValue): void {
     delete cursor.edge;
     cursor.offset = 1;
     const expected = probe.expected as Record<string, unknown>;
-    const formulaStatus = expected.decision;
-    expected.decision = "established";
+    const formulaStatus = schema3FormulaDecision(index);
     expected.proofGrounded = false;
-    expected.symbol = "x";
+    const symbol = testSymbol(index);
+    expected.symbol = symbol;
+    expected.cursorOccurrence = {
+      fileId: "main",
+      needle: `$${symbol}=1$`,
+      selection: { length: symbol.length, offset: 1 },
+    };
     expected.formulaDecision = {
       anchor: {
         fileId: "main",
-        needle: `$x_${index}=1$`,
-        selection: { length: `x_${index}=1`.length, offset: 1 },
+        needle: `$${symbol}=1$`,
+        selection: { length: `${symbol}=1`.length, offset: 1 },
       },
       status: formulaStatus,
     };
@@ -1093,8 +1399,8 @@ function addDecisionDomains(value: FixtureValue): void {
       const selector = {
         anchor: {
           fileId: "main",
-          needle: `$x_${index}=1$`,
-          selection: { length: `x_${index}=1`.length, offset: 1 },
+          needle: `$${symbol}=1$`,
+          selection: { length: `${symbol}=1`.length, offset: 1 },
         },
         kind: "source-meaning",
         relationId: null,
@@ -1106,8 +1412,8 @@ function addDecisionDomains(value: FixtureValue): void {
       const selector = {
         anchor: {
           fileId: "main",
-          needle: `$x_${index}=1$`,
-          selection: { length: `x_${index}=1`.length, offset: 1 },
+          needle: `$${symbol}=1$`,
+          selection: { length: `${symbol}=1`.length, offset: 1 },
         },
         kind: "source-meaning",
         relationId: null,
@@ -1119,8 +1425,16 @@ function addDecisionDomains(value: FixtureValue): void {
     const navigation = expected.navigation as {
       rename: Record<string, unknown>;
     };
-    navigation.rename.newName = "y";
+    navigation.rename.newName = symbol.replace("x", "y");
   });
+}
+
+function schema3FormulaDecision(index: number) {
+  if (index < 10) return "established" as const;
+  if (index < 20) return "partial" as const;
+  if (index < 30) return "ambiguous" as const;
+  if (index < 40) return "conflicting" as const;
+  return "unsupported" as const;
 }
 
 function unsupportedAuthoringContext(): MathAuthoringContext {
@@ -1194,7 +1508,7 @@ function fixtureValue(): FixtureValue {
       {
         documents: [
           {
-            content: `Independent scientific scene ${index}. The reviewed value is $x_${index}=1$.`,
+            content: `Independent scientific scene ${index}. The reviewed value is $${testSymbol(index)}=1$.`,
             fileId: "main",
             path: "main.md",
           },
@@ -1232,7 +1546,7 @@ function fixtureValue(): FixtureValue {
         cursor: {
           edge: "before",
           fileId: "main",
-          needle: `$x_${index}=1$`,
+          needle: `$${testSymbol(index)}=1$`,
           snapshotId: "initial",
         },
         expected: {
@@ -1265,6 +1579,10 @@ function fixtureValue(): FixtureValue {
     },
     schemaVersion: 1,
   };
+}
+
+function testSymbol(index: number): string {
+  return index < 10 ? `x_${index}` : `x_{${index}}`;
 }
 
 function sha256(value: string): string {

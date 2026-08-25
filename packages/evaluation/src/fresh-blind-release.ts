@@ -10,6 +10,7 @@ import {
   type AuthoredLocationExpectation,
   type AuthoredScientificFixture,
   type AuthoredScientificObservation,
+  type ScientificDecision,
 } from "./authored-scientific";
 import {
   compareAuthoredIntegrityProfiles,
@@ -37,6 +38,13 @@ const DIGEST = /^[0-9a-f]{64}$/u;
 const RELEASE_ID = /^v0\.[1-9][0-9]*$/u;
 const REQUIRED_SCENARIOS = 48;
 const REQUIRED_FAMILY_SCENARIOS = 8;
+const REQUIRED_SCHEMA_3_FORMULA_DECISIONS = {
+  ambiguous: 10,
+  conflicting: 10,
+  established: 10,
+  partial: 10,
+  unsupported: 8,
+} as const satisfies Readonly<Record<ScientificDecision, number>>;
 
 export interface FreshBlindReleaseFixture {
   readonly authoringSafety?: readonly FreshBlindAuthoringSafetyExpectation[];
@@ -72,6 +80,7 @@ export interface FreshBlindValidationInput {
 
 export interface FreshBlindSnapshotSyntaxFacts {
   readonly documents: readonly {
+    readonly compositeOccurrences?: readonly FreshBlindCompositeOccurrenceFact[];
     readonly fileId: string;
     readonly mathRootContentRanges: readonly SourceRange[];
   }[];
@@ -79,9 +88,18 @@ export interface FreshBlindSnapshotSyntaxFacts {
   readonly snapshotId: string;
 }
 
+export interface FreshBlindCompositeOccurrenceFact {
+  readonly kind: "modifier" | "named-operator" | "script" | "style";
+  readonly range: SourceRange;
+  /** Cursor-owning subrange; for scripts this is the exact nucleus. */
+  readonly selectionRange: SourceRange;
+}
+
 export interface FreshBlindValidationSummary {
   readonly decisions: Readonly<Record<string, number>>;
+  readonly entityDecisions: Readonly<Record<string, number>>;
   readonly families: Readonly<Record<string, number>>;
+  readonly formulaDecisions: Readonly<Record<string, number>>;
   readonly laws: number;
   readonly maximumMathSimilarity: number;
   readonly maximumProseSimilarity: number;
@@ -96,9 +114,9 @@ export interface FreshBlindSafetySummary {
   readonly falseConflictIds: readonly string[];
   readonly falseEstablishment: number;
   readonly falseEstablishmentIds: readonly string[];
-  /** Concrete source locations exposed or edited outside the review contract. */
+  /** Unsafe source locations or entity-surface authorization facets. */
   readonly unsafeNavigationOrEditLocations: number;
-  /** Probe ids with at least one unsafe navigation or edit location. */
+  /** Probe ids with at least one unsafe navigation/edit surface. */
   readonly unsafeNavigationOrEditCaseIds: readonly string[];
 }
 
@@ -401,6 +419,12 @@ export function validateFreshBlindRelease(
       );
     }
   }
+  const entityDecisions = count(primary.map((probe) => probe.expected.decision));
+  const formulaDecisions = count(primary.flatMap((probe) =>
+    probe.expected.formulaDecision === undefined
+      ? []
+      : [probe.expected.formulaDecision.status]
+  ));
   const decisions = count(primary.map((probe) =>
     probe.expected.formulaDecision?.status ?? probe.expected.decision
   ));
@@ -411,10 +435,21 @@ export function validateFreshBlindRelease(
     "conflicting",
     "unsupported",
   ]) {
-    if (!decisions[decision]) {
+    if (!entityDecisions[decision]) {
       throw new Error(
-        `${decision}: fresh blind fixture requires reviewed coverage`,
+        `${decision}: fresh blind fixture requires reviewed entity-decision coverage`,
       );
+    }
+  }
+  if (release.schemaVersion === 3) {
+    for (const [decision, required] of Object.entries(
+      REQUIRED_SCHEMA_3_FORMULA_DECISIONS,
+    )) {
+      if (formulaDecisions[decision] !== required) {
+        throw new Error(
+          `${decision}: fresh blind schema 3 requires exactly ${required} selected-formula decisions`,
+        );
+      }
     }
   }
   validateCommissioning(release);
@@ -443,7 +478,9 @@ export function validateFreshBlindRelease(
   }
   return {
     decisions,
+    entityDecisions,
     families,
+    formulaDecisions,
     laws,
     maximumMathSimilarity: isolation.maximumMath,
     maximumProseSimilarity: isolation.maximumProse,
@@ -629,6 +666,31 @@ function validateFormulaDecisionExpectations(
           );
         }
       }
+      if (release.schemaVersion === 3 && document.compositeOccurrences === undefined) {
+        throw new Error(
+          `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: schema 3 requires composite syntax facts`,
+        );
+      }
+      const compositeKeys = new Set<string>();
+      for (const occurrence of document.compositeOccurrences ?? []) {
+        const key = `${occurrence.kind}:${occurrence.range.startOffset}:${occurrence.range.endOffset}:${occurrence.selectionRange.startOffset}:${occurrence.selectionRange.endOffset}`;
+        if (compositeKeys.has(key)) {
+          throw new Error(
+            `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: duplicate composite syntax fact`,
+          );
+        }
+        compositeKeys.add(key);
+        if (
+          !validSourceRange(occurrence.range, source.content.length) ||
+          !validSourceRange(occurrence.selectionRange, source.content.length) ||
+          occurrence.selectionRange.startOffset < occurrence.range.startOffset ||
+          occurrence.selectionRange.endOffset > occurrence.range.endOffset
+        ) {
+          throw new Error(
+            `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: invalid composite syntax fact`,
+          );
+        }
+      }
     }
     factsByKey.set(key, fact);
   }
@@ -675,6 +737,33 @@ function validateFormulaDecisionExpectations(
         `${probe.id}: cursor and formulaDecision.anchor must select the same math root`,
       );
     }
+    const cursorDocument = snapshot.documents.find(
+      (candidate) => candidate.fileId === cursorAnchor.fileId,
+    )!;
+    const composite = selectFreshBlindCompositeOccurrence(
+      document?.compositeOccurrences ?? [],
+      cursorOffset,
+    );
+    if (composite) {
+      const expectedOccurrence = probe.expected.cursorOccurrence === undefined ||
+          probe.expected.cursorOccurrence === null
+        ? undefined
+        : resolveAuthoredAnchor(snapshot, probe.expected.cursorOccurrence);
+      const expectedSymbol = cursorDocument.content.slice(
+        composite.range.startOffset,
+        composite.range.endOffset,
+      );
+      if (
+        !expectedOccurrence ||
+        expectedOccurrence.fileId !== cursorAnchor.fileId ||
+        !sameRange(expectedOccurrence.range, composite.range) ||
+        probe.expected.symbol !== expectedSymbol
+      ) {
+        throw new Error(
+          `${probe.id}: cursorOccurrence and symbol must equal the exact syntax composite occurrence`,
+        );
+      }
+    }
     const safety = safetyById.get(probe.id)!;
     if (safety.forbiddenDispositions.includes(expected.status)) {
       throw new Error(
@@ -697,6 +786,33 @@ function validateFormulaDecisionExpectations(
   }
 }
 
+export function selectFreshBlindCompositeOccurrence(
+  occurrences: readonly FreshBlindCompositeOccurrenceFact[],
+  cursorOffset: number,
+): FreshBlindCompositeOccurrenceFact | undefined {
+  const eligible = occurrences.filter((occurrence) =>
+    occurrence.selectionRange.startOffset <= cursorOffset &&
+    cursorOffset < occurrence.selectionRange.endOffset
+  );
+  const scripts = eligible.filter((occurrence) => occurrence.kind === "script");
+  const candidates = scripts.length > 0 ? scripts : eligible;
+  return [...candidates].sort((left, right) => {
+    const leftWidth = left.range.endOffset - left.range.startOffset;
+    const rightWidth = right.range.endOffset - right.range.startOffset;
+    return (scripts.length > 0 ? rightWidth - leftWidth : leftWidth - rightWidth) ||
+      left.range.startOffset - right.range.startOffset ||
+      left.range.endOffset - right.range.endOffset;
+  })[0];
+}
+
+function validSourceRange(range: SourceRange, contentLength: number): boolean {
+  return Number.isInteger(range.startOffset) &&
+    Number.isInteger(range.endOffset) &&
+    range.startOffset >= 0 &&
+    range.startOffset < range.endOffset &&
+    range.endOffset <= contentLength;
+}
+
 function validateEntitySurfaceCommissioning(
   probeId: string,
   expected: AuthoredScientificFixture["probes"][number]["expected"],
@@ -714,9 +830,13 @@ function validateEntitySurfaceCommissioning(
     );
   }
   if (definition.status === "available") {
-    const definitions = resolvedLocationKeys(definition.required, snapshot);
+    const definitions = resolvedLocationKeys(
+      definition.allowed ?? definition.required,
+      snapshot,
+    );
+    const referenceAnchors = references.allowed ?? references.required;
     const referenceKeys = new Set(
-      resolvedLocationKeys(references.required, snapshot),
+      resolvedLocationKeys(referenceAnchors, snapshot),
     );
     if (definitions.some((location) => !referenceKeys.has(location))) {
       throw new Error(
@@ -724,21 +844,29 @@ function validateEntitySurfaceCommissioning(
       );
     }
     const symbol = expected.symbol;
-    if (!symbol || !references.required.every((anchor) => selectedAnchorText(anchor, snapshot) === symbol)) {
+    if (!symbol || !referenceAnchors.every((anchor) =>
+      selectedAnchorText(anchor, snapshot) === symbol
+    )) {
       throw new Error(
         `${probeId}: authorized references require one exact atomic source spelling`,
       );
     }
     const authoredOccurrences = exactAtomicOccurrences(snapshot, symbol);
-    if (authoredOccurrences.length !== references.required.length) {
+    if (authoredOccurrences.length !== referenceAnchors.length) {
       throw new Error(
         `${probeId}: reference allowlist must enumerate every exact atomic source occurrence`,
       );
     }
   }
   if (rename.status === "available") {
-    const referenceKeys = resolvedLocationKeys(references.required, snapshot);
-    const renameKeys = resolvedLocationKeys(rename.required, snapshot);
+    const referenceKeys = resolvedLocationKeys(
+      references.allowed ?? references.required,
+      snapshot,
+    );
+    const renameKeys = resolvedLocationKeys(
+      rename.allowed ?? rename.required,
+      snapshot,
+    );
     if (
       referenceKeys.length !== renameKeys.length ||
       referenceKeys.some((location, index) => location !== renameKeys[index])
@@ -813,20 +941,39 @@ function validateExactLocationContract(
   expected: AuthoredLocationExpectation,
   snapshot: ReturnType<typeof authoredSnapshotFor>,
 ): void {
-  if (expected.minimum !== expected.required.length) {
+  const envelope = expected.allowed ?? expected.required;
+  if (expected.allowed === undefined && expected.minimum !== expected.required.length) {
     throw new Error(
       `${probeId}: ${surface} must enumerate its complete location allowlist`,
     );
   }
-  if (expected.status === "available" && expected.required.length === 0) {
+  if (expected.status === "available" && envelope.length === 0) {
     throw new Error(`${probeId}: available ${surface} requires a source location`);
   }
-  const locations = expected.required.map((anchor) => {
+  const locations = envelope.map((anchor) => {
     const resolved = resolveAuthoredAnchor(snapshot, anchor);
     return `${resolved.fileId}:${resolved.range.startOffset}:${resolved.range.endOffset}`;
   });
   if (new Set(locations).size !== locations.length) {
     throw new Error(`${probeId}: ${surface} repeats a reviewed source location`);
+  }
+  if (
+    expected.allowed !== undefined &&
+    stableJson(locations) !== stableJson([...locations].sort())
+  ) {
+    throw new Error(`${probeId}: ${surface} allowed envelope is not canonical`);
+  }
+  const allowed = new Set(locations);
+  const required = resolvedLocationKeys(expected.required, snapshot);
+  if (required.some((location) => !allowed.has(location))) {
+    throw new Error(`${probeId}: ${surface} required locations must be allowed`);
+  }
+  const excluded = resolvedLocationKeys(expected.excluded, snapshot);
+  if (excluded.some((location) => allowed.has(location))) {
+    throw new Error(`${probeId}: ${surface} cannot both allow and exclude a location`);
+  }
+  if (expected.minimum > envelope.length) {
+    throw new Error(`${probeId}: ${surface} minimum exceeds its allowed envelope`);
   }
 }
 
@@ -948,11 +1095,16 @@ export function freshBlindSafetySummary(
         (probe.expected.navigation.rename.safety !== undefined &&
           observed.renameSafety !== probe.expected.navigation.rename.safety),
     );
+    const unsafeAuthorizations = unsafeSurfaceAuthorizations(
+      observed.surfaceAuthorizations,
+      probe.expected.navigation,
+    );
     const unsafeCaseLocations =
       unsafeDefinitions +
       unsafeReferences +
       unsafePreparation +
-      unsafeRename;
+      unsafeRename +
+      unsafeAuthorizations;
     unsafeNavigationOrEditLocations += unsafeCaseLocations;
     if (unsafeCaseLocations > 0) {
       unsafeNavigationOrEditCaseIds.add(probe.id);
@@ -1085,11 +1237,69 @@ function rejectExactLeakage(
   }
 }
 
+function unsafeSurfaceAuthorizations(
+  observed: AuthoredScientificObservation["surfaceAuthorizations"],
+  expected: AuthoredScientificFixture["probes"][number]["expected"]["navigation"],
+): number {
+  // Retained legacy observations predate public authorization capture.
+  if (!observed) return 0;
+  const surfaces = [
+    ["definition", observed.definition, expected.definition.status],
+    ["references", observed.references, expected.references.status],
+    ["prepareRename", observed.prepareRename, expected.prepareRename.status],
+    ["rename", observed.rename, expected.rename.status],
+  ] as const;
+  let failures = surfaces.filter(([, authorization, expectedStatus]) =>
+    authorization.status !==
+      (expectedStatus === "available" ? "authorized" : "refused")
+  ).length;
+  const authorized = surfaces.flatMap(([, authorization]) =>
+    authorization.status === "authorized"
+      ? [{
+          entityId: authorization.entityId,
+          focusOccurrenceId: authorization.focusOccurrenceId,
+        }]
+      : []
+  );
+  const identities = new Set(
+    authorized.map(authorizationIdentityKey),
+  );
+  // One case-level failure records that independently safe-looking surfaces
+  // disagree about the exact cursor occurrence or resolved entity.
+  if (identities.size > 1) failures += 1;
+  return failures;
+}
+
+function authorizationIdentityKey(
+  authorization: {
+    readonly entityId: Extract<
+      NonNullable<
+        AuthoredScientificObservation["surfaceAuthorizations"]
+      >["definition"],
+      { readonly status: "authorized" }
+    >["entityId"];
+    readonly focusOccurrenceId: Extract<
+      NonNullable<
+        AuthoredScientificObservation["surfaceAuthorizations"]
+      >["definition"],
+      { readonly status: "authorized" }
+    >["focusOccurrenceId"];
+  },
+): string {
+  return stableJson(authorization);
+}
+
 function unsafeLocations<
   Location extends { readonly fileId: string; readonly range: SourceRange },
 >(
   observed: readonly Location[],
   expected: {
+    readonly allowed?: readonly {
+      readonly fileId: string;
+      readonly needle: string;
+      readonly occurrence?: number;
+      readonly selection?: { readonly length: number; readonly offset: number };
+    }[];
     readonly excluded: readonly {
       readonly fileId: string;
       readonly needle: string;
@@ -1108,7 +1318,7 @@ function unsafeLocations<
   additionalUnsafe: (location: Location) => boolean = () => false,
 ): number {
   if (expected.status === "unavailable") return observed.length;
-  const required = expected.required.map((anchor) =>
+  const allowed = (expected.allowed ?? expected.required).map((anchor) =>
     resolveAuthoredAnchor(snapshot, anchor),
   );
   const excluded = expected.excluded.map((anchor) =>
@@ -1117,7 +1327,7 @@ function unsafeLocations<
   return observed.filter(
     (location) =>
       additionalUnsafe(location) ||
-      !required.some(
+      !allowed.some(
         (anchor) =>
           location.fileId === anchor.fileId &&
           sameRange(location.range, anchor.range),

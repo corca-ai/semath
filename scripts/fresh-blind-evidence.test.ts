@@ -72,6 +72,33 @@ describe("fresh blind reference isolation", () => {
     }
   });
 
+  test("extracts neutral composite owners without collapsing to their nucleus", () => {
+    const content = "😀 The value is $\\mathbf{\\hat{x}}_i=0$.";
+    const snapshot = {
+      documents: [{ content, fileId: "main", path: "main.tex" }],
+      id: "initial",
+    };
+    const [facts] = freshAuthoringSyntaxFactsForSelections([
+      { scenarioId: "composite", snapshot },
+    ]);
+    const document = facts!.documents[0]!;
+    const x = content.indexOf("x");
+    const formulaStart = content.indexOf("\\mathbf");
+    expect(document.mathRootContentRanges[0]!.startOffset).toBe(formulaStart);
+    expect(formulaStart).toBeGreaterThan(
+      [...content].findIndex((character) => character === "\\"),
+    );
+    const compositeOccurrences = document.compositeOccurrences;
+    if (!compositeOccurrences) throw new Error("missing composite syntax facts");
+    const owners = compositeOccurrences.filter((occurrence) =>
+      occurrence.selectionRange.startOffset <= x &&
+      x < occurrence.selectionRange.endOffset
+    );
+    expect(owners.map((occurrence) =>
+      content.slice(occurrence.range.startOffset, occurrence.range.endOffset)
+    )).toContain("\\mathbf{\\hat{x}}_i");
+  });
+
   test("versions the exact document, math, and prose lineage algorithms", () => {
     const content =
       "The calibrated relation follows the reviewed balance.\n\\[\na+b=c\n\\]\n";

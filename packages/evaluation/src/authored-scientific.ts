@@ -1,4 +1,5 @@
 import type {
+  EntitySurfaceAuthorization,
   MathAuthoringContext,
   MathAuthoringDisposition,
   MathInterpretationHypothesisInfo,
@@ -92,6 +93,8 @@ export interface AuthoredSourceAnchor {
 }
 
 export interface AuthoredLocationExpectation {
+  /** Exhaustive source locations authorized by fixture schema 2. */
+  readonly allowed?: readonly AuthoredSourceAnchor[];
   readonly excluded: readonly AuthoredSourceAnchor[];
   readonly minimum: number;
   readonly required: readonly AuthoredSourceAnchor[];
@@ -220,6 +223,26 @@ export interface ObservedLocation {
   readonly range: SourceRange;
 }
 
+export type AuthoredObservedSurfaceAuthorization =
+  | {
+      readonly entityId: Extract<
+        EntitySurfaceAuthorization,
+        { readonly status: "authorized" }
+      >["entityId"];
+      readonly focusOccurrenceId: Extract<
+        EntitySurfaceAuthorization,
+        { readonly status: "authorized" }
+      >["focusOccurrenceId"];
+      readonly status: "authorized";
+    }
+  | {
+      readonly refusalKind: Extract<
+        EntitySurfaceAuthorization,
+        { readonly status: "refused" }
+      >["reason"]["kind"];
+      readonly status: "refused";
+    };
+
 export interface AuthoredScientificObservation {
   readonly authoringContext?: MathAuthoringContext;
   readonly caseId: string;
@@ -262,6 +285,13 @@ export interface AuthoredScientificObservation {
   readonly renameSafety?: string;
   readonly symbol: string | null;
   readonly symbolLocation?: ObservedLocation;
+  /** Required for current fresh schema 3; optional for retained legacy reports. */
+  readonly surfaceAuthorizations?: {
+    readonly definition: AuthoredObservedSurfaceAuthorization;
+    readonly prepareRename: AuthoredObservedSurfaceAuthorization;
+    readonly references: AuthoredObservedSurfaceAuthorization;
+    readonly rename: AuthoredObservedSurfaceAuthorization;
+  };
 }
 
 export interface AuthoredScientificSurfaceResults {
@@ -875,7 +905,34 @@ export function observeAuthoredScientificProbe(
       : {}),
     symbol: view.symbol?.symbol ?? null,
     ...(view.symbol ? { symbolLocation: view.symbol.location } : {}),
+    surfaceAuthorizations: {
+      definition: observeSurfaceAuthorization(
+        results.definition.value.authorization,
+      ),
+      prepareRename: observeSurfaceAuthorization(
+        results.prepareRename.value.authorization,
+      ),
+      references: observeSurfaceAuthorization(
+        results.references.value.authorization,
+      ),
+      rename: observeSurfaceAuthorization(results.rename.value.authorization),
+    },
   };
+}
+
+function observeSurfaceAuthorization(
+  authorization: EntitySurfaceAuthorization,
+): AuthoredObservedSurfaceAuthorization {
+  return authorization.status === "authorized"
+    ? {
+        entityId: authorization.entityId,
+        focusOccurrenceId: authorization.focusOccurrenceId,
+        status: "authorized",
+      }
+    : {
+        refusalKind: authorization.reason.kind,
+        status: "refused",
+      };
 }
 
 export function observeAuthoredRelations(
@@ -1151,13 +1208,20 @@ function parseExpected(
       "minimum",
       "required",
       "excluded",
+      ...(schemaVersion === 2 ? ["allowed"] : []),
       "expectedText",
       "newName",
       "replacementText",
       "safety",
     ],
     `${path}.navigation.rename`,
-    ["expectedText", "newName", "replacementText", "safety"],
+    [
+      ...(schemaVersion === 2 ? ["allowed"] : []),
+      "expectedText",
+      "newName",
+      "replacementText",
+      "safety",
+    ],
   );
   const diagnostics = record(item.diagnostics, `${path}.diagnostics`);
   exact(
@@ -1222,6 +1286,7 @@ function parseExpected(
       definition: parseLocationExpectation(
         navigation.definition,
         `${path}.navigation.definition`,
+        schemaVersion,
       ),
       prepareRename: {
         ...(prepareRename.placeholder === undefined
@@ -1239,9 +1304,10 @@ function parseExpected(
       references: parseLocationExpectation(
         navigation.references,
         `${path}.navigation.references`,
+        schemaVersion,
       ),
       rename: {
-        ...parseLocationExpectation(rename, `${path}.navigation.rename`, [
+        ...parseLocationExpectation(rename, `${path}.navigation.rename`, schemaVersion, [
           "expectedText",
           "newName",
           "replacementText",
@@ -1329,11 +1395,25 @@ function parseRelationExpectations(
 function parseLocationExpectation(
   value: unknown,
   path: string,
+  schemaVersion: AuthoredScientificFixture["schemaVersion"] = 1,
   extensions: readonly string[] = [],
 ): AuthoredLocationExpectation {
   const item = record(value, path);
-  exact(item, ["status", "minimum", "required", "excluded", ...extensions], path, extensions);
+  const allowedField = schemaVersion === 2 ? ["allowed"] : [];
+  exact(
+    item,
+    ["status", "minimum", "required", "excluded", ...allowedField, ...extensions],
+    path,
+    [...allowedField, ...extensions],
+  );
   const result = {
+    ...(item.allowed === undefined
+      ? {}
+      : {
+          allowed: array(item.allowed, `${path}.allowed`).map((value, index) =>
+            parseAnchor(value, `${path}.allowed[${index}]`)
+          ),
+        }),
     excluded: array(item.excluded, `${path}.excluded`).map((value, index) =>
       parseAnchor(value, `${path}.excluded[${index}]`),
     ),
@@ -1348,6 +1428,9 @@ function parseLocationExpectation(
   }
   if (result.status === "unavailable" && (result.minimum || result.required.length)) {
     throw new Error(`${path}: unavailable surface cannot require locations`);
+  }
+  if (result.status === "unavailable" && result.allowed?.length) {
+    throw new Error(`${path}: unavailable surface cannot allow locations`);
   }
   return result;
 }
@@ -1414,7 +1497,11 @@ function validateProbe(
     probe.expected.navigation.references,
     probe.expected.navigation.rename,
   ]) {
-    for (const anchor of [...location.required, ...location.excluded]) {
+    for (const anchor of [
+      ...(location.allowed ?? []),
+      ...location.required,
+      ...location.excluded,
+    ]) {
       resolveAuthoredAnchor(snapshot, anchor);
     }
   }
@@ -1461,9 +1548,37 @@ function sameRenameNotationFamily(
 ): boolean {
   const controlSequence = /^\\\p{L}+$/u;
   const plainIdentifier = /^\p{L}$/u;
-  return controlSequence.test(current)
-    ? controlSequence.test(replacement)
-    : plainIdentifier.test(current) && plainIdentifier.test(replacement);
+  if (controlSequence.test(current)) {
+    return controlSequence.test(replacement);
+  }
+  if (plainIdentifier.test(current)) {
+    return plainIdentifier.test(replacement);
+  }
+  let prefix = 0;
+  while (
+    prefix < current.length && prefix < replacement.length &&
+    current[prefix] === replacement[prefix]
+  ) prefix += 1;
+  let suffix = 0;
+  while (
+    suffix < current.length - prefix && suffix < replacement.length - prefix &&
+    current[current.length - suffix - 1] ===
+      replacement[replacement.length - suffix - 1]
+  ) suffix += 1;
+  const currentNucleus = current.slice(prefix, current.length - suffix);
+  const replacementNucleus = replacement.slice(
+    prefix,
+    replacement.length - suffix,
+  );
+  const sharedPrefix = current.slice(0, prefix);
+  const sharedSuffix = suffix === 0 ? "" : current.slice(current.length - suffix);
+  if (sharedPrefix.endsWith("\\")) {
+    return /^\p{L}+$/u.test(currentNucleus) &&
+      /^\p{L}+$/u.test(replacementNucleus) &&
+      (sharedSuffix === "" || /^[\s_'^]/u.test(sharedSuffix));
+  }
+  return plainIdentifier.test(currentNucleus) &&
+    plainIdentifier.test(replacementNucleus);
 }
 
 function requireSplit(fixture: AuthoredScientificFixture, split: AuthoredSplit): void {
@@ -1758,6 +1873,22 @@ function checkLocationExpectation(
         basis: `${name} leaked ${anchor.fileId}:${anchor.needle}`,
       });
       failed = true;
+    }
+  }
+  if (expected.allowed) {
+    const allowed = expected.allowed.map((anchor) => resolveAuthoredAnchor(snapshot, anchor));
+    for (const item of actual) {
+      if (
+        !allowed.some(
+          (candidate) =>
+            item.fileId === candidate.fileId &&
+            item.path === candidate.path &&
+            sameRange(item.range, candidate.range),
+        )
+      ) {
+        failures.push({ area: name, basis: `${name} exposed an unallowed source location` });
+        failed = true;
+      }
     }
   }
   return failed;

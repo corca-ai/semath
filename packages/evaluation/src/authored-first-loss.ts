@@ -82,6 +82,8 @@ export interface AuthoredFirstLossAtlas {
   readonly failed: number;
   readonly passed: number;
   readonly byDecision: readonly AuthoredFirstLossCount[];
+  readonly byEntityDecision: readonly AuthoredFirstLossCount[];
+  readonly byFormulaDecision: readonly AuthoredFirstLossCount[];
   readonly byFamily: readonly AuthoredFirstLossCount[];
   readonly byField: readonly AuthoredFirstLossCount[];
   readonly byReason: readonly AuthoredFirstLossCount[];
@@ -124,14 +126,6 @@ export function classifyAuthoredFirstLoss(
       stage: "host-projection",
     };
   }
-  if (evidence.formulaLocationMatched === false) {
-    return {
-      basis: "selected formula location differs from reviewed evidence",
-      decisionDomain: "selected-formula",
-      reason: "formula-selection-mismatch",
-      stage: "identity",
-    };
-  }
   const observedDecision = evidence.cursorSignals.decision;
   if (
     (observedDecision === "established" || observedDecision === "conflicting") &&
@@ -142,6 +136,14 @@ export function classifyAuthoredFirstLoss(
       decisionDomain: "cursor-entity",
       reason: "unsafe-decision",
       stage: "decision",
+    };
+  }
+  if (evidence.formulaLocationMatched === false) {
+    return {
+      basis: "selected formula location differs from reviewed evidence",
+      decisionDomain: "selected-formula",
+      reason: "formula-selection-mismatch",
+      stage: "identity",
     };
   }
   if (
@@ -295,6 +297,14 @@ export function summarizeAuthoredFirstLoss(
     byDecision: counts(
       failed.map((record) =>
         record.expectedFormulaDecision ?? record.expectedDecision
+      ),
+    ),
+    byEntityDecision: counts(failed.map((record) => record.expectedDecision)),
+    byFormulaDecision: counts(
+      failed.flatMap((record) =>
+        record.expectedFormulaDecision === undefined
+          ? []
+          : [record.expectedFormulaDecision]
       ),
     ),
     byFamily: counts(failed.map((record) => record.family)),

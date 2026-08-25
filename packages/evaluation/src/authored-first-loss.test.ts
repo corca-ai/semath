@@ -151,6 +151,28 @@ describe("authored first-loss localization", () => {
     ).toMatchObject({ reason: "unsafe-decision", stage: "decision" });
   });
 
+  test("does not let a selected-formula identity mismatch mask unsafe entity certainty", () => {
+    expect(
+      classifyAuthoredFirstLoss({
+        cursorSignals: { ...signals, decision: "established" },
+        expectedDecision: "unsupported",
+        expectedFormulaDecision: "ambiguous",
+        expectedRelationsMatched: true,
+        formulaDecision: "ambiguous",
+        formulaLocationMatched: false,
+        identityFailures: [
+          { area: "formula", basis: "selected formula location differs" },
+        ],
+        probePassed: false,
+        relationSources: [],
+      }),
+    ).toMatchObject({
+      decisionDomain: "cursor-entity",
+      reason: "unsafe-decision",
+      stage: "decision",
+    });
+  });
+
   test("keeps cursor-entity certainty separate from the selected formula", () => {
     expect(
       classifyAuthoredFirstLoss({
@@ -265,6 +287,7 @@ describe("authored first-loss localization", () => {
         basis: "wrong cursor",
         caseId: "failure-a",
         expectedDecision: "partial",
+        expectedFormulaDecision: "ambiguous",
         family: "scope-comparison",
         field: "calculus-analysis",
         reason: "cursor-occurrence-mismatch",
@@ -276,8 +299,15 @@ describe("authored first-loss localization", () => {
       failed: 2,
       passed: 1,
       byDecision: [
+        { key: "ambiguous", count: 1 },
+        { key: "established", count: 1 },
+      ],
+      byEntityDecision: [
         { key: "established", count: 1 },
         { key: "partial", count: 1 },
+      ],
+      byFormulaDecision: [
+        { key: "ambiguous", count: 1 },
       ],
       byFamily: [
         { key: "discourse-reference", count: 1 },

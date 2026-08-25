@@ -124,7 +124,10 @@ async function runFreshBlindRelease(): Promise<void> {
                 id: probe.id,
               }]
         ),
-        { formulaDecisionRequired: evidence.release.schemaVersion === 3 },
+        {
+          formulaDecisionRequired: evidence.release.schemaVersion === 3,
+          surfaceAuthorizationsRequired: evidence.release.schemaVersion === 3,
+        },
       ),
     };
     run("bun", ["scripts/check-fresh-blind-lifecycle.ts"], {
@@ -218,7 +221,10 @@ interface ParsedEvaluation {
 export function parseFreshBlindEvaluation(
   value: unknown,
   expectedProbes: readonly MathAuthoringExpectationProbe[],
-  options: { readonly formulaDecisionRequired?: boolean } = {},
+  options: {
+    readonly formulaDecisionRequired?: boolean;
+    readonly surfaceAuthorizationsRequired?: boolean;
+  } = {},
 ): ParsedEvaluation {
   const report = record(value, "fresh blind evaluation");
   exact(report, ["results"], "fresh blind evaluation");
@@ -246,6 +252,7 @@ export function parseFreshBlindEvaluation(
       item,
       `fresh blind evaluation observations[${index}]`,
       options.formulaDecisionRequired === true,
+      options.surfaceAuthorizationsRequired === true,
     ),
   );
   if (
@@ -560,6 +567,7 @@ function parseObservation(
   value: unknown,
   label: string,
   formulaDecisionRequired: boolean,
+  surfaceAuthorizationsRequired: boolean,
 ): AuthoredScientificObservation {
   const item = record(value, label);
   const requiredKeys = [
@@ -569,6 +577,7 @@ function parseObservation(
     "definitions",
     "diagnostics",
     ...(formulaDecisionRequired ? ["formulaDecision"] : []),
+    ...(surfaceAuthorizationsRequired ? ["surfaceAuthorizations"] : []),
     "prepareRename",
     "proofGrounded",
     "references",
@@ -581,11 +590,15 @@ function parseObservation(
     ...requiredKeys,
     "renameSafety",
     "symbolLocation",
+    "surfaceAuthorizations",
   ]);
   const missing = requiredKeys.filter((key) => !(key in item));
   const unknown = Object.keys(item).filter((key) => !allowedKeys.has(key));
   if (formulaDecisionRequired && !("formulaDecision" in item)) {
     throw new Error(`${label}.formulaDecision is required`);
+  }
+  if (surfaceAuthorizationsRequired && !("surfaceAuthorizations" in item)) {
+    throw new Error(`${label}.surfaceAuthorizations is required`);
   }
   if (missing.length || unknown.length)
     throw new Error(`${label} has unexpected or missing fields`);
@@ -825,6 +838,113 @@ function parseObservation(
             `${label}.symbolLocation`,
           ),
         }),
+    ...(item.surfaceAuthorizations === undefined
+      ? {}
+      : {
+          surfaceAuthorizations: parseSurfaceAuthorizations(
+            item.surfaceAuthorizations,
+            `${label}.surfaceAuthorizations`,
+          ),
+        }),
+  };
+}
+
+function parseSurfaceAuthorizations(
+  value: unknown,
+  label: string,
+): NonNullable<AuthoredScientificObservation["surfaceAuthorizations"]> {
+  const item = record(value, label);
+  exact(
+    item,
+    ["definition", "prepareRename", "references", "rename"],
+    label,
+  );
+  return {
+    definition: parseSurfaceAuthorization(item.definition, `${label}.definition`),
+    prepareRename: parseSurfaceAuthorization(
+      item.prepareRename,
+      `${label}.prepareRename`,
+    ),
+    references: parseSurfaceAuthorization(item.references, `${label}.references`),
+    rename: parseSurfaceAuthorization(item.rename, `${label}.rename`),
+  };
+}
+
+function parseSurfaceAuthorization(
+  value: unknown,
+  label: string,
+): NonNullable<
+  AuthoredScientificObservation["surfaceAuthorizations"]
+>["definition"] {
+  const item = record(value, label);
+  const status = checked(
+    item.status,
+    /^(?:authorized|refused)$/u,
+    `${label}.status`,
+  ) as "authorized" | "refused";
+  if (status === "authorized") {
+    exact(item, ["entityId", "focusOccurrenceId", "status"], label);
+    return {
+      entityId: parseEntityId(item.entityId, `${label}.entityId`),
+      focusOccurrenceId: parseSourceOccurrenceId(
+        item.focusOccurrenceId,
+        `${label}.focusOccurrenceId`,
+      ),
+      status,
+    };
+  }
+  exact(item, ["refusalKind", "status"], label);
+  return {
+    refusalKind: checked(
+      item.refusalKind,
+      /^(?:unsupported|ambiguous|conflicting|engine-limit|incomplete-source|non-editable|invalid-replacement|capture)$/u,
+      `${label}.refusalKind`,
+    ) as Extract<
+      NonNullable<
+        AuthoredScientificObservation["surfaceAuthorizations"]
+      >["definition"],
+      { readonly status: "refused" }
+    >["refusalKind"],
+    status,
+  };
+}
+
+function parseEntityId(
+  value: unknown,
+  label: string,
+): Extract<
+  NonNullable<
+    AuthoredScientificObservation["surfaceAuthorizations"]
+  >["definition"],
+  { readonly status: "authorized" }
+>["entityId"] {
+  const item = record(value, label);
+  exact(item, ["anchor", "componentId", "kind", "scopePath"], label);
+  return {
+    anchor: parseSourceOccurrenceId(item.anchor, `${label}.anchor`),
+    componentId: nonemptyString(item.componentId, `${label}.componentId`),
+    kind: nonemptyString(item.kind, `${label}.kind`),
+    scopePath: array(item.scopePath, `${label}.scopePath`).map((value, index) =>
+      integer(value, `${label}.scopePath[${index}]`)
+    ),
+  };
+}
+
+function parseSourceOccurrenceId(
+  value: unknown,
+  label: string,
+): Extract<
+  NonNullable<
+    AuthoredScientificObservation["surfaceAuthorizations"]
+  >["definition"],
+  { readonly status: "authorized" }
+>["focusOccurrenceId"] {
+  const item = record(value, label);
+  exact(item, ["documentVersion", "fileId", "localId"], label);
+  return {
+    documentVersion: integer(item.documentVersion, `${label}.documentVersion`),
+    fileId: nonemptyString(item.fileId, `${label}.fileId`),
+    localId: integer(item.localId, `${label}.localId`),
   };
 }
 

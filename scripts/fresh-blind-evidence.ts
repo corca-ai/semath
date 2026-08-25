@@ -117,6 +117,23 @@ export function freshAuthoringSyntaxFactsForSelections(
         const syntax = service.getFile(document.fileId);
         if (!syntax) throw new Error(`${scenarioId}: missing wasmtex syntax`);
         return {
+          compositeOccurrences: syntax.nodes.flatMap((node) => {
+            if (
+              node.kind !== "modifier" && node.kind !== "named-operator" &&
+              node.kind !== "script" && node.kind !== "style"
+            ) {
+              return [];
+            }
+            return [{
+              kind: node.kind,
+              range: { ...node.ranges.full },
+              selectionRange: {
+                ...(node.kind === "script"
+                  ? node.ranges.nucleus ?? node.ranges.full
+                  : node.ranges.full),
+              },
+            }];
+          }),
           fileId: document.fileId,
           mathRootContentRanges: syntax.mathRoots.map((root) => ({
             ...root.contentRange,

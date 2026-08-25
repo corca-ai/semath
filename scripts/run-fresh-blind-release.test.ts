@@ -45,6 +45,34 @@ function expectedProbes(): readonly MathAuthoringExpectationProbe[] {
   }];
 }
 
+function surfaceAuthorizations() {
+  const focusOccurrenceId = {
+    documentVersion: 1,
+    fileId: "main",
+    localId: 1,
+  };
+  const authorized = {
+    entityId: {
+      anchor: focusOccurrenceId,
+      componentId: "component-1",
+      kind: "symbol",
+      scopePath: [],
+    },
+    focusOccurrenceId,
+    status: "authorized" as const,
+  };
+  const refused = {
+    refusalKind: "non-editable" as const,
+    status: "refused" as const,
+  };
+  return {
+    definition: authorized,
+    prepareRename: refused,
+    references: authorized,
+    rename: refused,
+  };
+}
+
 function evaluation() {
   return {
     results: [
@@ -287,9 +315,11 @@ describe("fresh blind retained report parsers", () => {
       location: null,
       status: "unsupported",
     };
+    observation.surfaceAuthorizations = surfaceAuthorizations();
     expect(
       parseFreshBlindEvaluation(raw, expectedProbes(), {
         formulaDecisionRequired: true,
+        surfaceAuthorizationsRequired: true,
       })
         .observations[0],
     ).toMatchObject({
@@ -303,6 +333,7 @@ describe("fresh blind retained report parsers", () => {
     expect(() =>
       parseFreshBlindEvaluation(raw, expectedProbes(), {
         formulaDecisionRequired: true,
+        surfaceAuthorizationsRequired: true,
       })
     ).toThrow("formulaDecision must match authoringContext");
 
@@ -310,6 +341,7 @@ describe("fresh blind retained report parsers", () => {
     expect(() =>
       parseFreshBlindEvaluation(raw, expectedProbes(), {
         formulaDecisionRequired: true,
+        surfaceAuthorizationsRequired: true,
       })
     ).toThrow("formulaDecision");
     expect(() => parseFreshBlindEvaluation(raw, expectedProbes())).not.toThrow();
@@ -317,6 +349,36 @@ describe("fresh blind retained report parsers", () => {
     observation.formulaDecision = {
       location: null,
       status: "unsupported",
+    };
+    expect(() => parseFreshBlindEvaluation(raw, expectedProbes()))
+      .toThrow("unexpected or missing fields");
+  });
+
+  test("requires and round-trips closed schema-3 surface authorizations", () => {
+    const raw = evaluation();
+    const observation = raw.results[0]!.observations[0]! as Record<string, unknown>;
+    observation.surfaceAuthorizations = surfaceAuthorizations();
+    expect(
+      parseFreshBlindEvaluation(raw, expectedProbes(), {
+        surfaceAuthorizationsRequired: true,
+      }).observations[0]!.surfaceAuthorizations,
+    ).toEqual(surfaceAuthorizations());
+
+    delete observation.surfaceAuthorizations;
+    expect(() =>
+      parseFreshBlindEvaluation(raw, expectedProbes(), {
+        surfaceAuthorizationsRequired: true,
+      })
+    ).toThrow("surfaceAuthorizations is required");
+    expect(() => parseFreshBlindEvaluation(raw, expectedProbes())).not.toThrow();
+
+    observation.surfaceAuthorizations = {
+      ...surfaceAuthorizations(),
+      rename: {
+        entityId: "entity-1",
+        refusalKind: "non-editable",
+        status: "refused",
+      },
     };
     expect(() => parseFreshBlindEvaluation(raw, expectedProbes()))
       .toThrow("unexpected or missing fields");

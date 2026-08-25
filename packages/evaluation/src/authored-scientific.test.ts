@@ -7,6 +7,7 @@ import {
   authoredProbeIdentityFailures,
   authoredRelationRangeMatches,
   authoredScenarioReviewPayload,
+  observeAuthoredScientificProbe,
   observeAuthoredRelations,
   parseAuthoredScientificFixture,
   scoreAuthoredScientificFixture,
@@ -14,11 +15,64 @@ import {
   type AuthoredArea,
   type AuthoredScientificFixture,
   type AuthoredScientificObservation,
+  type AuthoredScientificSurfaceResults,
   type AuthoredSplit,
   type ScientificDecision,
 } from "./authored-scientific";
 
 describe("independently authored scientific corpus", () => {
+  test("retains exact public entity-surface authorizations in observations", () => {
+    const probe = parseAuthoredScientificFixture(fixtureValue("holdout", 1))
+      .probes[0]!;
+    const focusOccurrenceId = {
+      documentVersion: 1,
+      fileId: "main",
+      localId: 1,
+    };
+    const authorized = {
+      entityId: {
+        anchor: focusOccurrenceId,
+        componentId: "component-1",
+        kind: "symbol",
+        scopePath: [],
+      },
+      focusOccurrenceId,
+      status: "authorized",
+    } as const;
+    const refused = {
+      reason: { kind: "non-editable", message: "not editable" },
+      status: "refused",
+    } as const;
+    const result = (value: unknown) => ({ value });
+    const results = {
+      definition: result({ authorization: authorized, kind: "locations", locations: [] }),
+      diagnostics: result({ diagnostics: [], kind: "diagnostics" }),
+      prepareRename: result({ authorization: refused, kind: "renamePreparation" }),
+      references: result({ authorization: authorized, kind: "locations", locations: [] }),
+      rename: result({ authorization: refused, kind: "editProposal" }),
+      semanticView: result({
+        kind: "semanticView",
+        view: {
+          authoringContext: {
+            disposition: "unsupported",
+            interpretations: { hypotheses: [] },
+          },
+          context: { relations: [] },
+          decision: { reasons: [], status: "partial" },
+          symbol: null,
+        },
+      }),
+    } as unknown as AuthoredScientificSurfaceResults;
+
+    expect(observeAuthoredScientificProbe(probe, results).surfaceAuthorizations)
+      .toEqual({
+        definition: authorized,
+        prepareRename: { refusalKind: "non-editable", status: "refused" },
+        references: authorized,
+        rename: { refusalKind: "non-editable", status: "refused" },
+      });
+  });
+
   test("treats trailing equation tags as presentation outside semantic relation ranges", () => {
     const content = "i_1+i_2+i_3=0. \\tag{2}";
     expect(
@@ -430,6 +484,15 @@ describe("independently authored scientific corpus", () => {
     };
     expect(() => parseAuthoredScientificFixture(value)).toThrow(
       "unavailable in fixture schema 1",
+    );
+
+    const navigation = fixtureValue("holdout", 1) as FixtureValue;
+    const expected = navigation.probes[0]!.expected as unknown as {
+      navigation: { references: Record<string, unknown> };
+    };
+    expected.navigation.references.allowed = [];
+    expect(() => parseAuthoredScientificFixture(navigation)).toThrow(
+      "navigation.references.allowed: unknown field",
     );
   });
 
