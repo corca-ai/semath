@@ -1,10 +1,10 @@
 # Spent holdout postmortems
 
-This document is a historical record of the terminal v0.38 through v0.41 semantic
+This document is a historical record of the terminal v0.38 through v0.42 semantic
 release evaluations. It is not a current scorecard, a release plan, or a source
 of expected answers for another holdout.
 
-All four fixtures are permanently spent. They must not be rerun, edited into a new
+All five fixtures are permanently spent. They must not be rerun, edited into a new
 holdout, or used as answer templates. Public regressions derived from them use
 new source text and the lowest authoritative public test layer.
 
@@ -16,6 +16,7 @@ new source text and the lowest authoritative public test layer.
 | v0.39 | `32571193980` | `9475579401` | `b61758bf3783954f2a4b057aabc048c3b0f913ad` | `68a23c8d1135e80d25c31c72e8136e6a436da0ea9d0d4748c21741a4913befce` | `d6ed5e53b7fc56372b8088df117aca11a0eb1792f1399767de3516f48b0f9103` |
 | v0.40 | `32730705424` | `9522100540` | `1fea214aa45224cc1767047dd78f46b02292183e` | `2e32389b8386845ee8ce491b3fc0a3fa55114abc3b1351c0f29152fba7a92e17` | `789011bea34fba2c4249231f9c70c7cebac6197b18b9c8c7447ce9c2abd1544d` |
 | v0.41 | `32800370262` | `9546760981` | `15ca913b4a19c81e3ad3d6a6054bee1059a7561f` | `1bf5870f1a8555a425061a9b280897f0ae0fb703e0b47625d8621e08bbda1b59` | `1f89a11044dc33ce43cf16f8d52046204dcd05ee171d9090eff62cd464ca4b12` |
+| v0.42 | `32820656318` | `9553675078` | `db15c0bacbc0d9f8b9a247fb6c6132481e28448c` | `672154b236f9fc73d4d0c5d24ee225ef2949f0ada72da5c6757a68fa545d0d34` | `d2edad8f07ac80b0f8a3f47a6718ea685047e68f29b95e3fc35e380d052276a1` |
 
 Each run passed the pre-reservation gates, permanently reserved its release
 identity, executed the engine once, terminalized, and retained its result. The
@@ -143,6 +144,48 @@ terminal receipt. A new fixture may be commissioned only after the corresponding
 public evaluator and engine regressions pass. v0.41 remains immutable spent
 evidence and must not be rerun.
 
+## Lessons retained from v0.42
+
+The schema-3 run passed its static, reservation, lifecycle, artifact, and
+attestation boundaries, then completed normally as `safety-failed`. It scored
+1 of 48 with raw risk 522: two reported false establishments, 44 coverage
+misses, and 41 navigation or identity findings. The committed, rebuilt,
+retained, and packaged WASM digests agreed, all 48 selected formula anchors
+matched, and no observation was engine-limited. Infrastructure was not the
+cause.
+
+Commissioning still confused source syntax with semantic occurrence identity.
+Thirty-eight probes selected a nucleus inside an indexed, decorated, styled, or
+otherwise composite notation while expecting a flat base symbol or an enclosing
+formula. The public cursor contract preserves the owned composite occurrence.
+Those malformed expectations dominated the navigation score and also made six
+source-grounded navigation results look unsafe. Future static validation must
+derive the selected occurrence from neutral syntax facts and reject a fixture
+that uses its own expected symbol as the oracle.
+
+The new entity/formula fields exposed a separate engine boundary rather than
+fixing it. Formula locations were exact in all 48 probes, but formula status was
+exact in only 12. The engine still derived the formula authoring disposition
+from the cursor entity's `MeaningDecision`, so independently reviewed
+ambiguous, conflicting, and unsupported formula states collapsed mostly to
+partial or conventional. Formula-root adjudication and cursor-entity
+adjudication must have separate inputs, conflicts, and evidence projections;
+neither result may authorize the other.
+
+Two retained cases remain genuine public safety work. One nonselected
+convention still emitted a supported typed-law relation. One explicitly denied
+formula root still generated positive canonical-symbol identity evidence.
+Separately, none of the reviewed conflict cases projected exact contradicting
+evidence. These findings require newly written public tests for nonselected
+conventions, exact-root refusal propagation, and formula-owned contradiction.
+They must not be addressed by lowering the contradiction or authority gates.
+
+Before v0.43 commissioning, public gates must therefore prove independent
+entity/formula decisions, syntax-backed composite cursor ownership, exact
+negative-frame propagation to nested identities, non-authoritative conventional
+candidates, and anchored formula contradictions. v0.42 remains immutable spent
+evidence and must not be rerun.
+
 ## Public regression atlas
 
 The following regression families are safe to promote. Tests must use newly
@@ -152,12 +195,15 @@ written public source, not holdout sentences, anchors, IDs, or observed output.
 | --- | --- | --- |
 | P0 | Formula-root commissioning | TeX and Markdown multiline displays derive exact root range, notation, scope, and version from syntax facts before sealing. |
 | P0 | Decision-domain separation | An established cursor entity inside a partial formula is scored as two different contracts. |
+| P0 | Formula-root adjudication | Cursor-entity proof cannot establish or conflict the selected formula; formula-owned evidence cannot authorize entity navigation or edits. |
+| P0 | Syntax-backed cursor oracle | Static commissioning derives the exact composite occurrence from neutral syntax instead of trusting a fixture-authored base symbol. |
 | P0 | Risk subtype consistency | Decision, proof, source-grounding, and excluded-relation signals share one typed case record; no helper reconstructs a different ID set. |
 | P0 | Guarded authority | A missing declaration or law condition cannot yield established or proof-grounded output. |
 | P0 | Conflict authority | Incompatible source evidence yields an anchored conflict and exports no established relation. |
 | P0 | Lifecycle retraction | Removing or weakening authorizing evidence retracts the relation, proof, navigation, and edit authority together. |
 | P0 | Navigation scope | A shadowed or out-of-scope entity exposes no definition, reference, or rename location outside its reviewed scope. |
 | P0 | Structural refusal | An undeclared power or opaque operator remains partial or unsupported and never receives source proof. |
+| P0 | Root-scoped refusal | A rejected formula root gives every nested implicit identity non-positive evidence without contaminating adjacent roots. |
 | P1 | Attachment | Explicit discourse attaches to the intended local or cross-document formula without leaking to a neighboring formula. |
 | P1 | Composite identity | Command-token cursors project the owned compound entity, such as a prefixed quantity, rather than only its command token. |
 | P1 | Pack unification | Canonical public laws bind equivalent formula shapes, indexed roles, and required conditions at exact ranges. |
