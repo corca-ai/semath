@@ -6,6 +6,7 @@ export * from "./authored-scientific";
 export * from "./conformance";
 export * from "./differential";
 export * from "./challenge";
+export * from "./challenge-observation";
 export * from "./equivalence-challenge";
 export * from "./evidence-graded";
 export * from "./domain-routing-challenge";
