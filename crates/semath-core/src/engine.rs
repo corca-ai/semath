@@ -4376,7 +4376,7 @@ impl SemathEngine {
             .as_ref()
             .filter(|_| selected_root_has_source_meaning)
             .and_then(|root| self.canonical_meaning_owner(document, root));
-        let (formula_context, formula_structural_candidates) =
+        let (mut formula_context, formula_structural_candidates) =
             if let Some(range) = queried_formula_range {
                 (
                     observations.formula_context(
@@ -4389,6 +4389,9 @@ impl SemathEngine {
             } else {
                 (context.clone(), Vec::new())
             };
+        if let Some(range) = queried_formula_range {
+            self.append_formula_index_claims(document, range, &mut formula_context);
+        }
         let (interpretation_domains, formula_domains_truncated) = queried_formula_range
             .map_or_else(
                 || (observations.domains.all_at(offset), domains_truncated),
@@ -5402,6 +5405,72 @@ impl SemathEngine {
             })
     }
 
+    fn append_formula_index_claims(
+        &self,
+        document: &AnalyzedDocument,
+        range: &SourceRange,
+        context: &mut SemanticContextInfo,
+    ) {
+        let mut seen_entities = BTreeSet::new();
+        let mut claim_sources = Vec::new();
+        let mut claim_sources_truncated = false;
+        for seed in document.semantic_occurrences.iter().filter(|occurrence| {
+            range.start_offset <= occurrence.selection_range.start_offset
+                && occurrence.selection_range.end_offset <= range.end_offset
+        }) {
+            let Some(focus) = self.index.cursor_focus(&document.document.file_id, seed) else {
+                continue;
+            };
+            let Some(entity) = self.resolved_entity(&focus.occurrence_id) else {
+                continue;
+            };
+            if !seen_entities.insert(entity.clone()) {
+                continue;
+            }
+            if claim_sources.len() == MAX_VIEW_CLAIMS {
+                claim_sources_truncated = true;
+                break;
+            }
+            claim_sources.push((entity, focus.occurrence_id));
+        }
+        let mut claims = Vec::new();
+        for (entity, occurrence_id) in claim_sources {
+            let Some(occurrence) = self.index.semantic.occurrence(&occurrence_id) else {
+                continue;
+            };
+            claims.extend(index_claims(
+                &self.index.semantic,
+                &self.index.documents,
+                &entity,
+                occurrence,
+            ));
+        }
+        claims.retain(|claim| {
+            claim.evidence.iter().any(|evidence| {
+                evidence.source_anchors.iter().any(|anchor| {
+                    anchor.location.file_id == document.document.file_id
+                        && ranges_overlap(&anchor.location.range, range)
+                })
+            }) || self
+                .index
+                .semantic
+                .claim(&ClaimId(claim.claim_id.clone()))
+                .and_then(|claim| self.index.semantic.evidence(&claim.evidence_id))
+                .is_some_and(|evidence| {
+                    evidence.provenance.iter().any(|occurrence_id| {
+                        occurrence_id.file_id == document.document.file_id
+                            && self
+                                .index
+                                .semantic
+                                .occurrence(occurrence_id)
+                                .is_some_and(|occurrence| ranges_overlap(&occurrence.range, range))
+                    })
+                })
+        });
+        append_context_claims(context, claims);
+        context.truncated |= claim_sources_truncated;
+    }
+
     fn has_prior_excluding_occurrence(
         &self,
         observations: &DocumentSemanticObservations,
@@ -6388,6 +6457,15 @@ fn append_index_claims(
     occurrence: &SourceOccurrence,
     context: &mut SemanticContextInfo,
 ) {
+    append_context_claims(context, index_claims(index, documents, entity, occurrence));
+}
+
+fn index_claims(
+    index: &ProjectSemanticIndex,
+    documents: &HashMap<String, AnalyzedDocument>,
+    entity: &EntityId,
+    occurrence: &SourceOccurrence,
+) -> Vec<crate::SemanticClaimInfo> {
     let raw = index
         .claims_for_entity_at(entity, occurrence)
         .into_iter()
@@ -6442,7 +6520,14 @@ fn append_index_claims(
             .then(left.value.cmp(&right.value))
             .then(left.claim_id.cmp(&right.claim_id))
     });
-    context.claims = claims;
+    claims
+}
+
+fn append_context_claims(
+    context: &mut SemanticContextInfo,
+    mut claims: Vec<crate::SemanticClaimInfo>,
+) {
+    context.claims.append(&mut claims);
     context.claims.sort_by(|left, right| {
         left.predicate
             .cmp(&right.predicate)

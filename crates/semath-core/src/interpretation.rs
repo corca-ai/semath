@@ -1,4 +1,3 @@
-use crate::decision::formula_has_establishment_proof;
 use crate::domain::formula_has_independent_typed_evidence;
 use crate::{
     ConstraintStatus, ConventionalCandidateInfo, DomainActivation, DomainSupportTier, Evidence,
@@ -384,7 +383,7 @@ fn formula_support(
     {
         return MathInterpretationSupportTier::Contradicted;
     }
-    if formula.conventional_candidate || !formula_has_establishment_proof(formula) {
+    if !formula_has_supported_interpretation(formula) {
         return MathInterpretationSupportTier::Tentative;
     }
     match decision {
@@ -430,6 +429,28 @@ fn formula_support(
         }
         _ => MathInterpretationSupportTier::Tentative,
     }
+}
+
+fn formula_has_supported_interpretation(formula: &LawRecognition) -> bool {
+    let has_typed_binding = formula.bindings.iter().any(|binding| {
+        matches!(
+            binding.proof,
+            LawBindingProof::Typed | LawBindingProof::Derived
+        ) && !binding.evidence.source_ranges.is_empty()
+    });
+    matches!(
+        formula.status,
+        LawRecognitionStatus::Recognized | LawRecognitionStatus::Verified
+    ) && formula.relation.is_some()
+        && has_typed_binding
+        && formula.bindings.iter().all(|binding| {
+            !matches!(binding.proof, LawBindingProof::Candidate)
+                && !binding.evidence.source_ranges.is_empty()
+        })
+        && formula
+            .conditions
+            .iter()
+            .all(|condition| condition.status == ConstraintStatus::Verified)
 }
 
 fn formula_has_independent_support(formula: &LawRecognition) -> bool {

@@ -3160,6 +3160,63 @@ fn authoring_claim_anchor_uses_the_claims_own_included_document() {
 }
 
 #[test]
+fn formula_claim_filter_is_file_aware_and_does_not_leak_limits_or_concepts() {
+    let main = "\\input{definitions}\n$x$";
+    let definitions = (0..40)
+        .map(|index| format!("Let $x$ be a length quantity for record {index}."))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "definitions".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: SourceRange {
+                start_offset: 0,
+                end_offset: 19,
+            },
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                main_document,
+                document("definitions", "definitions.tex", &definitions, 1),
+            ],
+        })
+        .unwrap();
+    let QueryValue::SemanticView { view } = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: main.rfind('x').unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap()
+        .value
+    else {
+        panic!("expected semantic view")
+    };
+
+    assert!(
+        view.authoring_context.claim_evidence.is_empty(),
+        "{view:#?}"
+    );
+    assert!(view.context.concepts.is_empty(), "{view:#?}");
+    assert!(!view.authoring_context.truncated, "{view:#?}");
+}
+
+#[test]
 fn public_claim_projection_does_not_join_same_spelling_across_scopes() {
     let content = "# First\nLet $x$ denote an event. Inspect $x$.\n# Second\nLet $x$ denote a function. Inspect $x$.";
     let first = content.find("Inspect $x$").unwrap() as u32 + "Inspect $".len() as u32;
@@ -5049,6 +5106,50 @@ fn asserted_only_preceding_recognition_cannot_form_an_equation_link() {
         current.authoring_context.equation_links.is_empty(),
         "{current:#?}"
     );
+}
+
+#[test]
+fn source_grounded_capacitor_roles_support_the_conventional_formula() {
+    let content = "\\section{Capacitor current}\nLet $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let $i_C(t)$ enter the positive terminal. Under this passive sign convention, the capacitor law is\n\\[\ni_C(t)=C\\frac{dv_C}{dt}(t).\n\\]\nThe relation applies where $v_C$ is differentiable; reversing the current reference would reverse the sign.\n";
+    let view = semantic_view_at(content, content.rfind("i_C(t)=").unwrap() as u32);
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conventional,
+        "{view:#?}"
+    );
+    let capacitor_hypotheses =
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .filter(|hypothesis| {
+                hypothesis.relation.as_ref().is_some_and(|relation| {
+                    relation.relation_id == "circuits:capacitor-current-law"
+                })
+            })
+            .collect::<Vec<_>>();
+    assert!(
+        capacitor_hypotheses.iter().any(|hypothesis| {
+            hypothesis.support == crate::MathInterpretationSupportTier::Supported
+        }),
+        "{capacitor_hypotheses:#?}"
+    );
+    assert!(view.context.relations.is_empty(), "{view:#?}");
+}
+
+#[test]
+fn closed_source_described_formula_is_partial_without_exporting_authority() {
+    let content = "The proposed estimator is $\\widehat x\\in\\operatorname*{argmin}_{x\\in\\mathbb R^n}\\lVert Ax-b\\rVert_2^2$.";
+    let view = semantic_view_at(content, content.find("\\widehat x").unwrap() as u32);
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial,
+        "{view:#?}"
+    );
+    assert!(view.context.relations.is_empty(), "{view:#?}");
+    assert!(view.authoring_context.equation_links.is_empty());
 }
 
 #[test]
