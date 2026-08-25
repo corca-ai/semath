@@ -406,6 +406,408 @@ fn semantic_view_at(content: &str, offset: u32) -> crate::SemanticViewInfo {
     *view
 }
 
+fn assert_retracted_formula_surfaces(
+    engine: &SemathEngine,
+    content: &str,
+    inventory_version: u64,
+    document_version: u64,
+) {
+    let offset = content.find("V=IR").expect("formula") as u32;
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            inventory_version,
+            document_version,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(view.authoring_context.lifecycle.retracted, "{view:#?}");
+    assert!(!view.authoring_context.lifecycle.editable, "{view:#?}");
+
+    for surface in [
+        Query::Definition {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::References {
+            file_id: "main".into(),
+            offset,
+            include_declaration: true,
+        },
+        Query::PrepareRename {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::Rename {
+            file_id: "main".into(),
+            offset,
+            new_name: "W".into(),
+        },
+    ] {
+        let result = engine
+            .query(query(surface, inventory_version, document_version))
+            .unwrap();
+        match result.value {
+            QueryValue::Locations {
+                authorization,
+                locations,
+            } => {
+                assert!(matches!(
+                    authorization,
+                    crate::EntitySurfaceAuthorization::Refused { .. }
+                ));
+                assert!(locations.is_empty());
+            }
+            QueryValue::RenamePreparation {
+                authorization,
+                range,
+                placeholder,
+            } => {
+                assert!(matches!(
+                    authorization,
+                    crate::EntitySurfaceAuthorization::Refused { .. }
+                ));
+                assert!(range.is_none());
+                assert!(placeholder.is_none());
+            }
+            QueryValue::EditProposal {
+                authorization,
+                proposal,
+            } => {
+                assert!(matches!(
+                    authorization,
+                    crate::EntitySurfaceAuthorization::Refused { .. }
+                ));
+                assert!(proposal.is_none());
+            }
+            value => panic!("unexpected entity surface: {value:#?}"),
+        }
+    }
+}
+
+#[test]
+fn directly_withdrawn_archival_formula_is_retracted_and_noneditable() {
+    let content = "The relation displayed next is withdrawn and retained only as an archival quotation.\n\\[V=IR\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    assert_retracted_formula_surfaces(&engine, content, 1, 1);
+}
+
+#[test]
+fn passively_unused_formula_is_retracted_and_noneditable() {
+    for content in [
+        "This formula is not being used: $V=IR$.",
+        "This formula must not be used: $V=IR$.",
+        "Do not use $V=IR$.",
+        "Do not apply $V=IR$.",
+        "Cannot apply $V=IR$.",
+        "$V=IR$ is not used.",
+        "The report is not final but does not use $V=IR$.",
+        "The report does not use $V=IR$.",
+        "The report did not use $V=IR$.",
+        "The report does not publish $V=IR$.",
+        "The report does not assert $V=IR$.",
+        "The report does not accept $V=IR$.",
+        "The report does not select $V=IR$.",
+        "We never use $V=IR$.",
+        "Never use $V=IR$.",
+        "We cannot use $V=IR$.",
+        "We must not use $V=IR$.",
+        "We should not publish $V=IR$.",
+        "The report cannot use $V=IR$.",
+        "This formula is never used: $V=IR$.",
+        "This formula has not been used: $V=IR$.",
+        "The report is not final, but $V=IR$ is not used.",
+        "The following formula has been withdrawn: $V=IR$.",
+        "The following formula was rejected: $V=IR$.",
+    ] {
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        assert_retracted_formula_surfaces(&engine, content, 1, 1);
+    }
+}
+
+#[test]
+fn incremental_withdrawal_retracts_prior_formula_authority() {
+    let before = "Let $V$ be voltage, $I$ current, and $R$ resistance. The circuit adopts Ohm's law.\n\\[V=IR\\]";
+    let after = "The relation displayed next is withdrawn and retained only as an archival quotation.\n\\[V=IR\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(before)).unwrap();
+    engine
+        .apply(ChangeEnvelope {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 2,
+            analysis_generation: 2,
+            changes: vec![ProjectChange::Upsert {
+                document: Box::new(document("main", "main.tex", after, 2)),
+            }],
+        })
+        .unwrap();
+
+    assert_retracted_formula_surfaces(&engine, after, 2, 2);
+}
+
+#[test]
+fn a_withdrawal_targets_only_the_nearest_formula() {
+    let content =
+        "This relation is withdrawn: $V=IR$, while another relation remains active: $P=VI$.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let lifecycle = |needle: &str| {
+        let offset = content.find(needle).expect("formula") as u32;
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        view.authoring_context.lifecycle
+    };
+
+    assert!(lifecycle("V=IR").retracted);
+    assert!(!lifecycle("P=VI").retracted);
+}
+
+#[test]
+fn an_ordinal_withdrawal_does_not_guess_between_multiple_displays() {
+    let content = "The second relation is withdrawn.\n\\[V=IR\\]\n\\[P=VI\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let offset = content.find("V=IR").expect("first formula") as u32;
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(!view.authoring_context.lifecycle.retracted, "{view:#?}");
+}
+
+#[test]
+fn an_ordinary_negative_property_does_not_retract_a_nearby_formula() {
+    for content in [
+        "The controller is not stable.\n\\[V=IR\\]",
+        "The state is not uniform when $Q=Av$.",
+        "The ignored sensor is not stable near $V=IR$.",
+        "The fallback channel is unavailable because the controller is not stable.\n\\[V=IR\\]",
+        "The report is not silent but publishes $V=IR$.",
+        "The draft is not incomplete and explicitly asserts $V=IR$.",
+        "The report is not assertive near $V=IR$.",
+        "The equation editor is unavailable beside $V=IR$.",
+        "The equation is not smooth but rejection-prone near $V=IR$.",
+        "The editor for the equation is unavailable beside $V=IR$.",
+        "The backup sensor is not used near $V=IR$.",
+        "The backup sensor is not used: $V=IR$ remains active.",
+        "The fallback rule does not apply: $V=IR$ remains active.",
+        "This formula is not stable but rejected input is recorded near $V=IR$.",
+        "The following formula is not smooth while the backup sensor is not used near $V=IR$.",
+        "The report is not final, but $V=IR$ remains active, and the backup sensor is not used.",
+        "This formula is not used for calibration: $V=IR$ remains active.",
+        "This formula is not used during calibration: $V=IR$ remains active.",
+        "$V=IR$ is not used by the backup sensor.",
+        "This formula is not published in the appendix: $V=IR$ remains active.",
+        "$V=IR$ is not selected for the plot.",
+        "This formula is unavailable in the mobile editor but remains valid: $V=IR$.",
+        "$V=IR$ is unavailable in the appendix but valid elsewhere.",
+        "The editor for the high resolution equation is unavailable: $V=IR$.",
+        "We do not publish in the supplementary appendix the formula: $V=IR$.",
+        "The editor concerning the equation is unavailable: $V=IR$.",
+        "The editor regarding the formula is unavailable: $V=IR$.",
+        "The editor handling the formula is unavailable: $V=IR$ remains valid.",
+        "The report does not publish. $V=IR$ remains active.",
+        "The report does not publish; $V=IR$ remains active.",
+        "The report does not publish—$V=IR$ remains active.",
+        "The report does not publish, $V=IR$ remains active.",
+    ] {
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+        let formula = if content.contains("V=IR") {
+            "V=IR"
+        } else {
+            "Q=Av"
+        };
+        let offset = content.find(formula).expect("formula") as u32;
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+
+        assert!(
+            !view.authoring_context.lifecycle.retracted,
+            "{content}: {view:#?}"
+        );
+    }
+}
+
+#[test]
+fn a_withdrawn_display_does_not_retract_the_next_display() {
+    let content = "The relation displayed next is withdrawn.\n\\[V=IR\\]\n\\[P=VI\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    let offset = content.find("P=VI").expect("second formula") as u32;
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert!(!view.authoring_context.lifecycle.retracted, "{view:#?}");
+}
+
+#[test]
+fn unselected_alternative_shape_roots_do_not_emit_a_conflict_diagnostic() {
+    let content = "Candidate amber defines $w$ as a vector. Candidate cobalt defines $w$ as a square matrix. Neither candidate is selected.\n\\[w=Az\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = result.value else {
+        panic!("expected diagnostics")
+    };
+
+    assert!(
+        diagnostics
+            .iter()
+            .all(|diagnostic| diagnostic.code != "notation-shape-conflict"),
+        "{diagnostics:#?}"
+    );
+}
+
+#[test]
+fn unrelated_selection_refusal_does_not_hide_a_shape_conflict() {
+    let content = "Candidate amber defines $w$ as a vector. Candidate cobalt defines $w$ as a square matrix. The renderer does not select a color profile.\n\\[w=Az\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = result.value else {
+        panic!("expected diagnostics")
+    };
+
+    assert!(
+        diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.code == "notation-shape-conflict"),
+        "{diagnostics:#?}"
+    );
+}
+
+#[test]
+fn partially_unselected_shape_roots_still_expose_a_conflict() {
+    let content = "Candidate amber defines $w$ as a vector. Candidate cobalt defines $w$ as a square matrix. One candidate is not selected.\n\\[w=Az\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let result = engine
+        .query(query(
+            Query::Diagnostics {
+                file_id: "main".into(),
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::Diagnostics { diagnostics } = result.value else {
+        panic!("expected diagnostics")
+    };
+
+    assert!(
+        diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.code == "notation-shape-conflict"),
+        "{diagnostics:#?}"
+    );
+}
+
+#[test]
+fn qualified_unselection_does_not_hide_a_shape_conflict() {
+    for selection in [
+        "No candidate is not selected.",
+        "No candidate is selected automatically.",
+    ] {
+        let content = format!(
+            "Candidate amber defines $w$ as a vector. Candidate cobalt defines $w$ as a square matrix. {selection}\n\\[w=Az\\]"
+        );
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(&content)).unwrap();
+        let result = engine
+            .query(query(
+                Query::Diagnostics {
+                    file_id: "main".into(),
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::Diagnostics { diagnostics } = result.value else {
+            panic!("expected diagnostics")
+        };
+
+        assert!(
+            diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code == "notation-shape-conflict"),
+            "{selection}: {diagnostics:#?}"
+        );
+    }
+}
+
 #[test]
 fn chained_equality_stores_operands_and_source_linked_relations_without_a_system_placeholder() {
     let mut engine = SemathEngine::default();

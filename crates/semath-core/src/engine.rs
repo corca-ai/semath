@@ -1469,6 +1469,8 @@ fn lower_typed_observation_facts(
     {
         let mut append = |symbol: &str,
                           evidence: &Evidence,
+                          polarity: EvidencePolarity,
+                          modality: EvidenceModality,
                           predicate: ClaimPredicate,
                           value: ClaimValue,
                           category: &str| {
@@ -1494,8 +1496,8 @@ fn lower_typed_observation_facts(
                 source: entity.anchor.clone(),
                 scope_path: entity.scope_path.clone(),
                 available_after: anchor.availability_order,
-                polarity: EvidencePolarity::Positive,
-                modality: EvidenceModality::Asserted,
+                polarity,
+                modality,
                 origin: EvidenceOrigin::Explicit,
                 provenance: vec![entity.anchor.clone()],
                 parent_claims: Vec::new(),
@@ -1520,6 +1522,8 @@ fn lower_typed_observation_facts(
             append(
                 &role.symbol,
                 &role.evidence,
+                EvidencePolarity::Positive,
+                EvidenceModality::Asserted,
                 ClaimPredicate::HasRole,
                 ClaimValue::Concept(role.concept_id),
                 "role",
@@ -1537,6 +1541,8 @@ fn lower_typed_observation_facts(
             append(
                 &shape.symbol,
                 &shape.evidence,
+                shape.polarity,
+                shape.modality,
                 ClaimPredicate::HasShape,
                 value,
                 "shape",
@@ -1547,6 +1553,8 @@ fn lower_typed_observation_facts(
                 append(
                     &quantity.symbol,
                     &quantity.evidence,
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
                     ClaimPredicate::HasQuantity,
                     ClaimValue::QuantityKind(quantity_kind),
                     "quantity",
@@ -1556,6 +1564,8 @@ fn lower_typed_observation_facts(
                 append(
                     &quantity.symbol,
                     &quantity.evidence,
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
                     ClaimPredicate::HasUnit,
                     ClaimValue::Unit(unit),
                     "unit",
@@ -1577,6 +1587,8 @@ fn lower_typed_observation_facts(
                 append(
                     &quantity.symbol,
                     &quantity.evidence,
+                    EvidencePolarity::Positive,
+                    EvidenceModality::Asserted,
                     ClaimPredicate::HasDimension,
                     ClaimValue::Dimension(exponents),
                     "dimension",
@@ -4069,6 +4081,11 @@ impl SemathEngine {
         let queried_formula_range = parsed.map(|math| &math.region.content_range);
         let queried_formula_is_rejected = queried_formula_range
             .is_some_and(|range| observations.semantic_evidence().formula_is_rejected(range));
+        let queried_formula_is_explicitly_retracted = queried_formula_range.is_some_and(|range| {
+            observations
+                .semantic_evidence()
+                .formula_is_explicitly_retracted(range)
+        });
         let mut projected_formulas = observations.laws.at(offset);
         if projected_formulas.is_empty()
             && formula_boundary
@@ -4090,9 +4107,10 @@ impl SemathEngine {
                 })
             });
         }
-        let formula_retracted = projected_formulas
-            .iter()
-            .any(|formula| self.formula_is_retracted(document, formula));
+        let formula_retracted = queried_formula_is_explicitly_retracted
+            || projected_formulas
+                .iter()
+                .any(|formula| self.formula_is_retracted(document, formula));
         projected_formulas.retain(|formula| !self.formula_is_retracted(document, formula));
         let (conventional_candidates, conventional_candidates_truncated) =
             conventional_candidates(&projected_formulas);

@@ -1,10 +1,10 @@
 # Spent holdout postmortems
 
-This document is a historical record of the terminal v0.38, v0.39, and v0.40 semantic
+This document is a historical record of the terminal v0.38 through v0.41 semantic
 release evaluations. It is not a current scorecard, a release plan, or a source
 of expected answers for another holdout.
 
-All three fixtures are permanently spent. They must not be rerun, edited into a new
+All four fixtures are permanently spent. They must not be rerun, edited into a new
 holdout, or used as answer templates. Public regressions derived from them use
 new source text and the lowest authoritative public test layer.
 
@@ -15,6 +15,7 @@ new source text and the lowest authoritative public test layer.
 | v0.38 | `32462617124` | `9440104778` | `1c11dcafc8801df0a34cf9f61829ef843dbc8534` | `fb1ced3d602a32ef697022f36bc67a57ca0fc4b5fe014eff2bedcf4314f3aa94` | `de733715718f3e6f8093ce0fac6101c277620ff2672536ceef857c53675b2cdb` |
 | v0.39 | `32571193980` | `9475579401` | `b61758bf3783954f2a4b057aabc048c3b0f913ad` | `68a23c8d1135e80d25c31c72e8136e6a436da0ea9d0d4748c21741a4913befce` | `d6ed5e53b7fc56372b8088df117aca11a0eb1792f1399767de3516f48b0f9103` |
 | v0.40 | `32730705424` | `9522100540` | `1fea214aa45224cc1767047dd78f46b02292183e` | `2e32389b8386845ee8ce491b3fc0a3fa55114abc3b1351c0f29152fba7a92e17` | `789011bea34fba2c4249231f9c70c7cebac6197b18b9c8c7447ce9c2abd1544d` |
+| v0.41 | `32800370262` | `9546760981` | `15ca913b4a19c81e3ad3d6a6054bee1059a7561f` | `1bf5870f1a8555a425061a9b280897f0ae0fb703e0b47625d8621e08bbda1b59` | `1f89a11044dc33ce43cf16f8d52046204dcd05ee171d9090eff62cd464ca4b12` |
 
 Each run passed the pre-reservation gates, permanently reserved its release
 identity, executed the engine once, terminalized, and retained its result. The
@@ -109,6 +110,38 @@ and exact allowlists for mathematical authority and contradictions. Intrinsic
 anchor, ordering, authority, and lifecycle invariants remain release-blocking.
 Missing semantic coverage remains visible through the ordinary score rather
 than being disguised as thousands of internal-object diffs.
+
+## Lessons retained from v0.41
+
+The first schema-2 run passed every pre-reservation gate and completed normally
+as `safety-failed`. It scored 5 of 48 with raw risk 498: 14 reported false
+establishments, two reported false conflicts, 28 coverage misses, and 25
+navigation or identity mismatches. The retained lifecycle comparison covered
+all eight selected transitions, and the committed and rebuilt WASM digests
+agreed, so infrastructure was not the cause.
+
+The bounded safety envelope exposed real defects that the ordinary score did
+not: two withdrawn formulas remained current and editable, no reviewed conflict
+produced contradictory evidence, and one alternative-shape case emitted
+authority and a diagnostic that belonged to neither selected alternative.
+Those are release blockers and require new public synthetic regressions.
+
+The run also revealed evaluator and commissioning defects. Seven condition-
+missing or conventional relation candidates were counted as established merely
+because `RelationInfo` was present. Diagnostic-limit failures were counted as
+false conflicts even for a reviewed conflict. Twenty probes put the cursor on
+`=` and asserted that no occurrence owned it, while the published cursor
+contract assigns a nonempty left trailing edge to the left occurrence. Finally,
+one decision field still mixed a cursor entity's meaning with the enclosing
+formula's disposition. These signals must be separated rather than fixed by
+weakening the safety envelope.
+
+Starting with v0.42, commissioning must distinguish cursor-entity decisions
+from selected-formula decisions, retain relation authority rather than infer it
+from relation presence, and record structured authoring-safety failures in the
+terminal receipt. A new fixture may be commissioned only after the corresponding
+public evaluator and engine regressions pass. v0.41 remains immutable spent
+evidence and must not be rerun.
 
 ## Public regression atlas
 

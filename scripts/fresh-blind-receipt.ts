@@ -20,18 +20,21 @@ export interface FreshBlindReceiptArtifacts {
 
 interface FreshBlindReceiptIdentity {
   readonly artifacts: FreshBlindReceiptArtifacts;
-  readonly contracts: FreshBlindPreflightManifest["contracts"];
+  readonly contracts: Omit<
+    FreshBlindPreflightManifest["contracts"],
+    "receiptPolicyVersion"
+  > & { readonly receiptPolicyVersion: 2 | 3 };
   readonly provenance: FreshBlindPreflightManifest["provenance"] & {
     readonly runAttempt: string;
     readonly runId: string;
   };
-  readonly receiptPolicyVersion: 2;
+  readonly receiptPolicyVersion: 2 | 3;
   readonly release: FreshBlindPreflightManifest["release"];
   readonly reservation: {
     readonly ledgerMarker: string;
     readonly sha256: string;
   };
-  readonly schemaVersion: 2;
+  readonly schemaVersion: 2 | 3;
   readonly startedAt: string;
 }
 
@@ -80,13 +83,13 @@ export function createFreshBlindStartedReceipt(input: {
       runAttempt: reservation.runAttempt,
       runId: reservation.runId,
     },
-    receiptPolicyVersion: 2,
+    receiptPolicyVersion: 3,
     release: manifest.release,
     reservation: {
       ledgerMarker: reservation.marker,
       sha256: input.reservationSha256,
     },
-    schemaVersion: 2,
+    schemaVersion: 3,
     startedAt: input.startedAt,
     status: "started",
   });
@@ -222,16 +225,27 @@ export function parseFreshBlindReceipt(
         ],
     "fresh blind receipt",
   );
-  literal(root.schemaVersion, 2, "fresh blind receipt.schemaVersion");
-  literal(
-    root.receiptPolicyVersion,
-    2,
-    "fresh blind receipt.receiptPolicyVersion",
-  );
+  const schemaVersion = root.schemaVersion;
+  const receiptPolicyVersion = root.receiptPolicyVersion;
+  if (schemaVersion !== 2 && schemaVersion !== 3) {
+    throw new Error(
+      "fresh blind receipt schemaVersion and receiptPolicyVersion must both be 2 or both be 3",
+    );
+  }
+  if (receiptPolicyVersion !== 2 && receiptPolicyVersion !== 3) {
+    throw new Error(
+      "fresh blind receipt schemaVersion and receiptPolicyVersion must both be 2 or both be 3",
+    );
+  }
+  if (schemaVersion !== receiptPolicyVersion) {
+    throw new Error(
+      "fresh blind receipt schemaVersion and receiptPolicyVersion must both be 2 or both be 3",
+    );
+  }
   const startedAt = iso(root.startedAt, "fresh blind receipt.startedAt");
 
   const release = parseRelease(root.release);
-  const contracts = parseContracts(root.contracts);
+  const contracts = parseContracts(root.contracts, receiptPolicyVersion);
   const provenance = parseProvenance(root.provenance);
   const reservation = parseReservation(root.reservation);
   const artifacts = parseArtifacts(root.artifacts);
@@ -240,14 +254,14 @@ export function parseFreshBlindReceipt(
     throw new Error(
       "fresh blind receipt reservation marker does not match execution identity",
     );
-  const identity = {
+  const identity: FreshBlindReceiptIdentity = {
     artifacts,
     contracts,
     provenance,
-    receiptPolicyVersion: 2 as const,
+    receiptPolicyVersion,
     release,
     reservation,
-    schemaVersion: 2 as const,
+    schemaVersion,
     startedAt,
   };
   if (status === "started") {
@@ -266,7 +280,11 @@ export function parseFreshBlindReceipt(
     throw new Error(
       "evaluated terminal receipt requires evaluation and lifecycle digests",
     );
-  const result = parseTerminalResult(root.result, status);
+  const result = parseTerminalResult(
+    root.result,
+    status,
+    receiptPolicyVersion,
+  );
   if (status !== "execution-error") {
     const lifecycle = record(
       record(result, "fresh blind receipt.result").lifecycle,
@@ -286,6 +304,7 @@ export function parseFreshBlindReceipt(
 function parseTerminalResult(
   value: unknown,
   status: FreshBlindTerminalStatus,
+  receiptPolicyVersion: 2 | 3,
 ): unknown {
   const result = record(value, "fresh blind receipt.result");
   if (status === "execution-error") {
@@ -295,11 +314,34 @@ function parseTerminalResult(
       record(result.evaluation, "fresh blind receipt.result.evaluation");
     return value;
   }
+  if (receiptPolicyVersion === 3 && !("authoringSafety" in result)) {
+    throw new Error(
+      "fresh blind receipt.result.authoringSafety is required by policy 3",
+    );
+  }
   exact(
     result,
-    ["evaluation", "facetFailureIds", "lifecycle", "safety", "validation"],
+    receiptPolicyVersion === 3
+      ? [
+          "authoringSafety",
+          "evaluation",
+          "facetFailureIds",
+          "lifecycle",
+          "safety",
+          "validation",
+        ]
+      : [
+          "evaluation",
+          "facetFailureIds",
+          "lifecycle",
+          "safety",
+          "validation",
+        ],
     "fresh blind receipt.result",
   );
+  const authoringSafety = receiptPolicyVersion === 3
+    ? parseAuthoringSafety(result.authoringSafety)
+    : { cases: 0, failures: 0 };
   record(result.evaluation, "fresh blind receipt.result.evaluation");
   const facetFailures = uniqueNonemptyStrings(
     result.facetFailureIds,
@@ -403,12 +445,66 @@ function parseTerminalResult(
   }
   parseValidation(result.validation);
   const unsafe =
-    facetFailures.length > 0 || unsafeCounts.some((count) => count > 0);
+    authoringSafety.failures > 0 || facetFailures.length > 0 ||
+    unsafeCounts.some((count) => count > 0);
   if (status === "completed" && unsafe)
     throw new Error("completed receipt cannot contain safety failures");
   if (status === "safety-failed" && !unsafe)
     throw new Error("safety-failed receipt must identify a safety failure");
   return value;
+}
+
+function parseAuthoringSafety(
+  value: unknown,
+): { readonly cases: number; readonly failures: number } {
+  const summary = record(
+    value,
+    "fresh blind receipt.result.authoringSafety",
+  );
+  exact(
+    summary,
+    ["cases", "failures"],
+    "fresh blind receipt.result.authoringSafety",
+  );
+  const cases = nonnegative(
+    summary.cases,
+    "fresh blind receipt.result.authoringSafety.cases",
+  );
+  if (cases === 0) {
+    throw new Error(
+      "fresh blind receipt.result.authoringSafety.cases must be positive",
+    );
+  }
+  if (!Array.isArray(summary.failures)) {
+    throw new Error(
+      "fresh blind receipt.result.authoringSafety.failures must be an array",
+    );
+  }
+  const kinds = new Set([
+    "authority-escalation",
+    "false-conflict",
+    "mismatch",
+    "missing",
+    "unexpected",
+    "unsafe-lifecycle",
+    "wrong-anchor",
+  ]);
+  for (const [index, value] of summary.failures.entries()) {
+    const path = `fresh blind receipt.result.authoringSafety.failures[${index}]`;
+    const failure = record(value, path);
+    const keys = Object.keys(failure);
+    if (
+      !keys.includes("kind") || !keys.includes("path") ||
+      keys.some((key) => !["actual", "expected", "kind", "path"].includes(key))
+    ) {
+      throw new Error(`${path} has unexpected or missing fields`);
+    }
+    if (typeof failure.kind !== "string" || !kinds.has(failure.kind)) {
+      throw new Error(`${path}.kind is invalid`);
+    }
+    nonempty(failure.path, `${path}.path`);
+  }
+  return { cases, failures: summary.failures.length };
 }
 
 function parseValidation(value: unknown): void {
@@ -562,7 +658,8 @@ function parseRelease(value: unknown): FreshBlindPreflightManifest["release"] {
 
 function parseContracts(
   value: unknown,
-): FreshBlindPreflightManifest["contracts"] {
+  receiptPolicyVersion: 2 | 3,
+): FreshBlindReceiptIdentity["contracts"] {
   const item = record(value, "fresh blind receipt.contracts");
   exact(
     item,
@@ -586,7 +683,7 @@ function parseContracts(
   );
   literal(
     item.receiptPolicyVersion,
-    2,
+    receiptPolicyVersion,
     "fresh blind receipt.contracts.receiptPolicyVersion",
   );
   literal(
@@ -597,7 +694,7 @@ function parseContracts(
   return {
     packSchemaVersion: 12,
     protocolVersion: 17,
-    receiptPolicyVersion: 2,
+    receiptPolicyVersion,
     wasmtexSyntaxSchemaVersion: 8,
   };
 }

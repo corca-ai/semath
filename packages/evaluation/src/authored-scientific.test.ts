@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import type { MathInterpretationSetInfo } from "../../protocol/src/index";
 import {
   AUTHORED_AREA_ALLOCATION,
   DOCUMENT_REASONING_FAMILIES,
@@ -304,6 +305,134 @@ describe("independently authored scientific corpus", () => {
     expect(score.risk.total).toBeGreaterThan(score.risk.missedCoverage * 2);
   });
 
+  test("counts an excluded candidate relation as false establishment only with reviewed authority", () => {
+    const value = fixtureValue("holdout", 1) as FixtureValue;
+    value.probes[0]!.expected.excludedRelationIds = ["candidate-law"];
+    const fixture = parseAuthoredScientificFixture(value);
+    const observation = observationValue();
+    observation.relations = [{
+      fileId: "main",
+      range: { startOffset: 35, endOffset: 44 },
+      relationId: "candidate-law",
+      roles: [],
+      sourceGrounded: false,
+    }];
+
+    expect(scoreAuthoredScientificFixture(fixture, [observation]).risk)
+      .toMatchObject({ falseEstablishment: 1 });
+
+    observation.interpretations = interpretationSet(
+      "candidate-law",
+      "structural-alternative",
+      "tentative",
+    );
+    const candidateOnly = scoreAuthoredScientificFixture(fixture, [observation]);
+    expect(candidateOnly.failures).toContain(
+      "probe-0: leaked relation candidate-law",
+    );
+    expect(candidateOnly.risk.falseEstablishment).toBe(0);
+
+    observation.interpretations = interpretationSet(
+      "candidate-law",
+      "typed-law",
+      "supported",
+    );
+    expect(scoreAuthoredScientificFixture(fixture, [observation]).risk)
+      .toMatchObject({ falseEstablishment: 1 });
+  });
+
+  test("keeps diagnostic overruns separate from false conflict risk", () => {
+    for (const decision of ["ambiguous", "conflicting"] as const) {
+      const fixture = parseAuthoredScientificFixture(
+        fixtureValue("holdout", 1, 0, [decision]),
+      );
+      const observation = observationValue();
+      observation.decision = decision;
+      observation.diagnostics = [{
+        code: "candidate-analysis-limit",
+        fileId: "main",
+        range: { startOffset: 35, endOffset: 44 },
+        severity: "warning",
+      }];
+      const score = scoreAuthoredScientificFixture(fixture, [observation]);
+      expect(score.failures).toContain(
+        "probe-0: problems 1; expected at most 0",
+      );
+      expect(score.risk.falseConflict).toBe(0);
+    }
+  });
+
+  test("separates cursor-entity and selected-formula decisions in fixture schema 2", () => {
+    const value = fixtureValue("holdout", 1) as FixtureValue & {
+      schemaVersion: number;
+    };
+    value.schemaVersion = 2;
+    const probe = value.probes[0]!;
+    const expected = probe.expected as typeof probe.expected & {
+      decision: ScientificDecision;
+      formulaDecision?: {
+        anchor: {
+          fileId: string;
+          needle: string;
+          selection: { length: number; offset: number };
+        };
+        status: "partial";
+      };
+      navigation: typeof probe.expected.navigation & {
+        rename: { newName?: string; status: "unavailable" };
+      };
+      symbol?: string;
+    };
+    expected.decision = "established";
+    expected.symbol = "x";
+    expected.formulaDecision = {
+      anchor: {
+        fileId: "main",
+        needle: "$x_0=y_0$",
+        selection: { length: 7, offset: 1 },
+      },
+      status: "partial",
+    };
+
+    expect(() => parseAuthoredScientificFixture(value)).toThrow(
+      "unavailable rename requires a same-family newName",
+    );
+    expected.navigation.rename.newName = "y";
+    const fixture = parseAuthoredScientificFixture(value);
+    const observation = observationValue();
+    observation.decision = "established";
+    observation.symbol = "x";
+    observation.formulaDecision = {
+      location: {
+        fileId: "main",
+        path: "main.tex",
+        range: { startOffset: 36, endOffset: 43 },
+      },
+      status: "partial",
+    };
+    const score = scoreAuthoredScientificFixture(fixture, [observation]);
+    expect(score.failures).toEqual([]);
+    expect(score.risk.falseEstablishment).toBe(0);
+
+    observation.formulaDecision = {
+      ...observation.formulaDecision,
+      status: "established",
+    };
+    expect(scoreAuthoredScientificFixture(fixture, [observation]).risk)
+      .toMatchObject({ falseEstablishment: 1 });
+  });
+
+  test("keeps fixture schema 1 byte-compatible and rejects decision-domain fields", () => {
+    const value = fixtureValue("holdout", 1) as FixtureValue;
+    (value.probes[0]!.expected as Record<string, unknown>).formulaDecision = {
+      anchor: { fileId: "main", needle: "$x_0=y_0$" },
+      status: "partial",
+    };
+    expect(() => parseAuthoredScientificFixture(value)).toThrow(
+      "unavailable in fixture schema 1",
+    );
+  });
+
   test("review and seal payloads exclude only their own attestations", () => {
     const fixture = parseAuthoredScientificFixture(fixtureValue("holdout", 1));
     expect(authoredScenarioReviewPayload(fixture, "scenario-0")).not.toContain(
@@ -501,6 +630,16 @@ function observationValue(): WritableObservation {
   };
 }
 
+function interpretationSet(
+  relationId: string,
+  kind: "structural-alternative" | "typed-law",
+  support: "supported" | "tentative",
+): MathInterpretationSetInfo {
+  return {
+    hypotheses: [{ kind, relation: { relationId }, support }],
+  } as unknown as MathInterpretationSetInfo;
+}
+
 function hex(value: number): string {
   return value.toString(16).padStart(64, "0");
 }
@@ -530,7 +669,9 @@ interface FixtureValue {
           }[];
           status: "available" | "unavailable";
         };
+        rename?: Record<string, unknown>;
       };
+      excludedRelationIds: string[];
       relations: {
         anchor: { fileId: string; needle: string };
         relationId: string;

@@ -20,7 +20,7 @@ import {
   type FreshBlindPreflightManifest,
 } from "./fresh-blind-preflight-manifest";
 
-describe("fresh blind schema-2 receipt", () => {
+describe("fresh blind versioned receipt", () => {
   test("keeps immutable started and terminal records plus content-addressed copies", async () => {
     const directory = await mkdtemp(join(tmpdir(), "semath-fresh-receipt-"));
     const path = join(directory, "receipt.json");
@@ -78,7 +78,7 @@ describe("fresh blind schema-2 receipt", () => {
   test("strictly rejects malformed contracts and terminal evidence", () => {
     const started = startedReceipt();
     expect(() =>
-      parseFreshBlindReceipt({ ...started, schemaVersion: 1 }),
+      parseFreshBlindReceipt({ ...started, schemaVersion: 2 }),
     ).toThrow("schemaVersion");
     expect(() => parseFreshBlindReceipt({ ...started, extra: true })).toThrow(
       "unexpected or missing fields",
@@ -90,6 +90,77 @@ describe("fresh blind schema-2 receipt", () => {
         artifacts: { ...terminal.artifacts, lifecycleSha256: null },
       }),
     ).toThrow("requires evaluation and lifecycle");
+    const result = terminal.result as Record<string, unknown>;
+    const lifecycle = result.lifecycle as Record<string, unknown>;
+    const lifecycleSubset = {
+      ...terminal,
+      result: {
+        ...result,
+        lifecycle: { ...lifecycle, comparedProbes: 8, comparedStages: 16 },
+      },
+    };
+    expect(parseFreshBlindReceipt(lifecycleSubset)).toEqual(lifecycleSubset);
+    expect(() =>
+      parseFreshBlindReceipt({
+        ...terminal,
+        result: {
+          ...result,
+          authoringSafety: { cases: 0, failures: [] },
+        },
+      }),
+    ).toThrow("authoringSafety.cases must be positive");
+  });
+
+  test("retains structured authoring safety findings in failed receipts", () => {
+    const completed = completedReceipt(startedReceipt());
+    const terminal = {
+      ...completed,
+      result: {
+        ...(completed.result as Record<string, unknown>),
+        authoringSafety: {
+          cases: 48,
+          failures: [{
+            actual: "established",
+            expected: "ambiguous",
+            kind: "authority-escalation",
+            path: "probe-01.authoringContext.disposition",
+          }],
+        },
+        facetFailureIds: [
+          "probe-01.authoringContext.disposition: authority-escalation",
+        ],
+      },
+      status: "safety-failed" as const,
+    };
+    expect(parseFreshBlindReceipt(terminal)).toEqual(terminal);
+  });
+
+  test("continues to parse immutable policy-2 terminal receipts without authoringSafety", () => {
+    const current = completedReceipt(startedReceipt());
+    const result = { ...(current.result as Record<string, unknown>) };
+    delete result.authoringSafety;
+    const legacy = {
+      ...current,
+      contracts: { ...current.contracts, receiptPolicyVersion: 2 as const },
+      receiptPolicyVersion: 2 as const,
+      result,
+      schemaVersion: 2 as const,
+    };
+    expect(parseFreshBlindReceipt(legacy)).toEqual(legacy);
+  });
+
+  test("requires structured authoring safety only in policy-3 terminals", () => {
+    const current = completedReceipt(startedReceipt());
+    const result = { ...(current.result as Record<string, unknown>) };
+    delete result.authoringSafety;
+    expect(() => parseFreshBlindReceipt({ ...current, result })).toThrow(
+      "authoringSafety",
+    );
+    expect(current).toMatchObject({
+      contracts: { receiptPolicyVersion: 3 },
+      receiptPolicyVersion: 3,
+      schemaVersion: 3,
+    });
   });
 
   test("terminalizes a reserved execution without claiming evaluation evidence", () => {
@@ -145,6 +216,10 @@ function completedReceipt(
     },
     completedAt: "2026-08-20T08:01:00.000Z",
     result: {
+      authoringSafety: {
+        cases: 48,
+        failures: [],
+      },
       evaluation: { results: [{}] },
       facetFailureIds: [],
       lifecycle: {

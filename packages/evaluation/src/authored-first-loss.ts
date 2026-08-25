@@ -4,6 +4,7 @@ import type {
   ScientificDecision,
   FirstLossStage,
 } from "./authored-scientific";
+import type { MathAuthoringDisposition } from "../../protocol/src/index";
 import {
   classifyRecognitionFrontier,
   type RecognitionFrontierSignals,
@@ -22,8 +23,11 @@ export interface AuthoredRelationSourceEvidence {
 export interface AuthoredFirstLossEvidence {
   readonly cursorSignals: RecognitionFrontierSignals;
   readonly expectedDecision: ScientificDecision;
+  readonly expectedFormulaDecision?: MathAuthoringDisposition;
   readonly expectedRelationsMatched: boolean;
   readonly hostProjectionMismatch?: boolean;
+  readonly formulaDecision?: MathAuthoringDisposition;
+  readonly formulaLocationMatched?: boolean;
   readonly identityFailures: readonly AuthoredIdentityFailure[];
   readonly probePassed: boolean;
   readonly relationSources: readonly AuthoredRelationSourceEvidence[];
@@ -31,6 +35,7 @@ export interface AuthoredFirstLossEvidence {
 
 export interface AuthoredFirstLossObservation {
   readonly basis: string;
+  readonly decisionDomain?: "cursor-entity" | "selected-formula";
   readonly reason: AuthoredFirstLossReason;
   readonly stage: FirstLossStage | null;
 }
@@ -42,6 +47,7 @@ export const AUTHORED_FIRST_LOSS_REASONS = [
   "neutral-syntax-unavailable",
   "discourse-evidence-missing",
   "cursor-occurrence-mismatch",
+  "formula-selection-mismatch",
   "entity-scope-unresolved",
   "navigation-projection-mismatch",
   "edit-projection-mismatch",
@@ -61,6 +67,7 @@ export type AuthoredFirstLossReason =
 export interface AuthoredFirstLossRecord extends AuthoredFirstLossObservation {
   readonly caseId: string;
   readonly expectedDecision: ScientificDecision;
+  readonly expectedFormulaDecision?: MathAuthoringDisposition;
   readonly family: DocumentReasoningFamily;
   readonly field: string;
   readonly split: "development" | "holdout";
@@ -117,6 +124,14 @@ export function classifyAuthoredFirstLoss(
       stage: "host-projection",
     };
   }
+  if (evidence.formulaLocationMatched === false) {
+    return {
+      basis: "selected formula location differs from reviewed evidence",
+      decisionDomain: "selected-formula",
+      reason: "formula-selection-mismatch",
+      stage: "identity",
+    };
+  }
   const observedDecision = evidence.cursorSignals.decision;
   if (
     (observedDecision === "established" || observedDecision === "conflicting") &&
@@ -124,6 +139,22 @@ export function classifyAuthoredFirstLoss(
   ) {
     return {
       basis: `unsafe ${observedDecision} decision differs from reviewed evidence`,
+      decisionDomain: "cursor-entity",
+      reason: "unsafe-decision",
+      stage: "decision",
+    };
+  }
+  if (
+    evidence.expectedFormulaDecision !== undefined &&
+    evidence.formulaDecision !== undefined &&
+    (evidence.formulaDecision === "established" ||
+      evidence.formulaDecision === "conflicting") &&
+    evidence.formulaDecision !== evidence.expectedFormulaDecision
+  ) {
+    return {
+      basis:
+        `unsafe ${evidence.formulaDecision} selected-formula decision differs from reviewed evidence`,
+      decisionDomain: "selected-formula",
       reason: "unsafe-decision",
       stage: "decision",
     };
@@ -158,6 +189,17 @@ export function classifyAuthoredFirstLoss(
   if (evidence.identityFailures.length) {
     const identity = identityLoss(evidence.identityFailures);
     return { ...identity, stage: "identity" };
+  }
+  if (
+    evidence.expectedFormulaDecision !== undefined &&
+    evidence.formulaDecision !== evidence.expectedFormulaDecision
+  ) {
+    return {
+      basis: "selected formula evidence does not produce the reviewed decision",
+      decisionDomain: "selected-formula",
+      reason: "evidence-sufficiency-mismatch",
+      stage: "decision",
+    };
   }
   const cursorStage = authoredStage(
     classifyRecognitionFrontier(evidence.cursorSignals),
@@ -250,7 +292,11 @@ export function summarizeAuthoredFirstLoss(
   return {
     failed: failed.length,
     passed: records.length - failed.length,
-    byDecision: counts(failed.map((record) => record.expectedDecision)),
+    byDecision: counts(
+      failed.map((record) =>
+        record.expectedFormulaDecision ?? record.expectedDecision
+      ),
+    ),
     byFamily: counts(failed.map((record) => record.family)),
     byField: counts(failed.map((record) => record.field)),
     byReason: counts(failed.map((record) => record.reason)),
@@ -275,6 +321,9 @@ function identityLoss(
   const basis = failures.map((failure) => failure.basis).join("; ");
   if (areas.has("cursor-symbol")) {
     return { basis, reason: "cursor-occurrence-mismatch" };
+  }
+  if (areas.has("formula")) {
+    return { basis, reason: "formula-selection-mismatch" };
   }
   if (areas.has("definition") || areas.has("references")) {
     return { basis, reason: "navigation-projection-mismatch" };

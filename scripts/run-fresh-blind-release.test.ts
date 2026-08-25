@@ -280,6 +280,48 @@ describe("fresh blind retained report parsers", () => {
     ).toThrow("must be 0/0 with no findings");
   });
 
+  test("requires schema-3 formula decisions to duplicate the observed authoring context exactly", () => {
+    const raw = evaluation();
+    const observation = raw.results[0]!.observations[0]! as Record<string, unknown>;
+    observation.formulaDecision = {
+      location: null,
+      status: "unsupported",
+    };
+    expect(
+      parseFreshBlindEvaluation(raw, expectedProbes(), {
+        formulaDecisionRequired: true,
+      })
+        .observations[0],
+    ).toMatchObject({
+      formulaDecision: { location: null, status: "unsupported" },
+    });
+
+    observation.formulaDecision = {
+      location: null,
+      status: "established",
+    };
+    expect(() =>
+      parseFreshBlindEvaluation(raw, expectedProbes(), {
+        formulaDecisionRequired: true,
+      })
+    ).toThrow("formulaDecision must match authoringContext");
+
+    delete observation.formulaDecision;
+    expect(() =>
+      parseFreshBlindEvaluation(raw, expectedProbes(), {
+        formulaDecisionRequired: true,
+      })
+    ).toThrow("formulaDecision");
+    expect(() => parseFreshBlindEvaluation(raw, expectedProbes())).not.toThrow();
+
+    observation.formulaDecision = {
+      location: null,
+      status: "unsupported",
+    };
+    expect(() => parseFreshBlindEvaluation(raw, expectedProbes()))
+      .toThrow("unexpected or missing fields");
+  });
+
   test("recomputes exact authoring results and rejects malformed nested unions", () => {
     const dishonest = evaluation();
     const result = dishonest.results[0];

@@ -151,6 +151,60 @@ describe("authored first-loss localization", () => {
     ).toMatchObject({ reason: "unsafe-decision", stage: "decision" });
   });
 
+  test("keeps cursor-entity certainty separate from the selected formula", () => {
+    expect(
+      classifyAuthoredFirstLoss({
+        cursorSignals: { ...signals, decision: "established" },
+        expectedDecision: "established",
+        expectedFormulaDecision: "partial",
+        expectedRelationsMatched: true,
+        formulaDecision: "partial",
+        formulaLocationMatched: true,
+        identityFailures: [],
+        probePassed: true,
+        relationSources: [],
+      }),
+    ).toMatchObject({ reason: "passed", stage: null });
+
+    expect(
+      classifyAuthoredFirstLoss({
+        cursorSignals: { ...signals, decision: "established" },
+        expectedDecision: "established",
+        expectedFormulaDecision: "partial",
+        expectedRelationsMatched: true,
+        formulaDecision: "established",
+        formulaLocationMatched: true,
+        identityFailures: [],
+        probePassed: false,
+        relationSources: [],
+      }),
+    ).toMatchObject({
+      decisionDomain: "selected-formula",
+      reason: "unsafe-decision",
+      stage: "decision",
+    });
+  });
+
+  test("localizes a wrong selected formula before its decision", () => {
+    expect(
+      classifyAuthoredFirstLoss({
+        cursorSignals: { ...signals, decision: "established" },
+        expectedDecision: "established",
+        expectedFormulaDecision: "ambiguous",
+        expectedRelationsMatched: true,
+        formulaDecision: "ambiguous",
+        formulaLocationMatched: false,
+        identityFailures: [],
+        probePassed: false,
+        relationSources: [],
+      }),
+    ).toMatchObject({
+      decisionDomain: "selected-formula",
+      reason: "formula-selection-mismatch",
+      stage: "identity",
+    });
+  });
+
   test("separates cursor, navigation, and edit projection reasons", () => {
     const base = {
       cursorSignals: signals,

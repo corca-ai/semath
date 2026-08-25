@@ -4,6 +4,7 @@ use crate::canonical::{SemanticExpr, SemanticExprKind, expression_name, render_c
 use crate::parser::ParsedMath;
 use crate::prose::{ProseShape, ProseShapeClaim};
 use crate::scope::ScopeGraph;
+use crate::semantic_index::{EvidenceModality, EvidencePolarity};
 use crate::{Evidence, ProjectDocument, SemanticDiagnostic, ShapeInfo, SourceRange};
 const MAX_SYMBOL_CLAIMS: usize = 8;
 
@@ -62,6 +63,8 @@ struct ShapeFact {
     refinements: Vec<String>,
     explicit: bool,
     scope_id: usize,
+    polarity: EvidencePolarity,
+    modality: EvidenceModality,
 }
 
 #[derive(Clone, Debug)]
@@ -80,13 +83,19 @@ pub(crate) struct ExplicitShapeClaim {
     pub display: String,
     pub symbol_range: SourceRange,
     pub evidence: Evidence,
+    pub polarity: EvidencePolarity,
+    pub modality: EvidenceModality,
+}
+
+fn establishes_shape(fact: &ShapeFact) -> bool {
+    fact.polarity == EvidencePolarity::Positive && fact.modality == EvidenceModality::Asserted
 }
 
 impl ShapeObservations {
     pub fn exported(&self) -> Vec<ShapeInfo> {
         self.facts
             .iter()
-            .filter(|fact| self.scopes.depth(fact.scope_id) == 0)
+            .filter(|fact| self.scopes.depth(fact.scope_id) == 0 && establishes_shape(fact))
             .map(|fact| {
                 fact.shape.info(
                     &fact.symbol,
@@ -111,6 +120,8 @@ impl ShapeObservations {
                 display: fact.shape.display(),
                 symbol_range: fact.symbol_range.clone(),
                 evidence: fact.evidence.clone(),
+                polarity: fact.polarity,
+                modality: fact.modality,
             })
             .collect()
     }
@@ -120,6 +131,7 @@ impl ShapeObservations {
             .iter()
             .filter(|fact| {
                 self.symbols_equivalent(&fact.symbol, symbol)
+                    && establishes_shape(fact)
                     && (self.scopes.depth(fact.scope_id) == 0
                         || fact.available_from <= offset
                         || fact.symbol_range.contains(offset))
@@ -145,6 +157,7 @@ impl ShapeObservations {
             .iter()
             .filter(|fact| {
                 self.symbols_equivalent(&fact.symbol, symbol)
+                    && establishes_shape(fact)
                     && (self.scopes.depth(fact.scope_id) == 0
                         || fact.available_from <= offset
                         || fact.symbol_range.contains(offset))
@@ -243,6 +256,8 @@ pub(crate) fn observe_shapes(
             refinements: claim.refinements.clone(),
             explicit: true,
             scope_id: analysis.scopes.id_at(claim.symbol_range.start_offset),
+            polarity: claim.polarity,
+            modality: claim.modality,
         });
     }
 
@@ -348,7 +363,7 @@ fn add_explicit_conflict_diagnostics(analysis: &mut ShapeObservations) {
     let mut facts = analysis
         .facts
         .iter()
-        .filter(|fact| fact.explicit)
+        .filter(|fact| fact.explicit && establishes_shape(fact))
         .cloned()
         .collect::<Vec<_>>();
     facts.sort_by_key(|fact| fact.symbol_range.start_offset);
@@ -413,6 +428,8 @@ fn collect_shape_declarations(expression: &SemanticExpr, analysis: &mut ShapeObs
                     refinements: Vec::new(),
                     explicit: true,
                     scope_id,
+                    polarity: EvidencePolarity::Positive,
+                    modality: EvidenceModality::Asserted,
                 });
             }
         }
@@ -518,9 +535,17 @@ mod tests {
     use super::observe_shapes;
     use crate::canonical::lower_document_region;
     use crate::parser::{parse_regions, test_math_regions};
-    use crate::{DocumentLanguage, ProjectDocument};
+    use crate::semantic_index::{EvidenceModality, EvidencePolarity};
+    use crate::{DocumentLanguage, Evidence, ProjectDocument, SourceRange};
 
     fn analyze(source: &str) -> super::ShapeObservations {
+        analyze_with_claims(source, &[])
+    }
+
+    fn analyze_with_claims(
+        source: &str,
+        claims: &[crate::prose::ProseShapeClaim],
+    ) -> super::ShapeObservations {
         let regions = test_math_regions(source, DocumentLanguage::Latex);
         let document = ProjectDocument {
             prose_annotations: vec![],
@@ -545,7 +570,7 @@ mod tests {
             .iter()
             .map(|math| lower_document_region(&document, &math.region.content_range))
             .collect::<Vec<_>>();
-        observe_shapes(&document, &parsed, &canonical, &[])
+        observe_shapes(&document, &parsed, &canonical, claims)
     }
 
     #[test]
@@ -563,6 +588,59 @@ mod tests {
         let analysis = analyze(source);
         assert_eq!(analysis.diagnostics.len(), 1);
         assert_eq!(analysis.diagnostics[0].code, "notation-shape-conflict");
+    }
+
+    #[test]
+    fn preserves_hypothetical_shape_roots_without_establishing_a_conflict() {
+        let evidence = |start_offset, end_offset| Evidence {
+            rule_id: "synthetic-alternative-shape".into(),
+            kind: "explicit-prose".into(),
+            strength: "strong".into(),
+            source_ranges: vec![SourceRange {
+                start_offset,
+                end_offset,
+            }],
+            source_anchors: Vec::new(),
+        };
+        let claims = vec![
+            crate::prose::ProseShapeClaim {
+                symbol: "q".into(),
+                symbol_range: SourceRange {
+                    start_offset: 0,
+                    end_offset: 1,
+                },
+                available_from: 1,
+                evidence: evidence(0, 1),
+                shape: crate::prose::ProseShape::Vector("n".into()),
+                refinements: Vec::new(),
+                polarity: EvidencePolarity::Positive,
+                modality: EvidenceModality::Hypothetical,
+            },
+            crate::prose::ProseShapeClaim {
+                symbol: "q".into(),
+                symbol_range: SourceRange {
+                    start_offset: 2,
+                    end_offset: 3,
+                },
+                available_from: 3,
+                evidence: evidence(2, 3),
+                shape: crate::prose::ProseShape::Matrix("m".into(), "n".into()),
+                refinements: Vec::new(),
+                polarity: EvidencePolarity::Positive,
+                modality: EvidenceModality::Hypothetical,
+            },
+        ];
+        let analysis = analyze_with_claims("q q", &claims);
+
+        assert!(analysis.diagnostics.is_empty());
+        assert!(analysis.exported().is_empty());
+        let roots = analysis.explicit_claims();
+        assert_eq!(roots.len(), 2);
+        assert!(
+            roots
+                .iter()
+                .all(|root| root.modality == EvidenceModality::Hypothetical)
+        );
     }
 
     #[test]

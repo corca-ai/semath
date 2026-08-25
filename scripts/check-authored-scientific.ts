@@ -137,25 +137,40 @@ for (const fixture of selected) {
     const probe = fixture.probes[index];
     if (!probe) throw new Error(`missing probe for observation ${index}`);
     const scenario = authoredScenarioFor(fixture, probe);
+    const identityFailures = authoredProbeIdentityFailures(
+      fixture,
+      probe,
+      run.observation,
+    );
     return {
       caseId: probe.id,
       expectedDecision: probe.expected.decision,
+      ...(probe.expected.formulaDecision
+        ? { expectedFormulaDecision: probe.expected.formulaDecision.status }
+        : {}),
       family: probe.family,
       field: scenario.field,
       split: fixture.batch.split,
       ...classifyAuthoredFirstLoss({
         cursorSignals: run.cursorSignals,
         expectedDecision: probe.expected.decision,
+        ...(probe.expected.formulaDecision
+          ? {
+              expectedFormulaDecision: probe.expected.formulaDecision.status,
+              formulaLocationMatched: !identityFailures.some(
+                (failure) => failure.area === "formula",
+              ),
+            }
+          : {}),
+        ...(run.observation.formulaDecision
+          ? { formulaDecision: run.observation.formulaDecision.status }
+          : {}),
         expectedRelationsMatched: expectedRelationsMatch(
           fixture,
           probe,
           run.observation,
         ),
-        identityFailures: authoredProbeIdentityFailures(
-          fixture,
-          probe,
-          run.observation,
-        ),
+        identityFailures,
         probePassed: !failedIds.has(probe.id),
         relationSources: run.relationSources,
       }),

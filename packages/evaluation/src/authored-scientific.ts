@@ -1,5 +1,7 @@
 import type {
   MathAuthoringContext,
+  MathAuthoringDisposition,
+  MathInterpretationHypothesisInfo,
   MathInterpretationSetInfo,
   QueryResult,
   RelationInfo,
@@ -69,6 +71,7 @@ export type ScientificDecision = SemanticViewInfo["decision"]["status"];
 export type AuthoredIdentityFailureArea =
   | "cursor-symbol"
   | "definition"
+  | "formula"
   | "references"
   | "prepare-rename"
   | "rename";
@@ -169,6 +172,10 @@ export interface AuthoredScientificProbe {
       readonly required: readonly AuthoredDiagnosticExpectation[];
     };
     readonly excludedRelationIds: readonly string[];
+    readonly formulaDecision?: {
+      readonly anchor: AuthoredSourceAnchor;
+      readonly status: MathAuthoringDisposition;
+    };
     readonly proofGrounded: boolean;
     readonly navigation: {
       readonly definition: AuthoredLocationExpectation;
@@ -198,7 +205,7 @@ export interface AuthoredScientificFixture {
   readonly batch: AuthoredScientificBatch;
   readonly probes: readonly AuthoredScientificProbe[];
   readonly scenarios: readonly AuthoredScientificScenario[];
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 1 | 2;
 }
 
 export interface AuthoredLawCatalogEntry {
@@ -224,6 +231,11 @@ export interface AuthoredScientificObservation {
     readonly range: SourceRange;
     readonly severity: "error" | "hint" | "warning";
   }[];
+  /** Required by authored fixture schema 2; derived from authoringContext. */
+  readonly formulaDecision?: {
+    readonly location: ObservedLocation | null;
+    readonly status: MathAuthoringDisposition;
+  };
   /** Present in protocol 16+ reports; omitted from preserved historical observations. */
   readonly interpretations?: MathInterpretationSetInfo;
   readonly prepareRename: {
@@ -281,6 +293,7 @@ export interface AuthoredScientificScorecard {
 export type AuthoredFalseEstablishmentCause =
   | "decision"
   | "excluded-relation"
+  | "formula-decision"
   | "proof-grounding"
   | "relation-grounding";
 
@@ -304,17 +317,26 @@ export function parseAuthoredScientificFixture(
 ): AuthoredScientificFixture {
   const root = record(value, "fixture");
   exact(root, ["schemaVersion", "batch", "scenarios", "probes"], "fixture");
-  if (root.schemaVersion !== 1) throw new Error("fixture.schemaVersion: must be 1");
+  const parsedSchemaVersion = integer(
+    root.schemaVersion,
+    "fixture.schemaVersion",
+  );
+  if (parsedSchemaVersion !== 1 && parsedSchemaVersion !== 2) {
+    throw new Error("fixture.schemaVersion: must be 1 or 2");
+  }
+  const schemaVersion = parsedSchemaVersion;
   const batch = parseBatch(root.batch);
   const scenarios = array(root.scenarios, "fixture.scenarios").map(parseScenario);
-  const probes = array(root.probes, "fixture.probes").map(parseProbe);
+  const probes = array(root.probes, "fixture.probes").map((probe, index) =>
+    parseProbe(probe, index, schemaVersion)
+  );
   unique(scenarios.map((item) => item.id), "fixture.scenarios.id");
   unique(probes.map((item) => item.id), "fixture.probes.id");
   const scenarioById = new Map(scenarios.map((item) => [item.id, item]));
   for (const probe of probes) {
     const scenario = scenarioById.get(probe.scenarioId);
     if (!scenario) throw new Error(`${probe.id}: unknown scenario ${probe.scenarioId}`);
-    validateProbe(probe, scenario);
+    validateProbe(probe, scenario, schemaVersion);
   }
   for (const scenario of scenarios) {
     const caseProbes = probes.filter((probe) => probe.scenarioId === scenario.id);
@@ -348,7 +370,7 @@ export function parseAuthoredScientificFixture(
   } else if (batch.frozenAt || batch.seal) {
     throw new Error("fixture.batch: development must remain editable and unsealed");
   }
-  return { batch, probes, scenarios, schemaVersion: 1 };
+  return { batch, probes, scenarios, schemaVersion };
 }
 
 export function validateAuthoredScientificTranche(
@@ -379,7 +401,11 @@ export function validateAuthoredScientificTranche(
   validateAreaAllocation(holdout);
 
   const decisions = countBy(
-    allPrimary.map((probe) => probe.expected.decision),
+    allPrimary.map((probe) =>
+      probe.expected.formulaDecision?.status ?? probe.expected.decision
+    ).filter((decision): decision is ScientificDecision =>
+      decision !== "conventional" && decision !== "engine-limited"
+    ),
     ["established", "partial", "ambiguous", "conflicting", "unsupported"] as const,
   );
   for (const decision of Object.keys(AUTHORED_DECISION_TARGET) as ScientificDecision[]) {
@@ -514,6 +540,28 @@ export function scoreAuthoredScientificFixture(
       caseMissedCoverage =
         !falseEstablishmentCauses.has("decision") && !caseFalseConflict;
     }
+    const expectedFormula = probe.expected.formulaDecision;
+    if (expectedFormula) {
+      const actualFormula = observed.formulaDecision;
+      if (!actualFormula) {
+        caseFailures.push("selected formula decision is missing");
+        caseMissedCoverage = true;
+      } else if (actualFormula.status !== expectedFormula.status) {
+        caseFailures.push(
+          `formula decision ${actualFormula.status}; expected ${expectedFormula.status}`,
+        );
+        const formulaFalseConflict =
+          actualFormula.status === "conflicting" &&
+          expectedFormula.status !== "conflicting";
+        caseFalseConflict ||= formulaFalseConflict;
+        if (
+          !falseEstablishmentCauses.has("formula-decision") &&
+          !formulaFalseConflict
+        ) {
+          caseMissedCoverage = true;
+        }
+      }
+    }
     if (observed.proofGrounded !== probe.expected.proofGrounded) {
       caseFailures.push(
         `proof grounding ${observed.proofGrounded}; expected ${probe.expected.proofGrounded}`,
@@ -575,7 +623,6 @@ export function scoreAuthoredScientificFixture(
       caseFailures.push(
         `problems ${problems.length}; expected at most ${probe.expected.diagnostics.maximum}`,
       );
-      caseFalseConflict = true;
     }
     for (const expected of probe.expected.diagnostics.required) {
       const anchor = resolveAuthoredAnchor(snapshot, expected.anchor);
@@ -648,6 +695,25 @@ export function authoredFalseEstablishmentCases(
       causes.add("decision");
       grounding.push(observed.proofGrounded);
     }
+    if (
+      probe.expected.formulaDecision &&
+      observed.formulaDecision?.status === "established" &&
+      probe.expected.formulaDecision.status !== "established"
+    ) {
+      causes.add("formula-decision");
+      const authority = (observed.authoringContext?.interpretations ??
+        observed.interpretations)?.hypotheses.filter(
+          authoredHypothesisIsMathematicalAuthority,
+        ) ?? [];
+      grounding.push(
+        authority.length > 0 && authority.every((hypothesis) =>
+          hypothesis.evidence.length > 0 &&
+          hypothesis.evidence.every((evidence) =>
+            evidence.sourceAnchors.length > 0
+          )
+        ),
+      );
+    }
     if (observed.proofGrounded && !probe.expected.proofGrounded) {
       causes.add("proof-grounding");
       grounding.push(true);
@@ -685,9 +751,21 @@ export function authoredFalseEstablishmentCases(
     const leakedRelations = observed.relations.filter((relation) =>
       probe.expected.excludedRelationIds.includes(relation.relationId),
     );
-    if (leakedRelations.length > 0) {
+    const interpretations = observed.authoringContext?.interpretations ??
+      observed.interpretations;
+    const falselyEstablishedRelations = interpretations === undefined
+      ? leakedRelations
+      : leakedRelations.filter((relation) =>
+        interpretations.hypotheses.some((hypothesis) =>
+          hypothesis.relation?.relationId === relation.relationId &&
+          authoredHypothesisIsMathematicalAuthority(hypothesis)
+        )
+      );
+    if (falselyEstablishedRelations.length > 0) {
       causes.add("excluded-relation");
-      grounding.push(leakedRelations.every((relation) => relation.sourceGrounded));
+      grounding.push(
+        falselyEstablishedRelations.every((relation) => relation.sourceGrounded),
+      );
     }
     if (causes.size > 0) {
       cases.push({
@@ -698,6 +776,18 @@ export function authoredFalseEstablishmentCases(
     }
   }
   return cases;
+}
+
+function authoredHypothesisIsMathematicalAuthority(
+  hypothesis: MathInterpretationHypothesisInfo,
+): boolean {
+  if (hypothesis.support === "explicit" || hypothesis.support === "derived") {
+    return true;
+  }
+  return hypothesis.support === "supported" &&
+    (hypothesis.kind === "typed-law" ||
+      hypothesis.kind === "source-meaning" ||
+      hypothesis.kind === "reviewed-convention");
 }
 
 export function observeAuthoredScientificProbe(
@@ -749,6 +839,14 @@ export function observeAuthoredScientificProbe(
       range: diagnostic.range,
       severity: diagnostic.severity,
     })),
+    ...(probe.expected.formulaDecision
+      ? {
+          formulaDecision: {
+            location: view.authoringContext.formula?.location ?? null,
+            status: view.authoringContext.disposition,
+          },
+        }
+      : {}),
     interpretations: view.authoringContext.interpretations,
     prepareRename: {
       ...(results.prepareRename.value.placeholder
@@ -951,7 +1049,11 @@ function parseReview(value: unknown, path: string): AuthoredScientificReview {
   };
 }
 
-function parseProbe(value: unknown, index: number): AuthoredScientificProbe {
+function parseProbe(
+  value: unknown,
+  index: number,
+  schemaVersion: AuthoredScientificFixture["schemaVersion"],
+): AuthoredScientificProbe {
   const path = `fixture.probes[${index}]`;
   const item = record(value, path);
   exact(
@@ -979,7 +1081,11 @@ function parseProbe(value: unknown, index: number): AuthoredScientificProbe {
   if (offset !== undefined && offset > needle.length) {
     throw new Error(`${path}.cursor.offset: must fall within the cursor needle`);
   }
-  const expected = parseExpected(item.expected, `${path}.expected`);
+  const expected = parseExpected(
+    item.expected,
+    `${path}.expected`,
+    schemaVersion,
+  );
   return {
     cursor: {
       ...(cursor.edge === undefined
@@ -1004,17 +1110,23 @@ function parseProbe(value: unknown, index: number): AuthoredScientificProbe {
 function parseExpected(
   value: unknown,
   path: string,
+  schemaVersion: AuthoredScientificFixture["schemaVersion"],
 ): AuthoredScientificProbe["expected"] {
   const item = record(value, path);
   exact(
     item,
     [
-      "authoringContext", "decision", "symbol", "cursorOccurrence", "proofGrounded", "relations", "excludedRelationIds",
+      "authoringContext", "decision", "symbol", "cursorOccurrence", "formulaDecision", "proofGrounded", "relations", "excludedRelationIds",
       "navigation", "diagnostics",
     ],
     path,
-    ["authoringContext", "symbol", "cursorOccurrence"],
+    schemaVersion === 1
+      ? ["authoringContext", "symbol", "cursorOccurrence", "formulaDecision"]
+      : ["authoringContext", "symbol", "cursorOccurrence"],
   );
+  if (schemaVersion === 1 && item.formulaDecision !== undefined) {
+    throw new Error(`${path}.formulaDecision: unavailable in fixture schema 1`);
+  }
   const navigation = record(item.navigation, `${path}.navigation`);
   exact(
     navigation,
@@ -1097,6 +1209,14 @@ function parseExpected(
       required: requiredDiagnostics,
     },
     excludedRelationIds: strings(item.excludedRelationIds, `${path}.excludedRelationIds`),
+    ...(schemaVersion === 1
+      ? {}
+      : {
+          formulaDecision: parseFormulaDecisionExpectation(
+            item.formulaDecision,
+            `${path}.formulaDecision`,
+          ),
+        }),
     proofGrounded: boolean(item.proofGrounded, `${path}.proofGrounded`),
     navigation: {
       definition: parseLocationExpectation(
@@ -1153,6 +1273,30 @@ function parseExpected(
     },
     relations: parseRelationExpectations(item.relations, `${path}.relations`),
     ...(item.symbol === undefined ? {} : { symbol: text(item.symbol, `${path}.symbol`) }),
+  };
+}
+
+function parseFormulaDecisionExpectation(
+  value: unknown,
+  path: string,
+): NonNullable<AuthoredScientificProbe["expected"]["formulaDecision"]> {
+  const item = record(value, path);
+  exact(item, ["anchor", "status"], path);
+  return {
+    anchor: parseAnchor(item.anchor, `${path}.anchor`),
+    status: oneOf(
+      item.status,
+      [
+        "ambiguous",
+        "conflicting",
+        "conventional",
+        "engine-limited",
+        "established",
+        "partial",
+        "unsupported",
+      ] as const,
+      `${path}.status`,
+    ),
   };
 }
 
@@ -1249,6 +1393,7 @@ function parseAnchorSelection(
 function validateProbe(
   probe: AuthoredScientificProbe,
   scenario: AuthoredScientificScenario,
+  schemaVersion: AuthoredScientificFixture["schemaVersion"],
 ): void {
   const snapshot = authoredSnapshotFor(scenario, probe);
   const cursor = resolveAuthoredAnchor(snapshot, probe.cursor);
@@ -1279,6 +1424,21 @@ function validateProbe(
       probe.expected.navigation.prepareRename.range,
     );
   }
+  if (probe.expected.formulaDecision) {
+    resolveAuthoredAnchor(snapshot, probe.expected.formulaDecision.anchor);
+  }
+  if (schemaVersion === 2) {
+    const rename = probe.expected.navigation.rename;
+    if (
+      rename.status === "unavailable" &&
+      (!rename.newName || !probe.expected.symbol ||
+        !sameRenameNotationFamily(probe.expected.symbol, rename.newName))
+    ) {
+      throw new Error(
+        `${probe.id}: unavailable rename requires a same-family newName`,
+      );
+    }
+  }
   for (const diagnostic of probe.expected.diagnostics.required) {
     resolveAuthoredAnchor(snapshot, diagnostic.anchor);
   }
@@ -1293,6 +1453,17 @@ function validateProbe(
       );
     }
   }
+}
+
+function sameRenameNotationFamily(
+  current: string,
+  replacement: string,
+): boolean {
+  const controlSequence = /^\\\p{L}+$/u;
+  const plainIdentifier = /^\p{L}$/u;
+  return controlSequence.test(current)
+    ? controlSequence.test(replacement)
+    : plainIdentifier.test(current) && plainIdentifier.test(replacement);
 }
 
 function requireSplit(fixture: AuthoredScientificFixture, split: AuthoredSplit): void {
@@ -1444,6 +1615,23 @@ export function authoredProbeIdentityFailures(
       area: "cursor-symbol",
       basis: `symbol ${observation.symbol ?? "null"}; expected ${probe.expected.symbol}`,
     });
+  }
+  if (probe.expected.formulaDecision) {
+    const expectedFormula = resolveAuthoredAnchor(
+      snapshot,
+      probe.expected.formulaDecision.anchor,
+    );
+    const actualFormula = observation.formulaDecision?.location;
+    if (
+      !actualFormula || actualFormula.fileId !== expectedFormula.fileId ||
+      actualFormula.path !== expectedFormula.path ||
+      !sameRange(actualFormula.range, expectedFormula.range)
+    ) {
+      failures.push({
+        area: "formula",
+        basis: "selected formula location differs",
+      });
+    }
   }
   checkLocationExpectation(
     "definition",

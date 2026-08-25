@@ -60,6 +60,7 @@ function manifest(): FreshBlindPreflightManifest {
 describe("fresh blind pre-blind manifest", () => {
   test("accepts one frozen candidate, contract, reference inventory, and artifact set", () => {
     expect(buildFreshBlindPreflightManifest(manifest())).toEqual(manifest());
+    expect(manifest().contracts.receiptPolicyVersion).toBe(3);
   });
 
   test("rejects drift in contract versions, reference inventory, or rebuilt WASM", () => {
@@ -69,6 +70,12 @@ describe("fresh blind pre-blind manifest", () => {
         contracts: { ...manifest().contracts, protocolVersion: 16 },
       }),
     ).toThrow("protocolVersion");
+    expect(() =>
+      parseFreshBlindPreflightManifest({
+        ...manifest(),
+        contracts: { ...manifest().contracts, receiptPolicyVersion: 2 },
+      }),
+    ).toThrow("receiptPolicyVersion");
     expect(() =>
       parseFreshBlindPreflightManifest({
         ...manifest(),
