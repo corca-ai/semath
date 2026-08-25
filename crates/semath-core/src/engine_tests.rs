@@ -1654,13 +1654,61 @@ fn rejected_or_undeclared_formulae_never_export_authoritative_relations() {
             "K=\\frac12mv^2",
             "classical-mechanics:kinetic-energy-definition",
         ),
+        (
+            "This analysis does not use the ideal-gas model. The archived comparison is $PV=nRT$.",
+            "PV=nRT",
+            "thermodynamics:ideal-gas",
+        ),
+        (
+            "The note does not adopt a heat-work sign convention and does not use the closed-system balance $\\Delta U=Q-W$.",
+            "\\Delta U=Q-W",
+            "thermodynamics:closed-system-first-law",
+        ),
+        (
+            "The update is unusable because the state and gradient shapes conflict; do not apply $x_{k+1}=x_k-\\eta g_k$.",
+            "x_{k+1}=x_k-\\eta g_k",
+            "optimization-ml:gradient-descent-update",
+        ),
+        (
+            "Without a consistent electrical reference convention, this analysis does not use $P=VI$.",
+            "P=VI",
+            "electromagnetism:electric-power-law",
+        ),
+        (
+            "The archived ideal-gas relation $PV=nRT$ is invalid for this analysis.",
+            "PV=nRT",
+            "thermodynamics:ideal-gas",
+        ),
+        (
+            "The model forbids the electric-power formula $P=VI$.",
+            "P=VI",
+            "electromagnetism:electric-power-law",
+        ),
+        (
+            "The closed-system balance $\\Delta U=Q-W$ is unavailable for this open system.",
+            "\\Delta U=Q-W",
+            "thermodynamics:closed-system-first-law",
+        ),
+        (
+            "The gradient update $x_{k+1}=x_k-\\eta g_k$ must be discarded.",
+            "x_{k+1}=x_k-\\eta g_k",
+            "optimization-ml:gradient-descent-update",
+        ),
+        (
+            "The Newton equation $F=ma$ is excluded from this model.",
+            "F=ma",
+            "classical-mechanics:newton-second-law",
+        ),
     ] {
         let view = semantic_view_at(
             content,
             (content.find(needle).unwrap() + needle.len()) as u32,
         );
         assert!(
-            !matches!(view.decision, MeaningDecision::Established { .. }),
+            !matches!(
+                view.decision,
+                MeaningDecision::Established { .. } | MeaningDecision::Conflicting { .. }
+            ),
             "{content}: {:?}",
             view.decision
         );
@@ -1672,6 +1720,52 @@ fn rejected_or_undeclared_formulae_never_export_authoritative_relations() {
             "{content}: {:#?}",
             view.context.relations
         );
+        assert!(view.diagnostics.is_empty(), "{content}: {view:#?}");
+        assert!(
+            view.authoring_context.equation_links.is_empty(),
+            "{content}: {view:#?}"
+        );
+    }
+}
+
+#[test]
+fn a_rejected_formula_cannot_authorize_navigation_or_editing() {
+    let content = "The model forbids the electric-power formula $P=VI$.";
+    let offset = content.find("P=VI").unwrap() as u32;
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    for query_kind in [
+        Query::Definition {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::References {
+            file_id: "main".into(),
+            offset,
+            include_declaration: true,
+        },
+        Query::PrepareRename {
+            file_id: "main".into(),
+            offset,
+        },
+        Query::Rename {
+            file_id: "main".into(),
+            offset,
+            new_name: "S".into(),
+        },
+    ] {
+        let result = engine.query(query(query_kind, 1, 1)).unwrap();
+        let authorization = match result.value {
+            QueryValue::Locations { authorization, .. }
+            | QueryValue::RenamePreparation { authorization, .. }
+            | QueryValue::EditProposal { authorization, .. } => authorization,
+            _ => panic!("expected an entity surface result"),
+        };
+        assert!(matches!(
+            authorization,
+            crate::EntitySurfaceAuthorization::Refused { .. }
+        ));
     }
 }
 
