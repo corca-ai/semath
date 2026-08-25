@@ -354,7 +354,7 @@
     {
       "caseId": "constraint-events-different-context-refusal",
       "decision": {
-        "status": "partial",
+        "status": "unsupported",
         "meaning": "absent",
         "problems": "none"
       },
