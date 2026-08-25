@@ -46,7 +46,7 @@
     {
       "caseId": "binding-role-collision-refusal",
       "decision": {
-        "status": "unsupported",
+        "status": "partial",
         "meaning": "absent",
         "problems": "none"
       },
@@ -73,7 +73,7 @@
     {
       "caseId": "constraint-matrix-vector-mismatch",
       "decision": {
-        "status": "unsupported",
+        "status": "partial",
         "meaning": "absent",
         "problems": "none"
       },
@@ -354,7 +354,7 @@
     {
       "caseId": "constraint-events-different-context-refusal",
       "decision": {
-        "status": "unsupported",
+        "status": "partial",
         "meaning": "absent",
         "problems": "none"
       },

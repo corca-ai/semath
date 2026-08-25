@@ -56,7 +56,15 @@ function hypothesis(
   } = {},
 ): MathInterpretationHypothesisInfo {
   return {
-    bindings: [],
+    bindings: [
+      {
+        constraint: { kind: "scalar" },
+        evidence: evidence("supporting").evidence,
+        parameter: "value",
+        proof: "typed",
+        symbol: "x",
+      },
+    ],
     conditions: [],
     documentVersion: 1,
     evidence: options.evidence ?? [evidence("supporting")],
@@ -75,7 +83,7 @@ function hypothesis(
       evidence: [],
       range: formula.location.range,
       relationId,
-      roles: [],
+      roles: [{ label: "Value", role: "value", symbol: "x" }],
       title: relationId,
     },
     scopePath: [0],
@@ -110,6 +118,23 @@ describe("selected-formula challenge observation", () => {
       "authoritative",
     );
 
+    const derived = hypothesis("test:law", "derived", { formula });
+    expect(
+      observeSelectedFormulaDecision({
+        disposition: "partial",
+        formula,
+        hypotheses: [
+          {
+            ...derived,
+            bindings: derived.bindings.map((binding) => ({
+              ...binding,
+              proof: "derived" as const,
+            })),
+          },
+        ],
+      }).recognizedRelations[0]?.authority,
+    ).toBe("authoritative");
+
     const candidateBinding = hypothesis("test:law", "explicit", { formula });
     const bindingLimited = observeSelectedFormulaDecision({
       disposition: "partial",
@@ -130,6 +155,72 @@ describe("selected-formula challenge observation", () => {
       ],
     });
     expect(bindingLimited.recognizedRelations[0]?.authority).toBe("candidate");
+
+    const assertedBinding = hypothesis("test:law", "explicit", { formula });
+    expect(
+      observeSelectedFormulaDecision({
+        disposition: "partial",
+        formula,
+        hypotheses: [
+          {
+            ...assertedBinding,
+            bindings: assertedBinding.bindings.map((binding) => ({
+              ...binding,
+              proof: "asserted" as const,
+            })),
+          },
+        ],
+      }).recognizedRelations[0]?.authority,
+    ).toBe("candidate");
+
+    const emptyBindings = hypothesis("test:law", "explicit", { formula });
+    expect(
+      observeSelectedFormulaDecision({
+        disposition: "partial",
+        formula,
+        hypotheses: [{ ...emptyBindings, bindings: [] }],
+      }).recognizedRelations[0]?.authority,
+    ).toBe("candidate");
+
+    const missingRole = hypothesis("test:law", "explicit", { formula });
+    if (!missingRole.relation) throw new Error("test relation must be present");
+    expect(
+      observeSelectedFormulaDecision({
+        disposition: "partial",
+        formula,
+        hypotheses: [
+          {
+            ...missingRole,
+            relation: {
+              ...missingRole.relation,
+              roles: [
+                ...missingRole.relation.roles,
+                { label: "Result", role: "result", symbol: "y" },
+              ],
+            },
+          },
+        ],
+      }).recognizedRelations[0]?.authority,
+    ).toBe("candidate");
+
+    const ungroundedBinding = hypothesis("test:law", "explicit", {
+      formula,
+    });
+    expect(
+      observeSelectedFormulaDecision({
+        disposition: "partial",
+        formula,
+        hypotheses: [
+          {
+            ...ungroundedBinding,
+            bindings: ungroundedBinding.bindings.map((binding) => ({
+              ...binding,
+              evidence: { ...binding.evidence, sourceRanges: [] },
+            })),
+          },
+        ],
+      }).recognizedRelations[0]?.authority,
+    ).toBe("candidate");
 
     const requiredCondition = hypothesis("test:law", "explicit", { formula });
     const conditionLimited = observeSelectedFormulaDecision({

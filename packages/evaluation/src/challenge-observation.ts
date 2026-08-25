@@ -102,11 +102,39 @@ export function observeSelectedFormulaDecision(
 function hypothesisIsEstablishmentGrade(
   hypothesis: FormulaRelationHypothesis,
 ): boolean {
+  const relationRoles = hypothesis.relation.roles;
+  const bindings = hypothesis.bindings;
+  const roleIds = relationRoles.map((role) => role.role);
+  const bindingParameters = bindings.map((binding) => binding.parameter);
   return (
     (hypothesis.support === "explicit" || hypothesis.support === "derived") &&
     hypothesis.missingDiscriminatorIds.length === 0 &&
-    hypothesis.bindings.every((binding) => binding.proof !== "candidate") &&
+    relationRoles.length > 0 &&
+    bindings.length === relationRoles.length &&
+    new Set(roleIds).size === roleIds.length &&
+    new Set(bindingParameters).size === bindingParameters.length &&
+    relationRoles.every((role) =>
+      bindings.some(
+        (binding) =>
+          binding.parameter === role.role && binding.symbol === role.symbol,
+      ),
+    ) &&
+    bindings.every(
+      (binding) =>
+        (binding.proof === "typed" || binding.proof === "derived") &&
+        binding.evidence.sourceRanges.length > 0 &&
+        binding.evidence.sourceRanges.every(validSourceRange),
+    ) &&
     hypothesis.conditions.every((condition) => condition.status === "verified")
+  );
+}
+
+function validSourceRange(range: SourceRange): boolean {
+  return (
+    Number.isInteger(range.startOffset) &&
+    Number.isInteger(range.endOffset) &&
+    range.startOffset >= 0 &&
+    range.endOffset > range.startOffset
   );
 }
 
