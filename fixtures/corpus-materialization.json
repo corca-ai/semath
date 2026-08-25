@@ -86,11 +86,11 @@
       "sha256": "4bc82b16d1cfca557eaa18edf116b6610da7e5dc06bb0f8a73949e0384346879"
     },
     {
-      "bytes": 886267,
+      "bytes": 885871,
       "cases": 720,
       "id": "electromagnetism",
       "path": "corpus/electromagnetism.json",
-      "sha256": "bfeeeb8a676753a819aa08a9a9c245a66564e4800867bcf16db4654b9b3cda2b"
+      "sha256": "09e89cd8d296f7ba9699af1e786e97a984352955e119630101bd34b60ff856ca"
     },
     {
       "bytes": 12511,
@@ -184,11 +184,11 @@
       "sha256": "73b947253177417427d320343348f51445fe333bf5c086eb1509a972b1b9cf8c"
     },
     {
-      "bytes": 596043,
+      "bytes": 595803,
       "cases": 480,
       "id": "optimization-ml-clusters",
       "path": "corpus/optimization-ml-clusters.json",
-      "sha256": "d0539023972de2efe01c829e0ed5e5373492d0ce04384ed5bfe4124345223da0"
+      "sha256": "67f893dcd45a8baec640aa186f904f3e509cda77cd1e51a6073fa6f197b7be63"
     },
     {
       "bytes": 9166,
@@ -254,6 +254,6 @@
       "sha256": "39d1369854f686e9847ff9cbad922da6d96f38177dfe977ad5e21002c3a1ec80"
     }
   ],
-  "totalBytes": 17716818,
+  "totalBytes": 17716182,
   "totalCases": 13516
 }

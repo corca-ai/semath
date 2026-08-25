@@ -757,25 +757,6 @@ impl ProjectSemanticIndex {
         self.entities.contains(entity)
     }
 
-    pub(crate) fn occurrences_for_file<'a>(
-        &'a self,
-        file_id: &str,
-    ) -> impl Iterator<Item = &'a SourceOccurrence> + 'a {
-        let first = SourceOccurrenceId {
-            file_id: file_id.to_owned(),
-            document_version: 0,
-            local_id: 0,
-        };
-        let last = SourceOccurrenceId {
-            file_id: file_id.to_owned(),
-            document_version: u64::MAX,
-            local_id: u32::MAX,
-        };
-        self.occurrences
-            .range(first..=last)
-            .map(|(_, occurrence)| occurrence)
-    }
-
     pub(crate) fn entity_decision(
         &self,
         occurrence_id: &SourceOccurrenceId,
@@ -1008,32 +989,6 @@ impl ProjectSemanticIndex {
                                 ClaimPredicate::Assumes | ClaimPredicate::Relates => false,
                             }
                     })
-            })
-    }
-
-    pub(crate) fn occurrence_has_explicit_identity(
-        &self,
-        occurrence_id: &SourceOccurrenceId,
-    ) -> bool {
-        let Some(occurrence) = self.occurrences.get(occurrence_id) else {
-            return false;
-        };
-        self.binding_claims
-            .get(&occurrence_binding_key(occurrence))
-            .into_iter()
-            .flatten()
-            .filter_map(|claim_id| self.claims.get(claim_id))
-            .any(|claim| {
-                claim.predicate == ClaimPredicate::Names
-                    && matches!(&claim.object, ClaimObject::Occurrence(id) if id == occurrence_id)
-                    && self
-                        .evidence
-                        .get(&claim.evidence_id)
-                        .is_some_and(|evidence| {
-                            evidence.origin == EvidenceOrigin::Explicit
-                                && evidence.modality == EvidenceModality::Asserted
-                                && evidence.polarity == EvidencePolarity::Positive
-                        })
             })
     }
 

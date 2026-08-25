@@ -351,6 +351,10 @@
           "label": "Every role is explicitly bound to its declared semantic domain."
         }
       ],
+      "activationPhrases": [
+        "regularized objective",
+        "regularized training objective"
+      ],
       "references": [
         "convex-optimization"
       ],
@@ -384,6 +388,10 @@
           ],
           "label": "Every role is explicitly bound to its declared semantic domain."
         }
+      ],
+      "activationPhrases": [
+        "constraint residual",
+        "numerically feasible"
       ],
       "references": [
         "convex-optimization"

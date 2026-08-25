@@ -322,7 +322,14 @@ export function validateStemBreadthBenchmark(
         }
         validateReviewProvenance(probe, scenarios);
         referenced.add(probeId);
-        decisions.add(probe.expected.decision);
+        const reviewedDecision =
+          probe.expected.formulaDecision?.status ?? probe.expected.decision;
+        if (
+          reviewedDecision !== "conventional" &&
+          reviewedDecision !== "engine-limited"
+        ) {
+          decisions.add(reviewedDecision);
+        }
       }
     }
     if (measuredCapabilities < 8) {

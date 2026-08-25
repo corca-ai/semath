@@ -595,14 +595,18 @@
           "label": "The field, speed, and independent time variable are explicitly bound to one homogeneous wave model."
         }
       ],
-      "activationPhrases": [
-        "homogeneous wave equation",
-        "scalar wave equation"
-      ],
+        "activationPhrases": [
+          "homogeneous wave equation",
+          "scalar wave equation",
+          "wave equation"
+        ],
       "references": [
         "electrodynamics"
       ],
-      "canonicalRelation": "\\nabla^2 field = \\frac{1}{speed^2} \\frac{\\partial^2 field}{\\partial time^2}"
+      "canonicalRelation": "\\nabla^2 field = \\frac{1}{speed^2} \\frac{\\partial^2 field}{\\partial time^2}",
+      "representations": [
+        "\\frac{\\partial^2 field}{\\partial time^2} = speed^2 \\nabla^2 field"
+      ]
     },
     {
       "id": "helmholtz-equation",

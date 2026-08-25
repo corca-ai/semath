@@ -1,10 +1,11 @@
 use std::collections::{BTreeSet, HashMap};
 
 use super::{
-    EngineError, SemathEngine, canonical_expression_owner, expression_carries_formula_fact,
+    EngineError, SemanticOccurrenceSeed, SemathEngine, canonical_expression_owner,
+    cursor_occurrence_is_syntax_backed, expression_carries_formula_fact,
     formula_meaning_is_adopted, formula_meaning_owns_relation_head, index_occurrence_range,
     notation_occurrence_range, occurrence_id_at_range, relation_expression_at_cursor,
-    stable_text_digest,
+    relation_range_owns_formula_root, stable_text_digest,
 };
 use crate::canonical::{
     SemanticExpr, SemanticExprKind, SemanticReference, lower_document_region, relation_head,
@@ -47,6 +48,46 @@ fn formula_meaning_ownership_is_independent_of_provenance_rule_id() {
     fact.evidence.rule_id = "public/notation-provenance-v2".into();
     assert!(formula_meaning_owns_relation_head(&fact));
     assert!(formula_meaning_is_adopted(&fact));
+}
+
+#[test]
+fn cursor_occurrence_requires_an_exact_neutral_syntax_atom() {
+    let mut source = document("main", "main.tex", "$x=1$", 1);
+    source.nodes.push(NotationNode {
+        kind: NotationNodeKind::Token,
+        parent: None,
+        children: Vec::new(),
+        ranges: NotationNodeRanges {
+            full: range(1, 2),
+            command: None,
+            name: None,
+            nucleus: None,
+            editable: Some(range(1, 2)),
+        },
+        state: SyntaxState::Complete,
+        name: None,
+        text: Some("x".into()),
+        arguments: Vec::new(),
+        lexical_class: Some(LexicalClass::Identifier),
+        math_class: None,
+        provenance: None,
+    });
+    let exact = SemanticOccurrenceSeed {
+        kind: OccurrenceKind::Notation,
+        surface: "x".into(),
+        selection_range: range(1, 2),
+        range: range(1, 2),
+        notation: Vec::new(),
+        candidate_options: Vec::new(),
+        application_end_offset: None,
+    };
+    assert!(cursor_occurrence_is_syntax_backed(&source, &exact));
+
+    let broad = SemanticOccurrenceSeed {
+        selection_range: range(1, 4),
+        ..exact
+    };
+    assert!(!cursor_occurrence_is_syntax_backed(&source, &broad));
 }
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -191,7 +232,10 @@ fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
         };
         let cursor_only_conflict = case.expected_decision == "conflicting"
             && case.expected_support.as_deref() == Some("contradicted");
-        let formula_scoped_expectation = case.expected_support.as_deref() == Some("derived");
+        let formula_scoped_expectation = matches!(
+            case.expected_support.as_deref(),
+            Some("derived" | "supported")
+        );
         let actual_decision = if formula_scoped_expectation {
             authoring_disposition_name(view.authoring_context.disposition)
         } else {
@@ -2505,8 +2549,13 @@ fn formula_metadescription_establishes_only_the_attached_relation() {
         panic!("expected semantic view")
     };
     assert!(
-        matches!(view.decision, MeaningDecision::Established { .. }),
+        matches!(view.decision, MeaningDecision::Partial { .. }),
         "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}",
     );
     assert!(view.symbol.is_some_and(|symbol| symbol.entity_id.is_none()));
     assert!(view.context.entity_id.is_some());
@@ -2583,7 +2632,6 @@ fn formula_metadescription_retains_its_meaning_after_trailing_punctuation() {
         let QueryValue::SemanticView { view } = result.value else {
             panic!("expected semantic view")
         };
-        assert!(matches!(view.decision, MeaningDecision::Established { .. }));
         assert_eq!(
             view.authoring_context.disposition,
             crate::MathAuthoringDisposition::Established
@@ -4004,24 +4052,27 @@ fn a_sign_convention_descriptor_only_authorizes_its_target_law() {
         }));
     }
 
-    for (content, formula, relation_id, condition_id) in [
+    for (content, formula, relation_id, condition_id, expected_established) in [
         (
             "Let $V$ be voltage, let $R$ be resistance, and let $I$ be electric current. Under this passive sign convention, the capacitor law is. $V=RI$.",
             "V=RI",
             "circuits:ohm-law",
             "consistent-references",
+            false,
         ),
         (
             "Let $C>0$ be capacitance, let $v(t)$ be voltage, let $i(t)$ be electric current, and let $t$ be time. Under this passive sign convention, the capacitor law is. $i(t)=C\\frac{dv}{dt}(t)$.",
             "i(t)=",
             "circuits:capacitor-current-law",
             "passive-sign-convention",
+            true,
         ),
     ] {
         let view = semantic_view_at(content, content.rfind(formula).unwrap() as u32);
-        assert_ne!(
-            view.authoring_context.disposition,
-            crate::MathAuthoringDisposition::Established
+        assert_eq!(
+            view.authoring_context.disposition == crate::MathAuthoringDisposition::Established,
+            expected_established,
+            "{content}: {view:#?}",
         );
         let hypothesis = view
             .authoring_context
@@ -4037,7 +4088,12 @@ fn a_sign_convention_descriptor_only_authorizes_its_target_law() {
             .expect("bounded relation candidate");
         assert!(hypothesis.conditions.iter().any(|condition| {
             condition.condition_id == condition_id
-                && condition.status == crate::ConstraintStatus::Required
+                && condition.status
+                    == if expected_established {
+                        crate::ConstraintStatus::Verified
+                    } else {
+                        crate::ConstraintStatus::Required
+                    }
         }));
     }
 }
@@ -4381,12 +4437,10 @@ fn symbolic_comparisons_do_not_cross_sibling_document_scopes() {
 fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
     let content = "Let $P$ be power.\nLet $F$ be force.\nLet $v$ be velocity.\nInstantaneous power is $P=\\mathbf{F}\\cdot\\mathbf{v}\\quad$.";
     let offsets = [
-        content.find("$P=").unwrap() as u32,
         content.find("P=").unwrap() as u32,
         content.find("\\mathbf{F}").unwrap() as u32,
         content.rfind("\\mathbf{v}").unwrap() as u32 + "\\mathbf{v}".len() as u32,
         content.rfind("\\quad").unwrap() as u32 + "\\quad".len() as u32,
-        content.rfind('$').unwrap() as u32 + 1,
     ];
     let mut engine = SemathEngine::default();
     engine.reset(snapshot(content)).unwrap();
@@ -4404,10 +4458,6 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
         let QueryValue::SemanticView { view } = result.value else {
             panic!("expected semantic view")
         };
-        assert!(
-            matches!(&view.decision, MeaningDecision::Established { .. }),
-            "offset {offset}"
-        );
         assert_eq!(
             view.authoring_context.disposition,
             crate::MathAuthoringDisposition::Established,
@@ -4468,7 +4518,7 @@ fn semantic_view_uses_the_relation_head_for_display_metadata_boundaries_only() {
     };
     assert_eq!(
         view.symbol.as_ref().map(|symbol| symbol.symbol.as_str()),
-        Some("Q")
+        None
     );
     assert!(view.context.entity_id.is_some());
 
@@ -4676,6 +4726,59 @@ fn a_negative_formula_in_a_disconnected_document_does_not_retract_a_relation() {
     assert_eq!(
         view.context.relations[0].relation_id,
         "fluid-mechanics:volumetric-flow-rate"
+    );
+}
+
+#[test]
+fn a_following_mean_normal_velocity_statement_verifies_the_attached_flow_formula() {
+    let source = "For a velocity field that is uniform over a cross-section, the volume crossing the\nsection in a time interval \\(\\Delta t\\) is the area \\(A\\) times the travelled distance\n\\(v\\Delta t\\).  Dividing by that interval gives the volumetric flow rate \\(Q\\),\n\\begin{equation}\n  Q = A v .\n  \\label{eq:uniform-volume-flux}\n\\end{equation}\nHere \\(v\\) is the section-averaged normal speed; a pointwise centerline speed should\nnot be substituted into Eq.~\\eqref{eq:uniform-volume-flux} unless the profile is\nactually uniform.\n";
+    let mut source_document = document("main", "main.tex", source, 1);
+    let math_start = source.find("\n  Q = A v").unwrap() as u32;
+    let math_end = source.find("\n\\end{equation}").unwrap() as u32;
+    let full_start = source.find("\\begin{equation}").unwrap() as u32;
+    let full_end = source.find("\\end{equation}").unwrap() as u32 + "\\end{equation}".len() as u32;
+    source_document.math_regions.push(crate::MathRegion {
+        full_range: range(full_start, full_end),
+        content_range: range(math_start, math_end),
+        delimiter: "equation".into(),
+        closed: true,
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![source_document],
+        })
+        .unwrap();
+
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: source.find("Q = A v").unwrap() as u32 + 1,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .any(|relation| { relation.relation_id == "fluid-mechanics:volumetric-flow-rate" })
     );
 }
 
@@ -4991,6 +5094,88 @@ fn cursor_entity_and_selected_formula_have_independent_decisions() {
 }
 
 #[test]
+fn an_explicit_formula_disjunction_is_ambiguous_at_every_nested_cursor() {
+    let content = "The specification permits either\n\\[R=A\\cap B\\qquad\\text{or}\\qquad R=A\\cup B.\\]\nNo alternative is selected.";
+    for needle in ["R=A\\cap B", "R=A\\cup B"] {
+        let view = semantic_view_at(content, content.find(needle).unwrap() as u32 + 3);
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Ambiguous,
+            "{needle}: {view:#?}"
+        );
+        assert_eq!(
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .filter(|hypothesis| {
+                    hypothesis.kind
+                        == crate::protocol::MathInterpretationKind::StructuralAlternative
+                        && hypothesis.support == crate::MathInterpretationSupportTier::Supported
+                })
+                .count(),
+            2,
+            "{needle}: {view:#?}"
+        );
+    }
+}
+
+#[test]
+fn reviewed_formula_ambiguity_is_bound_to_the_nearest_root() {
+    for (content, needle) in [
+        (
+            "The stored kinematics are\n\\[L=\\nabla u,\\qquad S=(L+L^T)/2.\\]\nReview leaves S unresolved between infinitesimal strain and rate of deformation.",
+            "S=(L+L^T)/2",
+        ),
+        (
+            "The channel may represent apparent power rather than mean electric power. The attributed display is\n\\[P_{aux}=V_{rms}I_{rms}.\\]",
+            "P_{aux}=",
+        ),
+    ] {
+        let view = semantic_view_at(content, content.find(needle).unwrap() as u32);
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Ambiguous,
+            "{content}: {view:#?}"
+        );
+    }
+}
+
+#[test]
+fn reviewed_formula_conflict_is_bound_to_the_nearest_root() {
+    for (content, needle) in [
+        (
+            "The draft used\n\\[d(v)=2|E|.\\]\nThat statement is incorrect under the declared convention. The corrected equation is $d(v)=|E|$.",
+            "d(v)=2",
+        ),
+        (
+            "The early plan proposed\n\\[J=L+\\lambda R.\\]\nThat line does not describe the released model.",
+            "J=L+",
+        ),
+        (
+            "The draft calculation was\n\\[P(A\\cup B)=P(A)+P(B).\\]\nReview rejected that value because overlap was counted twice.",
+            "P(A\\cup B)=",
+        ),
+    ] {
+        let view = semantic_view_at(content, content.find(needle).unwrap() as u32);
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Conflicting,
+            "{content}: {view:#?}"
+        );
+        assert!(view.context.relations.is_empty(), "{content}: {view:#?}");
+    }
+
+    let contrast = "The hydrostatic formula does not describe the sealed portion without a gas-pressure term. By contrast, with the vent open the accepted relation is\n\\[p_g=\\rho g h.\\]";
+    let view = semantic_view_at(contrast, contrast.find("p_g=").unwrap() as u32);
+    assert_ne!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Conflicting,
+        "a conflict without a preceding formula cannot bleed through a later contrast: {view:#?}"
+    );
+}
+
+#[test]
 fn competing_unselected_conventions_cannot_authorize_a_relation() {
     let content = "For a closed system, the note presents either the heat in and work out convention or the heat out and work in convention. Neither alternative is selected. The candidate display is $\\Delta U=Q-W$.";
     let view = semantic_view_at(content, content.rfind("\\Delta U=Q-W").unwrap() as u32);
@@ -5270,6 +5455,88 @@ fn subrelation_source_meaning_cannot_establish_a_mixed_sibling_root() {
 }
 
 #[test]
+fn a_system_root_is_established_only_when_every_relation_is_establishment_grade() {
+    let content = "Let $A$ and $B$ be sets. The set membership rules are $x\\in A\\cup B\\iff x\\in A\\lor x\\in B,\\quad x\\in A\\cap B\\iff x\\in A\\land x\\in B$.";
+    let view = semantic_view_at(content, content.rfind("A\\cap B").unwrap() as u32);
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+    for relation_id in ["discrete-math:set-union", "discrete-math:set-intersection"] {
+        assert!(
+            view.context
+                .relations
+                .iter()
+                .any(|relation| relation.relation_id == relation_id),
+            "missing {relation_id}: {view:#?}"
+        );
+    }
+}
+
+#[test]
+fn coordinated_recorded_formulae_share_the_explicit_source_adoption() {
+    let content = "### Calibrated local model\n\nNear 300 K, the thermistor bridge maps resistance to temperature and the ADC maps voltage to resistance. For small perturbations and independent ADC and calibration errors, the notebook records\n\\[\n\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV},\n\\]\n\\[\n\\sigma_T^2\\approx\\left(\\frac{dT}{dV}\\right)^2\\sigma_V^2\n+\\left(\\frac{dT}{dR}\\right)^2\\sigma_{R,\\mathrm{cal}}^2.\n\\]\n\n### Notebook correction\n\nThe technician had added raw voltage variance directly to temperature variance. Review crossed out that expression because it adds V squared to K squared. The accompanying claim of a Gaussian band also remains unsupported because no distributional model is recorded.";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+    let document = &engine.index.documents["main"];
+    let selected_range = document.parsed[1].region.content_range.clone();
+    assert!(
+        document.observations.formula_meanings.iter().any(|fact| {
+            fact.target_range == selected_range
+                && fact.authority == crate::prose::FormulaMeaningAuthority::Adopted
+        }),
+        "{:#?}",
+        document.observations.formula_meanings
+    );
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.rfind("\\sigma_T^2").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn an_adopted_equation_flow_preserves_both_role_and_root_meaning() {
+    let content = "For the alloy, $H(T)$ denotes specific enthalpy. The advected normal enthalpy flux is\n\\[q_n=\\rho u_n H(T).\\]";
+    let view = semantic_view_at(content, content.rfind("q_n=").unwrap() as u32);
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn a_prospective_equation_flow_is_partial_without_formula_authority() {
+    let content = "For the prospective resonator, $\\kappa$ is its linewidth. Its optical quality factor is\n\\[Q_o=\\omega_0/\\kappa.\\]";
+    let view = semantic_view_at(content, content.rfind("Q_o=").unwrap() as u32);
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial,
+        "{view:#?}"
+    );
+    assert!(view.context.relations.is_empty(), "{view:#?}");
+}
+
+#[test]
 fn selected_root_formula_adjudication_is_invariant_across_sibling_cursors() {
     let content =
         "Let $A$ and $B$ be events. Conditional probability is $P(A\\mid B)=P(A\\cap B)/P(B)$.";
@@ -5353,6 +5620,89 @@ fn condition_missing_and_rejected_roots_cannot_export_relations() {
     );
     assert!(view.context.relations.is_empty(), "{view:#?}");
     assert!(view.authoring_context.equation_links.is_empty());
+}
+
+#[test]
+fn trailing_formula_punctuation_belongs_to_the_root_without_adopting_a_nested_relation() {
+    let source = "$\n  x=y. \\label{eq:x}\n$";
+    let document = document("main", "main.tex", source, 1);
+    let relation_start = source.find("x=y").unwrap() as u32;
+    let relation_end = relation_start + "x=y".len() as u32;
+    assert!(relation_range_owns_formula_root(
+        &document,
+        &range(relation_start, relation_end),
+        &range(1, source.len() as u32 - 1),
+    ));
+    assert!(!relation_range_owns_formula_root(
+        &document,
+        &range(relation_start + 2, relation_end),
+        &range(1, source.len() as u32 - 1),
+    ));
+}
+
+#[test]
+fn a_complete_labeled_mass_rate_chain_establishes_its_formula_root() {
+    let content = "The meter reports cross-section mean speed $v$, and the bore determines area $A$. Liquid density and bore area are effectively constant over each acquisition window. For the local liquid phase, the adopted volume reduction is
+\\begin{equation}
+  Q=A v .
+  \\label{eq:volume-rate}
+\\end{equation}
+Density was sampled at the same temperature, allowing the corresponding mass rate to be written as
+\\begin{equation}
+  \\dot m=\\rho Q=\\rho A v .
+  \\label{eq:mass-rate}
+\\end{equation}";
+    let mut source = document("main", "main.tex", content, 1);
+    let mut cursor = 0;
+    while let Some(relative_start) = content[cursor..].find("\\begin{equation}") {
+        let full_start = cursor + relative_start;
+        let content_start = full_start + "\\begin{equation}".len();
+        let content_end = content[content_start..].find("\\end{equation}").unwrap() + content_start;
+        let full_end = content_end + "\\end{equation}".len();
+        source.math_regions.push(crate::MathRegion {
+            full_range: range(full_start as u32, full_end as u32),
+            content_range: range(content_start as u32, content_end as u32),
+            delimiter: "equation".into(),
+            closed: true,
+        });
+        cursor = full_end;
+    }
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![source],
+        })
+        .unwrap();
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: content.rfind("\\dot m=").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .any(|relation| { relation.relation_id == "fluid-mechanics:mass-flow-rate" })
+    );
 }
 
 #[test]
@@ -5988,6 +6338,112 @@ fn included_type_declarations_drive_project_law_inference() {
 }
 
 #[test]
+fn included_macro_role_declarations_bind_the_authored_call_surface() {
+    let main = "\\input{notation}\n$\\Efield=\\freecharge/\\permit$";
+    let roles = "In this manuscript, $\\Efield$ is the electric field, $\\freecharge$ is the free-charge density, and $\\permit$ is the homogeneous background permittivity.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "notation".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: range(0, 16),
+        },
+    });
+    for (name, surface) in [
+        ("Efield", "\\mathcal E"),
+        ("freecharge", "\\rho_f"),
+        ("permit", "\\varepsilon_b"),
+    ] {
+        let start = main.find(&format!("\\{name}")).unwrap() as u32;
+        let end = start + name.len() as u32 + 1;
+        main_document.macros.push(ProjectMacro {
+            kind: ProjectMacroKind::Call,
+            name: name.into(),
+            source: ProjectSourceRef {
+                file_id: "main".into(),
+                path: "main.tex".into(),
+                range: range(start, end),
+            },
+            definitions: Vec::new(),
+            expansion: ProjectMacroExpansion {
+                status: ProjectMacroExpansionStatus::Expanded,
+                depth: 0,
+                editable: false,
+                surface: Some(surface.into()),
+                input_range: Some(range(start, end)),
+                notation: None,
+            },
+        });
+    }
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![
+                main_document,
+                document("notation", "notation.tex", roles, 1),
+            ],
+        })
+        .unwrap();
+    let source_roles = engine.index.documents["notation"].observations.roles.all();
+    assert!(
+        source_roles
+            .iter()
+            .any(|role| role.symbol == "Efield"
+                && role.concept_id == "quantities-units:electric-field"),
+        "{source_roles:#?}"
+    );
+    let exported_roles = engine.index.documents["notation"]
+        .observations
+        .roles
+        .exported();
+    assert!(
+        exported_roles
+            .iter()
+            .any(|role| role.symbol == "Efield"
+                && role.concept_id == "quantities-units:electric-field"),
+        "{exported_roles:#?}"
+    );
+    assert_eq!(
+        engine.index.documents["main"].component_id,
+        engine.index.documents["notation"].component_id
+    );
+    let analyzed_main = &engine.index.documents["main"];
+    assert_eq!(analyzed_main.parsed.len(), 1);
+    assert!(analyzed_main.parsed[0].region.closed);
+    assert!(
+        analyzed_main
+            .macro_call_symbols
+            .iter()
+            .any(|(range, name)| {
+                name == "Efield"
+                    && analyzed_main.parsed[0].region.content_range.start_offset
+                        <= range.start_offset
+                    && range.end_offset <= analyzed_main.parsed[0].region.content_range.end_offset
+            })
+    );
+    let formula_offset = main.find("\\Efield").unwrap() as u32;
+    let external = &engine.index.external_types["main"];
+    for (symbol, concept) in [
+        ("\\Efield", "quantities-units:electric-field"),
+        ("\\freecharge", "electromagnetism:charge-density"),
+        ("\\permit", "electromagnetism:permittivity"),
+    ] {
+        let roles = external.roles_at(formula_offset, symbol);
+        assert!(
+            roles.iter().any(|role| role.concept_id == concept),
+            "{symbol}: {roles:#?}"
+        );
+    }
+}
+
+#[test]
 fn display_led_relational_claims_are_format_neutral_and_remain_partial() {
     let roles = "The design matrix satisfies $A\\in\\mathbb R^{m\\times n}$, the observation vector satisfies $b\\in\\mathbb R^m$, and the parameter vector satisfies $x\\in\\mathbb R^n$, with $m\\ge n$.\n";
     let cases = [
@@ -6277,57 +6733,20 @@ fn included_ordered_definition_evidence_keeps_its_source_document_anchor() {
             .interpretations
             .missing_discriminators
     );
-    let projected_requirement_evidence = view
-        .authoring_context
-        .requirements
-        .iter()
-        .flat_map(|requirement| match requirement {
-            crate::MathInterpretationRequirementInfo::Declaration { evidence, .. }
-            | crate::MathInterpretationRequirementInfo::RoleDeclaration { evidence, .. }
-            | crate::MathInterpretationRequirementInfo::Disambiguation { evidence, .. } => {
-                evidence.as_slice()
-            }
-            crate::MathInterpretationRequirementInfo::Condition { condition, .. } => {
-                condition.evidence.as_slice()
-            }
-        })
-        .filter(|item| {
-            matches!(
-                item.evidence.rule_id.as_str(),
-                "english-respectively-definition" | "english-clause-ordered-definition"
-            )
-        })
-        .collect::<Vec<_>>();
-    assert!(!projected_requirement_evidence.is_empty());
-    for item in projected_requirement_evidence {
-        assert_eq!(item.evidence.source_ranges.len(), item.source_anchors.len());
-        assert!(
-            item.evidence
-                .source_ranges
-                .iter()
-                .zip(&item.source_anchors)
-                .all(|(range, anchor)| {
-                    anchor.location.file_id == "roles"
-                        && anchor.location.path == "roles.tex"
-                        && anchor.location.range == *range
-                })
-        );
-    }
-
-    let ordered_definition_evidence = view
+    let included_definition_anchors = view
         .authoring_context
         .interpretations
         .hypotheses
         .iter()
         .flat_map(|hypothesis| &hypothesis.evidence)
-        .filter(|item| {
-            matches!(
-                item.evidence.rule_id.as_str(),
-                "english-respectively-definition" | "english-clause-ordered-definition"
-            )
-        })
+        .flat_map(|item| &item.source_anchors)
+        .filter(|anchor| anchor.location.file_id == "roles")
         .collect::<Vec<_>>();
-    assert!(ordered_definition_evidence.is_empty());
+    assert!(!included_definition_anchors.is_empty());
+    assert!(included_definition_anchors.iter().all(|anchor| {
+        anchor.location.path == "roles.tex"
+            && anchor.location.range.start_offset < anchor.location.range.end_offset
+    }));
 }
 
 #[test]
@@ -6655,6 +7074,135 @@ fn included_law_name_activates_the_typed_relation() {
 }
 
 #[test]
+fn included_coordinated_numerical_roles_establish_the_named_definition() {
+    let main = "\\input{roles}\nIts reported absolute error is $e=\\operatorname{norm}(u-u_h)$.";
+    let roles = "Let $u_h$ denote an approximate value and $u$ its exact value in the same numerical comparison. Let $e$ denote absolute error scalar.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "roles".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: range(0, 13),
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![main_document, document("roles", "roles.tex", roles, 1)],
+        })
+        .unwrap();
+    let formula_offset = main.find("e=").unwrap() as u32;
+    let source_roles = engine.index.documents["roles"].observations.roles.all();
+    assert!(
+        source_roles.iter().any(|role| {
+            role.symbol == "u_h" && role.concept_id == "numerical-analysis:approximate-value"
+        }),
+        "{source_roles:?}"
+    );
+    let external_roles = engine.index.external_types["main"].roles_at(formula_offset, "u_h");
+    assert!(
+        external_roles
+            .iter()
+            .any(|role| role.concept_id == "numerical-analysis:approximate-value"),
+        "{external_roles:?}"
+    );
+    let result = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: formula_offset,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = result.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .any(|relation| relation.relation_id == "numerical-analysis:absolute-error-definition"),
+        "{:#?}",
+        view.authoring_context
+    );
+}
+
+#[test]
+fn included_composite_assumption_verifies_the_newton_denominator() {
+    let main = "\\input{roles}\nThe Newton iteration is $q_1=q_0-f_0/c_0$.";
+    let roles = "Let $q_1$, $q_0$, $f_0$, and $c_0$ denote numerical iterate scalar, numerical iterate scalar, function value scalar, and derivative value scalar, respectively; $c_0$ is nonzero.";
+    let mut main_document = document("main", "main.tex", main, 1);
+    main_document.includes.push(ProjectInclude {
+        path: "roles".into(),
+        kind: "input".into(),
+        source: ProjectSourceRef {
+            file_id: "main".into(),
+            path: "main.tex".into(),
+            range: range(0, 13),
+        },
+    });
+    let mut engine = SemathEngine::default();
+    engine
+        .reset(ProjectSnapshot {
+            protocol_version: PROTOCOL_VERSION,
+            epoch: "project:1".into(),
+            inventory_version: 1,
+            project_id: "project".into(),
+            main_file_id: Some("main".into()),
+            documents: vec![main_document, document("roles", "roles.tex", roles, 1)],
+        })
+        .unwrap();
+    let assumptions = engine.index.documents["roles"]
+        .observations
+        .assumptions()
+        .to_vec();
+    assert!(
+        assumptions
+            .iter()
+            .any(|assumption| { assumption.value == "nonzero" && assumption.subjects == ["c_0"] }),
+        "{assumptions:?}"
+    );
+    let external_assumptions =
+        engine.index.external_types["main"].assumptions_at(main.find("q_1=").unwrap() as u32);
+    assert!(
+        external_assumptions
+            .iter()
+            .any(|assumption| { assumption.value == "nonzero" && assumption.subjects == ["c_0"] }),
+        "{external_assumptions:?}"
+    );
+    let view = engine
+        .query(query(
+            Query::SemanticView {
+                file_id: "main".into(),
+                offset: main.find("q_1=").unwrap() as u32,
+            },
+            1,
+            1,
+        ))
+        .unwrap();
+    let QueryValue::SemanticView { view } = view.value else {
+        panic!("expected semantic view")
+    };
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .any(|relation| { relation.relation_id == "numerical-analysis:newton-root-update" }),
+        "{:#?}",
+        view.authoring_context
+    );
+}
+
+#[test]
 fn declarations_in_a_later_include_do_not_flow_backwards() {
     let main = "$V=RI$\n\\input{definitions}";
     let definitions = "Let $V$ be voltage. Let $R$ be resistance. Let $I$ be electric current.";
@@ -6924,6 +7472,87 @@ fn explicit_role_shapes_do_not_conflict_with_neutral_formula_structure() {
             view.authoring_context.interpretations.hypotheses,
         );
     }
+}
+
+#[test]
+fn explicit_named_law_adoption_with_typed_roles_proves_its_intrinsic_condition() {
+    let content = "Here $J$ denotes inverse operator matrix and $A$ denotes linear operator matrix. The reviewed law context states matrix inverse for $J=\\operatorname{inv}(A)$.";
+    let view = semantic_view_at(
+        content,
+        content.find("J=\\operatorname{inv}(A)").unwrap() as u32 + 1,
+    );
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}",
+    );
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .any(|relation| { relation.relation_id == "linear-algebra:matrix-inverse-definition" }),
+        "{view:#?}"
+    );
+    let inverse = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .find(|hypothesis| hypothesis.hypothesis_id == "linear-algebra:matrix-inverse-definition")
+        .expect("matrix-inverse hypothesis");
+    assert!(
+        inverse
+            .conditions
+            .iter()
+            .all(|condition| { condition.status == crate::ConstraintStatus::Verified }),
+        "{inverse:#?}"
+    );
+}
+
+#[test]
+fn derivative_notation_derives_the_explicit_differentiation_variable_role() {
+    let content = "Suppose $f$ is differentiable on an interval. For every interior $s$, the two exact derivative notations agree: $f'(s)=\\frac{df}{ds}$.";
+    let view = semantic_view_at(content, content.rfind("f'(s)").unwrap() as u32 + 1);
+    let derivative = view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .find(|hypothesis| {
+            hypothesis.hypothesis_id == "calculus-analysis:first-derivative-relation"
+        })
+        .expect("first-derivative hypothesis");
+    assert!(
+        derivative.bindings.iter().any(|binding| {
+            binding.parameter == "variable" && binding.proof == crate::LawBindingProof::Derived
+        }),
+        "{derivative:#?}"
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}",
+    );
+
+    let structural = "The two first-derivative notations agree: $g'(s)=\\frac{dg}{ds}$.";
+    let structural_view =
+        semantic_view_at(structural, structural.rfind("g'(s)").unwrap() as u32 + 1);
+    let structural_derivative = structural_view
+        .authoring_context
+        .interpretations
+        .hypotheses
+        .iter()
+        .find(|hypothesis| {
+            hypothesis.hypothesis_id == "calculus-analysis:first-derivative-relation"
+        })
+        .expect("structural first-derivative hypothesis");
+    assert!(
+        structural_derivative.bindings.iter().any(|binding| {
+            binding.parameter == "function" && binding.proof == crate::LawBindingProof::Derived
+        }),
+        "{structural_derivative:#?}"
+    );
 }
 
 #[test]

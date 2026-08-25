@@ -128,6 +128,7 @@ pub(crate) fn application_end_offset(
             argument.kind,
             NotationNodeKind::Delimiter | NotationNodeKind::Group
         ) && argument.state == crate::SyntaxState::Complete
+            && argument.ranges.full.start_offset == occurrence_range.end_offset
             && argument.ranges.full.start_offset < argument.ranges.full.end_offset)
             .then_some(argument.ranges.full.end_offset)
     })

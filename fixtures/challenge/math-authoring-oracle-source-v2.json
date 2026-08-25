@@ -1213,6 +1213,12 @@
       ],
       "namedNeedles": [
         {
+          "fileId": "uncertainty-approximation.tex",
+          "id": "chain-formula.root",
+          "needle": "\n\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}.\n",
+          "snapshotId": "current"
+        },
+        {
           "id": "chain-formula",
           "snapshotId": "current",
           "fileId": "uncertainty-approximation.tex",
@@ -1294,6 +1300,12 @@
         }
       ],
       "namedNeedles": [
+        {
+          "fileId": "uncertainty-approximation.md",
+          "id": "chain-formula.root",
+          "needle": "\n\\frac{dT}{dV}=\\frac{dT}{dR}\\frac{dR}{dV}.\n",
+          "snapshotId": "current"
+        },
         {
           "id": "chain-formula",
           "snapshotId": "current",

@@ -516,7 +516,7 @@ pub(crate) fn coordinated_descriptions(
                 after.len() - body.len() + consumed,
             ));
         }
-        if lead == CoordinationLead::Write
+        if matches!(lead, CoordinationLead::Let | CoordinationLead::Write)
             && let Some((descriptions, consumed)) = coordinated_body(body, arity)
         {
             return Some((

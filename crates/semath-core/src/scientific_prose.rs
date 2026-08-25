@@ -1572,6 +1572,8 @@ fn classify_discourse_frame(
             " are forbidden",
             " is invalid",
             " are invalid",
+            " is incorrect",
+            " are incorrect",
             " is unavailable",
             " are unavailable",
             " is unusable",
@@ -1925,6 +1927,7 @@ fn negative_formula_action_marker(value: &str) -> Option<(usize, usize)> {
                         | "ever"
                         | "longer"
                         | "still"
+                        | "yet"
                         | "currently"
                         | "directly"
                         | "explicitly"
@@ -3672,6 +3675,32 @@ mod tests {
             &mentions,
             &[("cross section mean", "averaging", "mean-normal-velocity")],
         );
+        assert!(assumptions.iter().any(|assumption| {
+            assumption.value == "mean-normal-velocity"
+                && assumption
+                    .subjects
+                    .iter()
+                    .any(|subject| subject.symbol == "v")
+        }));
+
+        let source = "Here $v$ is the section-averaged normal speed; a pointwise centerline speed should not be substituted unless the profile is actually uniform.";
+        let start = source.find("$v$").unwrap();
+        let mentions = [ScientificMention {
+            symbol: "v".into(),
+            start,
+            end: start + 3,
+            math_index: 0,
+        }];
+        let assumptions = segment_scientific_clauses(source, DocumentLanguage::Latex, &[])
+            .iter()
+            .flat_map(|clause| {
+                extract_assumptions_with_phrases(
+                    clause,
+                    &mentions,
+                    &[("section averaged", "averaging", "mean-normal-velocity")],
+                )
+            })
+            .collect::<Vec<_>>();
         assert!(assumptions.iter().any(|assumption| {
             assumption.value == "mean-normal-velocity"
                 && assumption
