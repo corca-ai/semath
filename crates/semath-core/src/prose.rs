@@ -99,7 +99,21 @@ pub(crate) struct ProseObservations {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct FormulaMeaningFact {
     pub target_range: SourceRange,
+    pub ownership: FormulaMeaningOwnership,
+    pub authority: FormulaMeaningAuthority,
     pub evidence: Evidence,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum FormulaMeaningOwnership {
+    ExactTarget,
+    RelationHead,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum FormulaMeaningAuthority {
+    Adopted,
+    Descriptive,
 }
 
 pub(crate) fn assumption_formula_targets(assumption: &AssumptionInfo) -> &[SourceRange] {
@@ -226,7 +240,23 @@ impl ScientificSemanticEvidence {
     }
 
     pub(crate) fn formula_is_rejected(&self, range: &SourceRange) -> bool {
-        self.formula_disposition(range).0 == crate::semantic_index::EvidencePolarity::Negative
+        self.formula_is_explicitly_retracted(range)
+            || self.formula_disposition(range).0
+                == crate::semantic_index::EvidencePolarity::Negative
+    }
+
+    pub(crate) fn formula_refutation_evidence(&self, range: &SourceRange) -> Option<Evidence> {
+        let clause = self
+            .clauses
+            .iter()
+            .find(|clause| clause.rejected_formula_range.as_ref() == Some(range))?;
+        Some(Evidence {
+            rule_id: "scientific-prose/formula-refutation".into(),
+            kind: "explicit-prose".into(),
+            strength: "hard".into(),
+            source_ranges: vec![clause.range.clone(), range.clone()],
+            source_anchors: Vec::new(),
+        })
     }
 
     pub(crate) fn formula_is_explicitly_retracted(&self, range: &SourceRange) -> bool {
@@ -415,7 +445,10 @@ pub(crate) fn observe_prose(
         &clauses,
         &mentions,
         &events,
-        &construction_targets,
+        AssumptionDiscourse {
+            constructions: &discourse_constructions,
+            targets: &construction_targets,
+        },
         &mut analysis,
     );
 
@@ -1708,6 +1741,8 @@ fn collect_equation_flow_definitions(
             if let Some(target) = target {
                 output.formula_meanings.push(FormulaMeaningFact {
                     target_range: target.range.clone(),
+                    ownership: formula_meaning_ownership(&description),
+                    authority: formula_meaning_authority(&description),
                     evidence: Evidence {
                         rule_id: formula_meaning_rule_id(&description).into(),
                         kind: "attached-prose".into(),
@@ -1751,6 +1786,8 @@ fn collect_equation_flow_definitions(
         if classify_role(&description).is_none() {
             output.formula_meanings.push(FormulaMeaningFact {
                 target_range: symbol_range,
+                ownership: formula_meaning_ownership(&description),
+                authority: formula_meaning_authority(&description),
                 evidence: Evidence {
                     rule_id: formula_meaning_rule_id(&description).into(),
                     kind: "attached-prose".into(),
@@ -1972,6 +2009,33 @@ fn formula_meaning_rule_id(description: &str) -> &'static str {
         "english-notation-meaning"
     } else {
         "english-equation-flow-meaning"
+    }
+}
+
+fn formula_meaning_ownership(description: &str) -> FormulaMeaningOwnership {
+    if formula_description_words(description)
+        .last()
+        .is_some_and(|word| word == "notation")
+    {
+        FormulaMeaningOwnership::RelationHead
+    } else {
+        FormulaMeaningOwnership::ExactTarget
+    }
+}
+
+fn formula_meaning_authority(description: &str) -> FormulaMeaningAuthority {
+    let words = formula_description_words(description).collect::<Vec<_>>();
+    if words.last().is_some_and(|word| word == "notation")
+        || words.iter().any(|word| {
+            matches!(
+                word.as_str(),
+                "accepted" | "adopted" | "approved" | "chosen" | "selected"
+            )
+        })
+    {
+        FormulaMeaningAuthority::Adopted
+    } else {
+        FormulaMeaningAuthority::Descriptive
     }
 }
 
@@ -2236,6 +2300,7 @@ fn collect_semantic_evidence(
                     | "balance"
                     | "estimate"
                     | "calculation"
+                    | "proposal"
             )
         };
         let is_target_tail = |word: &str| {
@@ -2390,6 +2455,25 @@ fn collect_semantic_evidence(
                 }
                 let continuation = &words[refusal_prefix + 1..];
                 continuation.is_empty()
+                    || continuation
+                        .iter()
+                        .enumerate()
+                        .rev()
+                        .find(|(_, word)| is_formula_metanoun(word))
+                        .is_some_and(|(metanoun, _)| {
+                            metanoun_is_directly_owned(
+                                &continuation
+                                    .iter()
+                                    .map(|word| (*word).to_owned())
+                                    .collect::<Vec<_>>(),
+                                metanoun,
+                            ) && (continuation[metanoun + 1..]
+                                .iter()
+                                .all(|word| is_target_tail(word))
+                                || continuation[metanoun + 1..]
+                                    .first()
+                                    .is_some_and(|word| matches!(*word, "under" | "within")))
+                        })
                     || (matches!(*word, "withdraw" | "withdraws" | "withdrew" | "withdrawn")
                         && continuation.first() == Some(&"and")
                         && continuation.contains(&"archival")
@@ -2572,6 +2656,30 @@ fn collect_semantic_evidence(
         });
         targeted_refusal || negative_action
     };
+    let demonstrative_formula_target = |value: &str| {
+        let words = value
+            .to_ascii_lowercase()
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        words.windows(2).any(|pair| {
+            matches!(pair[0].as_str(), "this" | "that")
+                && matches!(
+                    pair[1].as_str(),
+                    "formula"
+                        | "equation"
+                        | "identity"
+                        | "law"
+                        | "model"
+                        | "relation"
+                        | "balance"
+                        | "estimate"
+                        | "calculation"
+                        | "proposal"
+                )
+        })
+    };
     let attachment = AttachmentGraph::new(document);
     let scopes = ScopeGraph::new(document);
     let clause_evidence = clauses
@@ -2616,6 +2724,8 @@ fn collect_semantic_evidence(
                 None
             };
             let rejected_formula_range = if clause.frame.polarity == EvidencePolarity::Negative {
+                let demonstrative_target =
+                    demonstrative_formula_target(&source[clause.start..clause.end]);
                 polarity_range.clone().and_then(|marker| {
                     let clause_scope = scopes.path_at(range.start_offset);
                     let mut candidates = parsed
@@ -2623,7 +2733,10 @@ fn collect_semantic_evidence(
                         .map(|math| math.region.content_range.clone())
                         .filter(|formula| {
                             scope_visible(&clause_scope, &scopes.path_at(formula.start_offset))
-                                && attachment.permits(&range, formula)
+                                && (attachment.permits(&range, formula)
+                                    || demonstrative_target
+                                        && formula.end_offset <= range.start_offset
+                                        && range.start_offset - formula.end_offset <= 32)
                         })
                         .filter_map(|formula| {
                             let marker_distance = if formula.end_offset <= marker.start_offset {
@@ -2676,23 +2789,24 @@ fn collect_semantic_evidence(
                         clause.end
                     };
                     let formula_precedes_marker = formula.end_offset <= marker.start_offset
-                        && source[formula_end..marker_start]
-                            .split(|character: char| !character.is_ascii_alphabetic())
-                            .filter(|word| !word.is_empty())
-                            .all(|word| {
-                                matches!(
-                                    word.to_ascii_lowercase().as_str(),
-                                    "is" | "are"
-                                        | "was"
-                                        | "were"
-                                        | "has"
-                                        | "have"
-                                        | "had"
-                                        | "will"
-                                        | "must"
-                                        | "should"
-                                )
-                            });
+                        && (demonstrative_target
+                            || source[formula_end..marker_start]
+                                .split(|character: char| !character.is_ascii_alphabetic())
+                                .filter(|word| !word.is_empty())
+                                .all(|word| {
+                                    matches!(
+                                        word.to_ascii_lowercase().as_str(),
+                                        "is" | "are"
+                                            | "was"
+                                            | "were"
+                                            | "has"
+                                            | "have"
+                                            | "had"
+                                            | "will"
+                                            | "must"
+                                            | "should"
+                                    )
+                                }));
                     let refusal_before_formula = formula_refusal(
                         &source[clause.start..marker_start],
                         &source[marker_start..predicate_end],
@@ -3146,6 +3260,48 @@ fn construction_formula_targets(
                         identifies_formula: true,
                     });
             }
+        }
+    }
+    for construction in constructions {
+        let DiscourseConstruction::AlternativeSelection {
+            selection_clause_index,
+            target_mention_index,
+            evidence_start,
+            evidence_end,
+            ..
+        } = construction
+        else {
+            continue;
+        };
+        let Some((clause, mention)) = clauses
+            .get(*selection_clause_index)
+            .zip(mentions.get(*target_mention_index))
+        else {
+            continue;
+        };
+        let evidence_range = SourceRange {
+            start_offset: index.utf16_for_byte(*evidence_start),
+            end_offset: index.utf16_for_byte(*evidence_end),
+        };
+        let target_range = SourceRange {
+            start_offset: index.utf16_for_byte(mention.start),
+            end_offset: index.utf16_for_byte(mention.end),
+        };
+        if attachment.permits(&evidence_range, &target_range) {
+            targets
+                .entry(clause.start)
+                .or_default()
+                .push(ConstructionFormulaTarget {
+                    relation_centered: canonical_expressions.iter().any(|expression| {
+                        ranges_overlap(&expression.range, &target_range)
+                            && matches!(
+                                expression.kind,
+                                SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                            )
+                    }),
+                    range: target_range,
+                    identifies_formula: false,
+                });
         }
     }
     for values in targets.values_mut() {
@@ -3862,13 +4018,18 @@ fn collect_ordered_clause_definition(
     }
 }
 
+struct AssumptionDiscourse<'a> {
+    constructions: &'a [DiscourseConstruction],
+    targets: &'a BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
+}
+
 fn collect_assumptions(
     source: &str,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
-    construction_targets: &BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
+    discourse: AssumptionDiscourse<'_>,
     output: &mut ProseObservations,
 ) {
     let condition_phrases = built_in_packs()
@@ -3905,7 +4066,8 @@ fn collect_assumptions(
     condition_formula_descriptors.sort();
     condition_formula_descriptors.dedup();
     for (clause_index, clause) in clauses.iter().enumerate() {
-        let clause_targets = construction_targets
+        let clause_targets = discourse
+            .targets
             .get(&clause.start)
             .into_iter()
             .flatten()
@@ -3973,6 +4135,63 @@ fn collect_assumptions(
                 },
             });
         }
+    }
+    for construction in discourse.constructions {
+        let DiscourseConstruction::AlternativeSelection {
+            alternatives_clause_index,
+            selection_clause_index,
+            selected: false,
+            ..
+        } = construction
+        else {
+            continue;
+        };
+        let Some(clause) = clauses.get(*selection_clause_index) else {
+            continue;
+        };
+        let Some(alternatives_clause) = clauses.get(*alternatives_clause_index) else {
+            continue;
+        };
+        let alternatives_range = SourceRange {
+            start_offset: index.utf16_for_byte(alternatives_clause.start),
+            end_offset: index.utf16_for_byte(alternatives_clause.end),
+        };
+        let Some(prior) = output
+            .assumptions
+            .iter()
+            .filter(|assumption| assumption.kind == "sign-convention")
+            .find(|assumption| {
+                assumption.evidence.source_ranges.iter().any(|range| {
+                    alternatives_range.start_offset <= range.start_offset
+                        && range.end_offset <= alternatives_range.end_offset
+                })
+            })
+        else {
+            continue;
+        };
+        let Some(target) = discourse
+            .targets
+            .get(&clause.start)
+            .and_then(|targets| targets.first())
+        else {
+            continue;
+        };
+        let phrase_range = SourceRange {
+            start_offset: index.utf16_for_byte(clause.start),
+            end_offset: index.utf16_for_byte(clause.end),
+        };
+        output.assumptions.push(AssumptionInfo {
+            kind: "alternative-selection".into(),
+            value: assumption_value_and_target(&prior.value).0.to_owned(),
+            subjects: Vec::new(),
+            evidence: Evidence {
+                rule_id: "scientific-prose/alternative-selection".into(),
+                kind: "discourse-target".into(),
+                strength: "strong".into(),
+                source_ranges: vec![target.range.clone(), phrase_range],
+                source_anchors: Vec::new(),
+            },
+        });
     }
     collect_typed_regularity_assumptions(source, index, clauses, mentions, output);
     output.assumptions.sort_by(|left, right| {
@@ -4571,6 +4790,8 @@ fn push_formula_metadescription(
     };
     analysis.formula_meanings.push(FormulaMeaningFact {
         target_range: expression.range.clone(),
+        ownership: formula_meaning_ownership(description),
+        authority: formula_meaning_authority(description),
         evidence: Evidence {
             rule_id: formula_meaning_rule_id(description).into(),
             kind: "attached-prose".into(),
@@ -6446,6 +6667,33 @@ gain.";
             !analysis
                 .semantic_evidence
                 .formula_is_explicitly_retracted(&formulas[1].content_range)
+        );
+    }
+
+    #[test]
+    fn demonstrative_proposal_refusal_targets_the_preceding_formula() {
+        let source = "A draft proposed $A=B$. Review rejects that proposal under the stated assumptions. The adopted relation is $A=-B$.";
+        let analysis = analyze(source);
+        let formulas = test_math_regions(source, DocumentLanguage::Latex);
+
+        assert_eq!(formulas.len(), 2);
+        assert!(
+            analysis
+                .semantic_evidence
+                .formula_is_explicitly_retracted(&formulas[0].content_range),
+            "{:#?}",
+            analysis.semantic_evidence.clauses
+        );
+        assert!(
+            analysis
+                .semantic_evidence
+                .formula_refutation_evidence(&formulas[0].content_range)
+                .is_some()
+        );
+        assert!(
+            !analysis
+                .semantic_evidence
+                .formula_is_rejected(&formulas[1].content_range)
         );
     }
 

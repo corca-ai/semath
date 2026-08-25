@@ -76,16 +76,34 @@ export interface MathAuthoringOracleSourceCase {
   }[];
 }
 
-export interface EvidenceConstraint {
-  readonly anchors: readonly string[];
+export interface EvidenceAnchorState {
+  readonly anchor: string;
   readonly generation: "authored" | "generated";
-  readonly kind: string;
   readonly lifecycle: "current" | "retracted";
+}
+
+interface EvidenceConstraintBase {
+  readonly kind: string;
   readonly provenance?: MathInterpretationEvidenceInfo["provenance"];
   readonly role?: MathInterpretationEvidenceInfo["role"];
   readonly ruleId?: string;
   readonly strength: string;
 }
+
+export type EvidenceConstraint = EvidenceConstraintBase & (
+  | {
+      readonly anchors: readonly string[];
+      readonly anchorStates?: never;
+      readonly generation: "authored" | "generated";
+      readonly lifecycle: "current" | "retracted";
+    }
+  | {
+      readonly anchors?: never;
+      readonly anchorStates: readonly EvidenceAnchorState[];
+      readonly generation?: never;
+      readonly lifecycle?: never;
+    }
+);
 
 export interface HypothesisSelector {
   readonly formulaAnchor: string;
@@ -706,12 +724,12 @@ function compilePreCapSemanticKey(
     return {
       provenance: reviewed.provenance,
       role: reviewed.role,
-      sourceAnchors: reviewed.anchors.map((anchorId) => {
-        const anchor = requiredValue(anchors[anchorId], `${constraint.id}: pre-cap evidence anchor ${anchorId} missing`);
+      sourceAnchors: evidenceAnchorStates(reviewed).map((state) => {
+        const anchor = requiredValue(anchors[state.anchor], `${constraint.id}: pre-cap evidence anchor ${state.anchor} missing`);
         return {
           documentVersion: anchor.documentVersion,
-          generation: reviewed.generation,
-          lifecycle: reviewed.lifecycle,
+          generation: state.generation,
+          lifecycle: state.lifecycle,
           location: anchor.location,
         };
       }),
@@ -748,9 +766,11 @@ function sourceRelativeCapProjection(
       evidence: hypothesis.evidence.map((id) => {
         const evidence = requiredValue(oracle.evidence[id], `${constraint.id}: cap evidence missing`);
         return {
-          anchors: evidence.anchors.map((anchorId) => anchors[anchorId]?.logicalId),
-          generation: evidence.generation,
-          lifecycle: evidence.lifecycle,
+          anchorStates: evidenceAnchorStates(evidence).map((state) => ({
+            anchor: anchors[state.anchor]?.logicalId,
+            generation: state.generation,
+            lifecycle: state.lifecycle,
+          })).sort(stableCompare),
           provenance: evidence.provenance,
           role: evidence.role,
         };
@@ -779,12 +799,12 @@ function sourceRelativeRequiredHypothesesProjection(
     evidence: hypothesis.evidence.map((id) => {
       const evidence = requiredValue(oracle.evidence[id], `${constraint.id}: paired hypothesis evidence missing`);
       return {
-        anchors: evidence.anchors.map((anchorId) =>
-          requiredValue(anchors[anchorId], `${constraint.id}: paired hypothesis evidence anchor missing`).logicalId
-        ).sort(),
-        generation: evidence.generation,
+        anchorStates: evidenceAnchorStates(evidence).map((state) => ({
+          anchor: requiredValue(anchors[state.anchor], `${constraint.id}: paired hypothesis evidence anchor missing`).logicalId,
+          generation: state.generation,
+          lifecycle: state.lifecycle,
+        })).sort(stableCompare),
         kind: evidence.kind,
-        lifecycle: evidence.lifecycle,
         provenance: evidence.provenance ?? null,
         role: evidence.role ?? null,
         ruleId: evidence.ruleId ?? null,
@@ -823,15 +843,15 @@ function sourceRelativePairSafetyProjection(
       `${constraint.id}: paired safety evidence ${id} missing`,
     );
     return {
-      anchors: reviewed.anchors.map((anchorId) =>
-        requiredValue(
-          anchors[anchorId],
+      anchorStates: evidenceAnchorStates(reviewed).map((state) => ({
+        anchor: requiredValue(
+          anchors[state.anchor],
           `${constraint.id}: paired safety evidence anchor missing`,
-        ).logicalId
-      ).sort(),
-      generation: reviewed.generation,
+        ).logicalId,
+        generation: state.generation,
+        lifecycle: state.lifecycle,
+      })).sort(stableCompare),
       kind: reviewed.kind,
-      lifecycle: reviewed.lifecycle,
       provenance: reviewed.provenance ?? null,
       role: reviewed.role ?? null,
       ruleId: reviewed.ruleId ?? null,
@@ -1406,8 +1426,45 @@ function pairProjection(
 }
 
 function parseEvidenceConstraint(value: unknown, path: string): EvidenceConstraint {
-  const item = object(value, path, ["anchors", "generation", "kind", "lifecycle", "strength"], ["provenance", "role", "ruleId"]);
-  return { anchors: strings(item.anchors, `${path}.anchors`), generation: choice(item.generation, ["authored", "generated"], `${path}.generation`), kind: text(item.kind, `${path}.kind`), lifecycle: choice(item.lifecycle, ["current", "retracted"], `${path}.lifecycle`), ...(item.provenance === undefined ? {} : { provenance: choice(item.provenance, provenances, `${path}.provenance`) }), ...(item.role === undefined ? {} : { role: choice(item.role, ["supporting", "contradicting"], `${path}.role`) }), ...(item.ruleId === undefined ? {} : { ruleId: text(item.ruleId, `${path}.ruleId`) }), strength: text(item.strength, `${path}.strength`) };
+  const item = object(
+    value,
+    path,
+    ["kind", "strength"],
+    ["anchors", "anchorStates", "generation", "lifecycle", "provenance", "role", "ruleId"],
+  );
+  const common = {
+    kind: text(item.kind, `${path}.kind`),
+    ...(item.provenance === undefined ? {} : { provenance: choice(item.provenance, provenances, `${path}.provenance`) }),
+    ...(item.role === undefined ? {} : { role: choice(item.role, ["supporting", "contradicting"], `${path}.role`) }),
+    ...(item.ruleId === undefined ? {} : { ruleId: text(item.ruleId, `${path}.ruleId`) }),
+    strength: text(item.strength, `${path}.strength`),
+  };
+  if (item.anchorStates !== undefined) {
+    if (item.anchors !== undefined || item.generation !== undefined || item.lifecycle !== undefined) {
+      throw new Error(`${path}: anchorStates is mutually exclusive with anchors/generation/lifecycle`);
+    }
+    const anchorStates = array(item.anchorStates, `${path}.anchorStates`).map((value, index) => {
+      const statePath = `${path}.anchorStates[${index}]`;
+      const state = object(value, statePath, ["anchor", "generation", "lifecycle"]);
+      return {
+        anchor: text(state.anchor, `${statePath}.anchor`),
+        generation: choice(state.generation, ["authored", "generated"], `${statePath}.generation`),
+        lifecycle: choice(state.lifecycle, ["current", "retracted"], `${statePath}.lifecycle`),
+      };
+    });
+    if (anchorStates.length === 0) throw new Error(`${path}.anchorStates: expected at least one anchor state`);
+    unique(anchorStates.map((state) => state.anchor), `${path}.anchorStates.anchor`);
+    return { ...common, anchorStates };
+  }
+  if (item.anchors === undefined || item.generation === undefined || item.lifecycle === undefined) {
+    throw new Error(`${path}: expected either anchorStates or complete anchors/generation/lifecycle`);
+  }
+  return {
+    ...common,
+    anchors: strings(item.anchors, `${path}.anchors`),
+    generation: choice(item.generation, ["authored", "generated"], `${path}.generation`),
+    lifecycle: choice(item.lifecycle, ["current", "retracted"], `${path}.lifecycle`),
+  };
 }
 
 function parseCaseConstraint(value: unknown, index: number): MathAuthoringCaseConstraint {
@@ -1605,10 +1662,10 @@ function validateConstraintReferences(
   for (const id of evidenceIds) {
     const evidence = oracle.evidence[id];
     if (!evidence) throw new Error(`${item.id}: unknown evidence ${id}`);
-    for (const anchorId of evidence.anchors) {
-      const anchor = anchors[anchorId];
+    for (const state of evidenceAnchorStates(evidence)) {
+      const anchor = anchors[state.anchor];
       if (!anchor || anchor.caseId !== item.sourceCaseId) {
-        throw new Error(`${item.id}: evidence ${id} has an unknown or cross-case anchor ${anchorId}`);
+        throw new Error(`${item.id}: evidence ${id} has an unknown or cross-case anchor ${state.anchor}`);
       }
     }
   }
@@ -1628,7 +1685,9 @@ function validateConstraintReferences(
     if (!generated.evidence.length) throw new Error(`${item.id}: generated subnode requires reviewed evidence`);
     for (const id of generated.evidence) {
       const evidence = requiredValue(oracle.evidence[id], `${item.id}: generated subnode evidence missing`);
-      if (evidence.generation !== "generated" || !evidence.anchors.includes(generated.anchor)) {
+      if (!evidenceAnchorStates(evidence).some((state) =>
+        state.anchor === generated.anchor && state.generation === "generated"
+      )) {
         throw new Error(`${item.id}: generated subnode evidence ${id} must identify its generated anchor`);
       }
     }
@@ -1722,9 +1781,16 @@ function requiredConditionConstraintsMatch(actual: MathInterpretationHypothesisI
   return stableJson(actual.map(({ conditionId, label, status }) => ({ conditionId, label, status })).sort(stableCompare)) === stableJson([...expected].sort(stableCompare));
 }
 function interpretationEvidenceMatches(item: MathInterpretationEvidenceInfo, expected: EvidenceConstraint, compiled: CompiledMathAuthoringOracle): boolean { return item.evidence.kind === expected.kind && (expected.ruleId === undefined || item.evidence.ruleId === expected.ruleId) && item.evidence.strength === expected.strength && (expected.provenance === undefined || item.provenance === expected.provenance) && (expected.role === undefined || item.role === expected.role) && sameAnchorSet(item.sourceAnchors, expected, compiled); }
-function sameAnchorSet(actual: readonly { documentVersion: number; generation: "authored" | "generated"; lifecycle: "current" | "retracted"; location: { fileId: string; path: string; range: SourceRange } }[], expected: EvidenceConstraint, compiled: CompiledMathAuthoringOracle): boolean { return stableJson(actual.map((item) => ({ anchor: logicalAnchorForLocation(item.location, item.documentVersion, compiled), generation: item.generation, lifecycle: item.lifecycle })).sort(stableCompare)) === stableJson(expected.anchors.map((id) => ({ anchor: compiled.anchors[id]?.logicalId, generation: expected.generation, lifecycle: expected.lifecycle })).sort(stableCompare)); }
+function sameAnchorSet(actual: readonly { documentVersion: number; generation: "authored" | "generated"; lifecycle: "current" | "retracted"; location: { fileId: string; path: string; range: SourceRange } }[], expected: EvidenceConstraint, compiled: CompiledMathAuthoringOracle): boolean { return stableJson(actual.map((item) => ({ anchor: logicalAnchorForLocation(item.location, item.documentVersion, compiled), generation: item.generation, lifecycle: item.lifecycle })).sort(stableCompare)) === stableJson(evidenceAnchorStates(expected).map((state) => ({ anchor: compiled.anchors[state.anchor]?.logicalId, generation: state.generation, lifecycle: state.lifecycle })).sort(stableCompare)); }
 function evidenceReferencesKey(items: readonly MathInterpretationEvidenceReferenceInfo[], compiled: CompiledMathAuthoringOracle): unknown { return items.map((item) => ({ kind: item.evidence.kind, ruleId: item.evidence.ruleId, strength: item.evidence.strength, anchors: item.sourceAnchors.map((anchor) => ({ anchor: logicalAnchorForLocation(anchor.location, anchor.documentVersion, compiled), generation: anchor.generation, lifecycle: anchor.lifecycle })).sort(stableCompare) })).sort(stableCompare); }
-function evidenceConstraintProjection(item: EvidenceConstraint, compiled: CompiledMathAuthoringOracle): unknown { return { anchors: item.anchors.map((id) => ({ anchor: compiled.anchors[id]?.logicalId, generation: item.generation, lifecycle: item.lifecycle })).sort(stableCompare), kind: item.kind, ruleId: item.ruleId, strength: item.strength }; }
+function evidenceConstraintProjection(item: EvidenceConstraint, compiled: CompiledMathAuthoringOracle): unknown { return { anchors: evidenceAnchorStates(item).map((state) => ({ anchor: compiled.anchors[state.anchor]?.logicalId, generation: state.generation, lifecycle: state.lifecycle })).sort(stableCompare), kind: item.kind, ruleId: item.ruleId, strength: item.strength }; }
+function evidenceAnchorStates(item: EvidenceConstraint): readonly EvidenceAnchorState[] {
+  return item.anchorStates ?? item.anchors.map((anchor) => ({
+    anchor,
+    generation: item.generation,
+    lifecycle: item.lifecycle,
+  }));
+}
 function requirementMatches(item: MathInterpretationRequirementInfo, expected: RequirementConstraint): boolean { if (item.kind !== expected.kind) return false; if (expected.symbol !== undefined && (!("symbol" in item) || item.symbol !== expected.symbol)) return false; if (expected.parameter !== undefined && (item.kind !== "role-declaration" || item.parameter !== expected.parameter)) return false; return expected.conditionLabel === undefined || (item.kind === "condition" && item.condition.label === expected.conditionLabel); }
 function contextHasAnchor(context: MathAuthoringContext, anchor: ResolvedNamedAnchor): boolean { let found = false; const visit = (value: unknown): void => { if (found || !value) return; if (Array.isArray(value)) { value.forEach(visit); return; } if (typeof value !== "object") return; const item = value as Record<string, unknown>; if (isLocation(item.location) && typeof item.documentVersion === "number" && sameResolvedAnchor(item.location, item.documentVersion, anchor)) found = true; Object.values(item).forEach(visit); }; visit(context); return found; }
 function logicalAnchorForLocation(location: { fileId: string; path: string; range: SourceRange }, version: number, compiled: CompiledMathAuthoringOracle): string | null { return Object.values(compiled.anchors).find((anchor) => sameResolvedAnchor(location, version, anchor))?.logicalId ?? null; }
@@ -1857,7 +1923,7 @@ function validateReviewAttestation(oracle: MathAuthoringOracle, value: unknown):
 function reviewIdentity(value: unknown, path: string): string {
   const identity = text(value, path);
   if (/pending|placeholder|self|unknown|tbd/iu.test(identity) ||
-    !/^(?:agent:\/root\/[a-z0-9_/-]+|github:[a-z0-9_.-]+\/[a-z0-9_.-]+)$/iu.test(identity)) {
+    !/^(?:agent:\/root(?:\/[a-z0-9_/-]+)?|github:[a-z0-9_.-]+\/[a-z0-9_.-]+)$/iu.test(identity)) {
     throw new Error(`${path}: expected externally identifiable non-placeholder reviewer/author`);
   }
   return identity;

@@ -82,7 +82,31 @@ impl DomainObservations {
     }
 
     pub(crate) fn all_at(&self, offset: u32) -> Vec<DomainActivation> {
-        self.accumulate(offset)
+        self.accumulate(offset, None)
+            .into_iter()
+            .map(|(pack_id, activation)| DomainActivation {
+                pack_id,
+                pack_version: activation.pack_version,
+                title: activation.title,
+                support: activation.support,
+                scope_kind: activation.scope_kind.into(),
+                scope_range: activation.scope_range,
+                evidence: activation.evidence,
+            })
+            .collect()
+    }
+
+    pub(crate) fn all_for_range_with_truncation(
+        &self,
+        range: &SourceRange,
+    ) -> (Vec<DomainActivation>, bool) {
+        let active = self.all_for_range(range);
+        let truncated = active.len() > MAX_ACTIVATIONS;
+        (active, truncated)
+    }
+
+    pub(crate) fn all_for_range(&self, range: &SourceRange) -> Vec<DomainActivation> {
+        self.accumulate(range.start_offset, Some(range))
             .into_iter()
             .map(|(pack_id, activation)| DomainActivation {
                 pack_id,
@@ -97,7 +121,7 @@ impl DomainObservations {
     }
 
     pub(crate) fn relevance(&self, pack_id: &str, offset: u32) -> Option<DomainRelevance> {
-        self.accumulate(offset)
+        self.accumulate(offset, None)
             .into_iter()
             .find(|(candidate, _)| candidate == pack_id)
             .map(|(_, activation)| DomainRelevance {
@@ -118,7 +142,11 @@ impl DomainObservations {
             + self.equations.len() as u32
     }
 
-    fn accumulate(&self, offset: u32) -> Vec<(String, ActivationAccumulator)> {
+    fn accumulate(
+        &self,
+        offset: u32,
+        selected_range: Option<&SourceRange>,
+    ) -> Vec<(String, ActivationAccumulator)> {
         let mut active = BTreeMap::<String, ActivationAccumulator>::new();
         for hypothesis in &self.hypotheses {
             if !self.scopes.visible(hypothesis.scope_id, offset) {
@@ -139,7 +167,14 @@ impl DomainObservations {
             );
         }
         for equation in &self.equations {
-            let in_equation = self.include_current_equation && equation.range.contains(offset);
+            let in_equation = self.include_current_equation
+                && selected_range.map_or_else(
+                    || equation.range.contains(offset),
+                    |range| {
+                        equation.range.start_offset < range.end_offset
+                            && range.start_offset < equation.range.end_offset
+                    },
+                );
             let precedes_in_scope = equation.range.end_offset <= offset
                 && equation.source_established
                 && self.scopes.visible(equation.scope_id, offset);

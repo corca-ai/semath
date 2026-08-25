@@ -1,5 +1,11 @@
 import type { SemanticViewInfo } from "../../../packages/protocol/src/index";
 import type { CorpusDocument } from "./model";
+import {
+  evidenceBelongsToFormulaDocument,
+  interpretationEvidenceIsGrounded,
+  observeSelectedFormulaDecision,
+  sameFormulaAnchor,
+} from "./challenge-observation";
 
 export const RECOGNITION_FRONTIER_STAGES = [
   "syntax-unavailable",
@@ -15,7 +21,11 @@ export const RECOGNITION_FRONTIER_STAGES = [
 
 export type RecognitionFrontierStage =
   (typeof RECOGNITION_FRONTIER_STAGES)[number];
-export type RecognitionDecision = SemanticViewInfo["decision"]["status"];
+export type RecognitionDecision =
+  | SemanticViewInfo["decision"]["status"]
+  | "conventional"
+  | "engine-limited";
+export type RecognitionDecisionDomain = "cursor-entity" | "selected-formula";
 
 export interface RecognitionFrontierSignals {
   readonly decision: RecognitionDecision;
@@ -31,6 +41,7 @@ export interface RecognitionFrontierSignals {
 export interface RecognitionFrontierCase {
   readonly baseline: {
     readonly decision: RecognitionDecision;
+    readonly decisionDomain: RecognitionDecisionDomain;
     readonly stage: RecognitionFrontierStage;
   };
   readonly cursor: { readonly fileId: string; readonly needle: string };
@@ -39,7 +50,8 @@ export interface RecognitionFrontierCase {
   readonly id: string;
   readonly target: {
     readonly decision: RecognitionDecision;
-    readonly relationId: string | null;
+    readonly decisionDomain: RecognitionDecisionDomain;
+    readonly relationIds: readonly string[];
     readonly stage: RecognitionFrontierStage;
   };
   readonly variationTags: readonly string[];
@@ -52,13 +64,14 @@ export interface RecognitionFrontier {
     readonly protocolVersion: number;
   };
   readonly cases: readonly RecognitionFrontierCase[];
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
 }
 
 export interface RecognitionFrontierObservation {
   readonly caseId: string;
   readonly decision: RecognitionDecision;
-  readonly relationId: string | null;
+  readonly decisionDomain: RecognitionDecisionDomain;
+  readonly relationIds: readonly string[];
   readonly signals: RecognitionFrontierSignals;
   readonly stage: RecognitionFrontierStage;
 }
@@ -88,13 +101,64 @@ export function classifyRecognitionFrontier(
   }
   if (signals.decision === "ambiguous") return "genuine-ambiguity";
   if (signals.decision === "established") return "established";
-  if (signals.engineLimited) {
+  if (signals.engineLimited || signals.decision === "engine-limited") {
     return "canonical-unsupported";
   }
   if (!signals.discourseEvidence) return "discourse-evidence-missing";
   if (!signals.identityResolved) return "identity-scope-unresolved";
   if (!signals.structuralCandidates) return "structural-candidate-missing";
   return "type-condition-evidence-missing";
+}
+
+export function formulaFrontierSignals(
+  view: SemanticViewInfo,
+  syntaxAvailable: boolean,
+): RecognitionFrontierSignals {
+  const context = view.authoringContext;
+  const formula = context.formula;
+  const hypotheses = formula
+    ? context.interpretations.hypotheses.filter(
+        (hypothesis) =>
+          hypothesis.formula !== undefined &&
+          sameFormulaAnchor(hypothesis.formula, formula),
+      )
+    : [];
+  const formulaObservation = observeSelectedFormulaDecision({
+    disposition: context.disposition,
+    formula,
+    hypotheses: context.interpretations.hypotheses,
+  });
+  const sourceGroundedConflict =
+    context.disposition === "conflicting" &&
+    formulaObservation.decision.sourceGrounded;
+  return {
+    decision: context.disposition,
+    discourseEvidence:
+      hypotheses.some((hypothesis) =>
+        hypothesis.evidence.some((evidence) =>
+          evidence.provenance === "natural-language-extraction" &&
+          interpretationEvidenceIsGrounded(evidence) &&
+          formula !== undefined &&
+          evidenceBelongsToFormulaDocument(evidence, formula),
+        ),
+      ),
+    engineLimited:
+      context.disposition === "engine-limited" || context.lifecycle.engineLimited,
+    identityResolved: context.formula !== undefined,
+    sourceGroundedConflict,
+    structuralCandidates: hypotheses.some(
+      (hypothesis) => hypothesis.kind === "typed-law",
+    ),
+    syntaxAvailable,
+    typeOrConditionEvidence:
+      context.requirements.some((requirement) =>
+        "evidence" in requirement && requirement.evidence.length > 0,
+      ) ||
+      context.conditions.some((condition) => condition.evidence.length > 0) ||
+      hypotheses.some(
+        (hypothesis) => hypothesis.bindings.length > 0,
+      ),
+  };
 }
 
 export function frontierSignals(
@@ -156,8 +220,8 @@ export function frontierSignals(
 export function parseRecognitionFrontier(value: unknown): RecognitionFrontier {
   const root = record(value, "recognition frontier");
   exact(root, ["schemaVersion", "baseline", "cases"], "recognition frontier");
-  if (root.schemaVersion !== 1) {
-    throw new Error("recognition frontier.schemaVersion: must be 1");
+  if (root.schemaVersion !== 2) {
+    throw new Error("recognition frontier.schemaVersion: must be 2");
   }
   const baseline = record(root.baseline, "recognition frontier.baseline");
   exact(
@@ -165,9 +229,9 @@ export function parseRecognitionFrontier(value: unknown): RecognitionFrontier {
     ["commit", "protocolVersion", "note"],
     "recognition frontier.baseline",
   );
-  if (!Array.isArray(root.cases) || root.cases.length < 24) {
+  if (!Array.isArray(root.cases) || root.cases.length !== 32) {
     throw new Error(
-      "recognition frontier.cases: must contain at least 24 independently authored cases",
+      "recognition frontier.cases: must contain exactly 32 independently authored cases",
     );
   }
   const cases = root.cases.map(parseCase);
@@ -191,7 +255,7 @@ export function parseRecognitionFrontier(value: unknown): RecognitionFrontier {
       ),
     },
     cases,
-    schemaVersion: 1,
+    schemaVersion: 2,
   };
 }
 
@@ -214,6 +278,15 @@ export function scoreRecognitionFrontier(
   let falseEstablishment = 0;
   let missedCoverage = 0;
   if (byId.size !== observations.length) failures.push("duplicate observations");
+  if (observations.length !== frontier.cases.length) {
+    failures.push(`observation count ${observations.length}; expected ${frontier.cases.length}`);
+  }
+  const expectedIds = new Set(frontier.cases.map((item) => item.id));
+  for (const observed of observations) {
+    if (!expectedIds.has(observed.caseId)) {
+      failures.push(`${observed.caseId}: unexpected observation`);
+    }
+  }
   for (const item of frontier.cases) {
     const expected = item.target;
     stages[expected.stage].total += 1;
@@ -242,15 +315,19 @@ export function scoreRecognitionFrontier(
         missedCoverage += 1;
       }
     }
+    if (observed.decisionDomain !== expected.decisionDomain) {
+      caseFailures.push(
+        `decision domain ${observed.decisionDomain}; expected ${expected.decisionDomain}`,
+      );
+    }
     if (observed.stage !== expected.stage) {
       caseFailures.push(`stage ${observed.stage}; expected ${expected.stage}`);
     }
-    if (
-      expected.relationId !== null &&
-      observed.relationId !== expected.relationId
-    ) {
+    const expectedRelationIds = expected.relationIds;
+    const observedRelationIds = [...new Set(observed.relationIds)].sort();
+    if (JSON.stringify(observedRelationIds) !== JSON.stringify(expectedRelationIds)) {
       caseFailures.push(
-        `relation ${observed.relationId}; expected ${expected.relationId}`,
+        `relations ${observedRelationIds.join(",") || "none"}; expected ${expectedRelationIds.join(",") || "none"}`,
       );
       if (observed.decision === "established") falseEstablishment += 1;
       else missedCoverage += 1;
@@ -267,7 +344,9 @@ export function scoreRecognitionFrontier(
     ...(failures[0] ? { firstFailure: failures[0] } : {}),
     passed:
       frontier.cases.length -
-      new Set(failures.map((failure) => failure.split(":", 1)[0])).size,
+      frontier.cases.filter((item) =>
+        failures.some((failure) => failure.startsWith(`${item.id}:`)),
+      ).length,
     risk: {
       falseConflict,
       falseEstablishment,
@@ -315,7 +394,11 @@ function parseCase(value: unknown, index: number): RecognitionFrontierCase {
     throw new Error(`${path}.variationTags: must not be empty`);
   }
   return {
-    baseline: { decision: baseline.decision, stage: baseline.stage },
+    baseline: {
+      decision: baseline.decision,
+      decisionDomain: baseline.decisionDomain,
+      stage: baseline.stage,
+    },
     cursor: {
       fileId: text(cursor.fileId, `${path}.cursor.fileId`),
       needle: text(cursor.needle, `${path}.cursor.needle`),
@@ -325,7 +408,8 @@ function parseCase(value: unknown, index: number): RecognitionFrontierCase {
     id: text(item.id, `${path}.id`),
     target: {
       decision: target.decision,
-      relationId: target.relationId,
+      decisionDomain: target.decisionDomain,
+      relationIds: target.relationIds,
       stage: target.stage,
     },
     variationTags: item.variationTags.map((tag, tagIndex) =>
@@ -340,24 +424,50 @@ function parseExpectation(
   relation: boolean,
 ): {
   decision: RecognitionDecision;
-  relationId: string | null;
+  decisionDomain: RecognitionDecisionDomain;
+  relationIds: readonly string[];
   stage: RecognitionFrontierStage;
 } {
   const item = record(value, path);
-  exact(item, relation ? ["decision", "stage", "relationId"] : ["decision", "stage"], path);
+  exact(item, relation ? ["decision", "decisionDomain", "stage", "relationId", "additionalRelationIds"] : ["decision", "decisionDomain", "stage"], path);
   const decision = text(item.decision, `${path}.decision`);
   if (!isDecision(decision)) throw new Error(`${path}.decision: invalid decision`);
   const stage = text(item.stage, `${path}.stage`);
   if (!(RECOGNITION_FRONTIER_STAGES as readonly string[]).includes(stage)) {
     throw new Error(`${path}.stage: invalid stage`);
   }
-  const relationId = relation ? item.relationId : null;
-  if (relationId !== null && typeof relationId !== "string") {
-    throw new Error(`${path}.relationId: must be text or null`);
+  const decisionDomain = text(item.decisionDomain, `${path}.decisionDomain`);
+  if (decisionDomain !== "cursor-entity" && decisionDomain !== "selected-formula") {
+    throw new Error(`${path}.decisionDomain: invalid decision domain`);
   }
+  if (
+    decisionDomain === "cursor-entity" &&
+    (decision === "conventional" || decision === "engine-limited")
+  ) {
+    throw new Error(`${path}.decision: invalid cursor-entity decision`);
+  }
+  const relationId = relation ? item.relationId : null;
+  const parsedRelationId = relationId === null ? null : text(relationId, `${path}.relationId`);
+  if (item.additionalRelationIds !== undefined && !Array.isArray(item.additionalRelationIds)) {
+    throw new Error(`${path}.additionalRelationIds: must be an array`);
+  }
+  const additionalRelationIds = (item.additionalRelationIds as unknown[] | undefined ?? []).map(
+    (value, index) => text(value, `${path}.additionalRelationIds[${index}]`),
+  );
+  if (parsedRelationId !== null && decisionDomain !== "selected-formula") {
+    throw new Error(`${path}.relationId: relation expectations require selected-formula domain`);
+  }
+  if (parsedRelationId === null && additionalRelationIds.length > 0) {
+    throw new Error(`${path}.additionalRelationIds: requires a primary relationId`);
+  }
+  const relationIds = parsedRelationId === null
+    ? []
+    : [parsedRelationId, ...additionalRelationIds].sort();
+  unique(relationIds, `${path}.relationIds`);
   return {
     decision,
-    relationId,
+    decisionDomain: decisionDomain as RecognitionDecisionDomain,
+    relationIds,
     stage: stage as RecognitionFrontierStage,
   };
 }
@@ -366,6 +476,8 @@ function isDecision(value: string): value is RecognitionDecision {
   return [
     "ambiguous",
     "conflicting",
+    "conventional",
+    "engine-limited",
     "established",
     "partial",
     "unsupported",

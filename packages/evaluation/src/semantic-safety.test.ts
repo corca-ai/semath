@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  observedFormulaRelations,
   planSemanticSafetySuite,
   resolveSemanticSafetyAnchor,
   scoreSemanticSafetySuite,
@@ -9,6 +10,7 @@ import {
   type PlannedSemanticSafetyCase,
   type SemanticSafetyObservation,
 } from "./semantic-safety";
+import type { MathAuthoringContext } from "../../protocol/src/index";
 import { loadSemanticSafetySpec } from "../../../scripts/check-semantic-safety-fixture";
 
 describe("v0.30 open semantic safety planning", () => {
@@ -60,6 +62,7 @@ describe("v0.30 open semantic safety planning", () => {
         ? {
             ...item,
             relations: [{
+              establishmentGrade: true,
               relationId: "period-frequency-reciprocity",
               roles: [
                 { role: "frequency", symbol: "f" },
@@ -74,6 +77,132 @@ describe("v0.30 open semantic safety planning", () => {
     expect(
       score.safetyFailures.some((failure) =>
         failure.includes("retained period-frequency-reciprocity after retraction"),
+      ),
+    ).toBe(true);
+  });
+
+  test("keeps grounded candidate evidence separate from establishment authority", () => {
+    const formula = {
+      documentVersion: 1,
+      location: {
+        fileId: "main",
+        path: "main.tex",
+        range: { endOffset: 8, startOffset: 3 },
+      },
+      scopePath: [1],
+      sourceNotation: "x=1",
+    };
+    const relation = {
+      conditions: [],
+      description: "candidate relation",
+      evidence: [],
+      range: formula.location.range,
+      relationId: "test:candidate",
+      roles: [{ label: "value", role: "value", symbol: "x" }],
+      title: "candidate relation",
+    };
+    const hypothesis = {
+      bindings: [],
+      conditions: [],
+      evidence: [
+        {
+          evidence: {
+            kind: "prose",
+            ruleId: "test/candidate",
+            sourceRanges: [{ endOffset: 8, startOffset: 3 }],
+            strength: "asserted",
+          },
+          provenance: "natural-language-extraction",
+          role: "supporting",
+          sourceAnchors: [
+            {
+              documentVersion: 1,
+              generation: "authored",
+              lifecycle: "current",
+              location: formula.location,
+              scopePath: [1],
+            },
+          ],
+        },
+      ],
+      formula,
+      hypothesisId: "test:candidate",
+      kind: "reviewed-convention",
+      missingDiscriminatorIds: [],
+      relation,
+      support: "explicit",
+    };
+    const context = {
+      formula,
+      interpretations: {
+        hypotheses: [hypothesis, { ...hypothesis, support: "contradicted" }],
+      },
+    } as unknown as MathAuthoringContext;
+
+    expect(observedFormulaRelations(context)).toEqual([
+      {
+        establishmentGrade: false,
+        relationId: "candidate",
+        roles: [{ role: "value", symbol: "x" }],
+        sourceGrounded: true,
+      },
+    ]);
+  });
+
+  test("rejects inconsistent duplicate authority projections", async () => {
+    const spec = await loadSemanticSafetySpec();
+    const plan = planSemanticSafetySuite(spec);
+    const observations = plan.map(expectedObservation);
+    const target = observations.find((item) => item.relations.length > 0)!;
+    const relation = target.relations[0]!;
+    const damaged = observations.map((item) =>
+      item === target
+        ? {
+            ...item,
+            relations: [
+              relation,
+              { ...relation, establishmentGrade: !relation.establishmentGrade },
+            ],
+          }
+        : item,
+    );
+
+    expect(
+      scoreSemanticSafetySuite(spec, plan, damaged).safetyFailures.some(
+        (failure) => failure.includes("inconsistent authority projections"),
+      ),
+    ).toBe(true);
+  });
+
+  test("rejects an unexpected establishment-grade projection with no expected relation", async () => {
+    const spec = await loadSemanticSafetySpec();
+    const plan = planSemanticSafetySuite(spec);
+    const observations = plan.map(expectedObservation);
+    const targetPlan = plan.find(
+      (item) =>
+        item.expected.relations.length === 0 &&
+        !item.expected.decisions.includes("established"),
+    )!;
+    const target = observations.find((item) => item.caseId === targetPlan.id)!;
+    const damaged = observations.map((item) =>
+      item === target
+        ? {
+            ...item,
+            relations: [
+              {
+                establishmentGrade: true,
+                relationId: "unexpected-law",
+                roles: [{ role: "value", symbol: "x" }],
+                sourceGrounded: true,
+              },
+            ],
+          }
+        : item,
+    );
+
+    expect(
+      scoreSemanticSafetySuite(spec, plan, damaged).safetyFailures.some(
+        (failure) => failure.includes("unexpected establishment-grade relation"),
       ),
     ).toBe(true);
   });
@@ -153,6 +282,7 @@ function expectedObservation(
   return {
     caseId: item.id,
     decision: item.expected.decisions[0]!,
+    decisionDomain: "selected-formula",
     definitions,
     prepareRename:
       navigation.mode === "exact" &&
@@ -173,7 +303,12 @@ function expectedObservation(
     meaningRelationId: item.expected.relations[0]?.relationId ?? null,
     proofGrounded: item.expected.proofGrounded,
     references,
-    relations: item.expected.relations.map((relation) => ({ ...relation })),
+    relations: item.expected.relations.map((relation) => ({
+      ...relation,
+      establishmentGrade:
+        item.expected.proofGrounded &&
+        item.expected.decisions.includes("established"),
+    })),
     rename: {
       edits:
         navigation.mode === "exact"

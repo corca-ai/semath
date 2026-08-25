@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "v030-open-development-semantic-safety",
   "cases": [
     {
@@ -20,7 +20,8 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
         "expected": {
-          "decisions": ["partial"],
+          "decisionDomain": "selected-formula",
+          "decisions": ["conventional"],
           "proofGrounded": false,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
@@ -50,6 +51,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "V=RI", "edge": "after"},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["partial", "unsupported"],
           "proofGrounded": false,
           "relations": [],
@@ -80,6 +82,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "x\\ne y", "offset": 0},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["conflicting"],
           "proofGrounded": true,
           "relations": [],
@@ -109,7 +112,8 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "drive", "needle": "V=RI", "edge": "after"},
         "expected": {
-          "decisions": ["partial"],
+          "decisionDomain": "selected-formula",
+          "decisions": ["conventional"],
           "proofGrounded": false,
           "relations": [{"relationId": "ohm-law", "roles": [{"role": "voltage", "symbol": "V"}, {"role": "current", "symbol": "I"}, {"role": "resistance", "symbol": "R"}], "sourceGrounded": true}],
           "excludedRelationIds": [],
@@ -139,7 +143,8 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "A\\cap B", "edge": "after"},
         "expected": {
-          "decisions": ["ambiguous", "partial"],
+          "decisionDomain": "selected-formula",
+          "decisions": ["unsupported"],
           "proofGrounded": false,
           "relations": [],
           "excludedRelationIds": [],
@@ -170,6 +175,7 @@
         "semanticCursor": {"fileId": "main", "needle": "y=Ax", "edge": "after"},
         "navigationCursor": {"fileId": "main", "needle": "y=Ax", "offset": 3},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["established"],
           "proofGrounded": true,
           "relations": [{"relationId": "matrix-vector-product", "roles": [{"role": "result", "symbol": "y"}, {"role": "operator", "symbol": "A"}, {"role": "vector", "symbol": "x"}], "sourceGrounded": true}],
@@ -219,6 +225,7 @@
         "semanticCursor": {"fileId": "main", "needle": "Apply \\(B\\) in the safety check", "offset": 8},
         "navigationCursor": {"fileId": "main", "needle": "Apply \\(B\\) in the safety check", "offset": 8},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["ambiguous", "partial", "unsupported"],
           "proofGrounded": false,
           "relations": [],
@@ -260,6 +267,7 @@
           "snapshotId": "accepted",
           "semanticCursor": {"fileId": "main", "needle": "f=1/T", "edge": "after"},
           "expected": {
+            "decisionDomain": "selected-formula",
             "decisions": ["established"],
             "proofGrounded": true,
             "relations": [{"relationId": "period-frequency-reciprocity", "roles": [{"role": "frequency", "symbol": "f"}, {"role": "period", "symbol": "T"}], "sourceGrounded": true}],
@@ -273,6 +281,7 @@
           "snapshotId": "reviewed",
           "semanticCursor": {"fileId": "main", "needle": "f=1/T", "edge": "after"},
           "expected": {
+            "decisionDomain": "selected-formula",
             "decisions": ["partial", "unsupported"],
             "proofGrounded": false,
             "relations": [],
@@ -304,6 +313,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "A^\\top A\\theta=A^\\top b", "edge": "after"},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["partial"],
           "proofGrounded": false,
           "relations": [{"relationId": "least-squares-normal-equation", "roles": [{"role": "design", "symbol": "A"}, {"role": "parameter", "symbol": "\\theta"}, {"role": "observation", "symbol": "b"}], "sourceGrounded": true}],
@@ -334,6 +344,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "A^\\top A\\theta=A^\\top b", "edge": "after"},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["established"],
           "proofGrounded": true,
           "relations": [{"relationId": "least-squares-normal-equation", "roles": [{"role": "design", "symbol": "A"}, {"role": "parameter", "symbol": "\\theta"}, {"role": "observation", "symbol": "b"}], "sourceGrounded": true}],
@@ -364,6 +375,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "\\omega_c=2\\pi(20\\,\\mathrm{Hz})", "edge": "after"},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["established"],
           "proofGrounded": true,
           "relations": [{"relationId": "angular-frequency-definition", "roles": [{"role": "angular-frequency", "symbol": "\\omega_c"}, {"role": "pi", "symbol": "pi"}, {"role": "frequency", "symbol": "20\\,\\mathrm{Hz}"}], "sourceGrounded": true}],
@@ -394,6 +406,7 @@
         "snapshotId": "reviewed",
         "semanticCursor": {"fileId": "main", "needle": "\\omega=2\\pi(ab)", "edge": "after"},
         "expected": {
+          "decisionDomain": "selected-formula",
           "decisions": ["partial", "unsupported"],
           "proofGrounded": false,
           "relations": [],

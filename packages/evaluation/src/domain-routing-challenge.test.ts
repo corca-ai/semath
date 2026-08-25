@@ -4,6 +4,7 @@ import {
   DOMAIN_CHALLENGE_FAMILIES,
   parseDomainRoutingChallenge,
   scoreDomainRoutingChallenge,
+  selectDomainRoutingDecision,
 } from "./domain-routing-challenge";
 
 const fixture = parseDomainRoutingChallenge(
@@ -26,8 +27,11 @@ describe("scoped-domain challenge", () => {
     const observations = fixture.cases.map((item) => ({
       caseId: item.id,
       decision: item.expectedDecision,
+      decisionDomain: item.decisionDomain,
       domains: item.expectedDomains,
       problemCount: item.expectedProblems,
+      recognizedRelations: item.expectedRelations,
+      sourceGrounded: item.expectedSourceGrounded,
     }));
     expect(scoreDomainRoutingChallenge(fixture, observations)).toMatchObject({
       failures: [],
@@ -39,5 +43,35 @@ describe("scoped-domain challenge", () => {
     const score = scoreDomainRoutingChallenge(fixture, changed);
     expect(score.passed).toBe(29);
     expect(score.failures).toHaveLength(2);
+
+    const leaked = observations.map((observation, index) =>
+      index === fixture.cases.findIndex((item) => item.expectedDomains.length === 0)
+        ? { ...observation, domains: [{ packId: "probability", support: "tentative" }] }
+        : observation,
+    );
+    expect(scoreDomainRoutingChallenge(fixture, leaked).passed).toBe(29);
+
+    expect(
+      scoreDomainRoutingChallenge(fixture, [
+        ...observations,
+        { ...observations[0]!, caseId: "unexpected" },
+      ]).failures,
+    ).toContain("unexpected: unexpected observation");
+
+    const wrongRelation = observations.map((observation, index) =>
+      index === fixture.cases.findIndex((item) => item.decisionDomain === "selected-formula")
+        ? { ...observation, recognizedRelations: [] }
+        : observation,
+    );
+    expect(scoreDomainRoutingChallenge(fixture, wrongRelation).passed).toBe(29);
+  });
+
+  test("selects the reviewed decision domain without changing domain evidence", () => {
+    expect(
+      selectDomainRoutingDecision("selected-formula", "established", "partial"),
+    ).toBe("partial");
+    expect(
+      selectDomainRoutingDecision("cursor-entity", "established", "partial"),
+    ).toBe("established");
   });
 });

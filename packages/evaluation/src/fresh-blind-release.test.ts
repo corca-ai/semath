@@ -1,10 +1,13 @@
 import { createHash } from "node:crypto";
 import { describe, expect, test } from "bun:test";
+import { freshAuthoringSyntaxFactsForSelections } from "../../../scripts/fresh-blind-evidence";
 import {
+  AUTHORED_AREA_ALLOCATION,
   authoredFixtureSealPayload,
   authoredScenarioReviewPayload,
   parseAuthoredScientificFixture,
   type AuthoredScientificObservation,
+  type AuthoredArea,
 } from "./authored-scientific";
 import type { MathAuthoringContext } from "../../protocol/src/index";
 import { projectMathAuthoringContext } from "./math-authoring-development";
@@ -15,6 +18,7 @@ import {
   freshBlindSealPayload,
   parseFreshBlindReleaseFixture,
   planFreshBlindSnapshotTransitions,
+  selectFreshBlindOccurrence,
   validateFreshBlindProfileIsolation,
   validateFreshBlindRelease,
 } from "./fresh-blind-release";
@@ -32,6 +36,12 @@ describe("fresh blind release evidence", () => {
       "guarded-condition": 8,
       "scope-comparison": 8,
     });
+    const wrongField = fixtureValue();
+    wrongField.fixture.scenarios[0]!.field = "cross-field";
+    const wrongFieldRelease = finalize(wrongField);
+    expect(() =>
+      validateFreshBlindRelease(wrongFieldRelease, validation(wrongFieldRelease))
+    ).toThrow("requires exactly 6 holdout scenarios");
   });
 
   test("reuses the sealed evidence contract across semantic release cycles", () => {
@@ -213,13 +223,41 @@ describe("fresh blind release evidence", () => {
     const value = fixtureValue();
     addDecisionDomains(value);
     const release = finalize(value);
-    expect(validateFreshBlindRelease(release, validation(release)).scenarios)
-      .toBe(48);
+    const summary = validateFreshBlindRelease(release, validation(release));
+    expect(summary.scenarios).toBe(48);
     expect(release).toMatchObject({
       fixture: { schemaVersion: 2 },
       release: { id: "v0.42" },
       schemaVersion: 3,
     });
+    expect(summary.entityDecisions).toEqual({
+      ambiguous: 10,
+      conflicting: 9,
+      established: 10,
+      partial: 10,
+      unsupported: 9,
+    });
+    expect(summary.formulaDecisions).toEqual({
+      ambiguous: 10,
+      conflicting: 10,
+      established: 10,
+      partial: 10,
+      unsupported: 8,
+    });
+
+    const wrongAllocation = fixtureValue();
+    addDecisionDomains(wrongAllocation);
+    const wrongProbe = wrongAllocation.fixture.probes[0]!.expected as {
+      formulaDecision: { status: string };
+    };
+    wrongProbe.formulaDecision.status = "partial";
+    const wrongAllocationRelease = finalize(wrongAllocation);
+    expect(() =>
+      validateFreshBlindRelease(
+        wrongAllocationRelease,
+        validation(wrongAllocationRelease),
+      )
+    ).toThrow("requires exactly");
 
     const legacyInner = fixtureValue();
     addAuthoringSafety(legacyInner);
@@ -262,6 +300,436 @@ describe("fresh blind release evidence", () => {
       .mathRootContentRanges[0]!.startOffset = -1;
     expect(() => validateFreshBlindRelease(release, invalidFacts))
       .toThrow("invalid formula math-root fact");
+    const invalidOccurrenceFacts = validation(release);
+    const invalidOccurrence = invalidOccurrenceFacts.authoringSyntaxFacts[0]!
+      .documents[0]!.occurrences![0]!;
+    invalidOccurrence.selectionRange.startOffset =
+      invalidOccurrence.range.startOffset - 1;
+    expect(() => validateFreshBlindRelease(release, invalidOccurrenceFacts))
+      .toThrow("invalid occurrence syntax fact");
+
+    for (const [formula, composite] of [
+      ["x_0=1", "x_0"],
+      ["\\hat{x}=1", "\\hat{x}"],
+      ["\\mathbf{x}=1", "\\mathbf{x}"],
+    ] as const) {
+      const baseFocused = fixtureValue();
+      addDecisionDomains(baseFocused);
+      replaceFirstFormula(baseFocused, formula, composite);
+      const baseExpected = baseFocused.fixture.probes[0]!.expected as {
+        cursorOccurrence: {
+          needle: string;
+          selection: { length: number; offset: number };
+        };
+        symbol: string;
+      };
+      baseExpected.cursorOccurrence.selection = {
+        length: 1,
+        offset: baseExpected.cursorOccurrence.needle.indexOf("x"),
+      };
+      baseExpected.symbol = "x";
+      const baseNavigation = baseExpected as typeof baseExpected & {
+        navigation: { rename: { newName: string } };
+      };
+      baseNavigation.navigation.rename.newName = "y";
+      const baseRelease = finalize(baseFocused);
+      expect(() =>
+        validateFreshBlindRelease(baseRelease, validation(baseRelease))
+      ).toThrow("must equal syntax-selected cursor ownership");
+    }
+
+    const compositeRename = fixtureValue();
+    addDecisionDomains(compositeRename);
+    replaceFirstFormula(compositeRename, "\\hat{x}=1", "\\hat{x}");
+    const compositeExpected = compositeRename.fixture.probes[0]!.expected as
+      unknown as AuthoredProbeExpected;
+    const compositeAnchor = compositeExpected.cursorOccurrence!;
+    const available = {
+      allowed: [compositeAnchor],
+      excluded: [],
+      minimum: 1,
+      required: [compositeAnchor],
+      status: "available" as const,
+    };
+    compositeExpected.navigation.definition = structuredClone(available);
+    compositeExpected.navigation.references = structuredClone(available);
+    compositeExpected.navigation.prepareRename = {
+      placeholder: "\\hat{x}",
+      range: compositeAnchor,
+      status: "available",
+    };
+    compositeExpected.navigation.rename = {
+      ...structuredClone(available),
+      expectedText: "\\hat{x}",
+      newName: "\\hat{y}",
+      replacementText: "\\hat{y}",
+      safety: "reviewed composite identity",
+    };
+    const compositeRenameRelease = finalize(compositeRename);
+    expect(() =>
+      validateFreshBlindRelease(
+        compositeRenameRelease,
+        validation(compositeRenameRelease),
+      )
+    ).not.toThrow();
+    const orderedOccurrences = fixtureValue();
+    addDecisionDomains(orderedOccurrences);
+    replaceFirstFormula(orderedOccurrences, "x+y=1", "x");
+    const orderedOccurrenceRelease = finalize(orderedOccurrences);
+    const nonCanonicalOccurrences = validation(orderedOccurrenceRelease);
+    const [firstOccurrenceFact, ...remainingOccurrenceFacts] =
+      nonCanonicalOccurrences.authoringSyntaxFacts;
+    const [firstOccurrenceDocument, ...remainingOccurrenceDocuments] =
+      firstOccurrenceFact!.documents;
+    nonCanonicalOccurrences.authoringSyntaxFacts = [{
+      ...firstOccurrenceFact!,
+      documents: [{
+        ...firstOccurrenceDocument!,
+        occurrences: [...firstOccurrenceDocument!.occurrences!].reverse(),
+      }, ...remainingOccurrenceDocuments],
+    }, ...remainingOccurrenceFacts];
+    expect(() =>
+      validateFreshBlindRelease(
+        orderedOccurrenceRelease,
+        nonCanonicalOccurrences,
+      )
+    ).toThrow("occurrence syntax facts are not canonical");
+
+    const wrongCompositeFamily = fixtureValue();
+    addDecisionDomains(wrongCompositeFamily);
+    replaceFirstFormula(wrongCompositeFamily, "\\hat{x}=1", "\\hat{x}");
+    const wrongCompositeExpected = wrongCompositeFamily.fixture.probes[0]!
+      .expected as unknown as AuthoredProbeExpected;
+    const wrongCompositeAnchor = wrongCompositeExpected.cursorOccurrence!;
+    wrongCompositeExpected.navigation.definition = structuredClone({
+      ...available,
+      allowed: [wrongCompositeAnchor],
+      required: [wrongCompositeAnchor],
+    });
+    wrongCompositeExpected.navigation.references = structuredClone(
+      wrongCompositeExpected.navigation.definition,
+    );
+    wrongCompositeExpected.navigation.prepareRename = {
+      placeholder: "\\hat{x}",
+      range: wrongCompositeAnchor,
+      status: "available",
+    };
+    wrongCompositeExpected.navigation.rename = {
+      ...structuredClone(wrongCompositeExpected.navigation.definition),
+      expectedText: "\\hat{x}",
+      newName: "\\bar{x}",
+      replacementText: "\\bar{x}",
+      safety: "invalid family mutation",
+    };
+    const wrongCompositeRelease = finalize(wrongCompositeFamily);
+    expect(() =>
+      validateFreshBlindRelease(
+        wrongCompositeRelease,
+        validation(wrongCompositeRelease),
+      )
+    ).toThrow("preserve one exact editable notation family");
+
+    const missingOccurrences = validation(release);
+    delete (missingOccurrences.authoringSyntaxFacts[0]!.documents[0]! as {
+      occurrences?: unknown;
+    }).occurrences;
+    expect(() => validateFreshBlindRelease(release, missingOccurrences))
+      .toThrow("requires complete occurrence syntax facts");
+  });
+
+  test("mirrors exact, trailing, application, gap, and ambiguous cursor ownership", () => {
+    const occurrence = (
+      startOffset: number,
+      endOffset: number,
+      selectionStart = startOffset,
+      selectionEnd = endOffset,
+      applicationEndOffset?: number,
+    ) => ({
+      ...(applicationEndOffset === undefined ? {} : { applicationEndOffset }),
+      kind: "identifier" as const,
+      range: { startOffset, endOffset },
+      selectionRange: {
+        startOffset: selectionStart,
+        endOffset: selectionEnd,
+      },
+      surface: "x",
+    });
+    const decorated = occurrence(6, 7, 1, 8, 11);
+    for (const offset of [1, 6, 7, 8, 11]) {
+      expect(selectFreshBlindOccurrence([decorated], offset)).toBe(decorated);
+    }
+    const left = occurrence(1, 2);
+    const right = occurrence(2, 3);
+    expect(selectFreshBlindOccurrence([left, right], 2)).toBe(right);
+
+    const indexed = occurrence(1, 4, 1, 2);
+    const index = occurrence(3, 4);
+    expect(selectFreshBlindOccurrence([indexed, index], 3)).toBe(index);
+    expect(selectFreshBlindOccurrence([indexed, index], 4)).toBe(indexed);
+
+    const container = occurrence(1, 10);
+    const nested = occurrence(4, 5);
+    expect(selectFreshBlindOccurrence([container, nested], 5)).toBe(nested);
+    expect(selectFreshBlindOccurrence([
+      occurrence(1, 6),
+      nested,
+    ], 5)?.range).toEqual({ startOffset: 1, endOffset: 6 });
+
+    expect(selectFreshBlindOccurrence([left, right], 6)).toBeUndefined();
+    expect(selectFreshBlindOccurrence([
+      occurrence(1, 2, 0, 4),
+      occurrence(1, 2, 0, 5),
+    ], 3)).toBeUndefined();
+  });
+
+  test("uses an explicit navigation envelope without treating required as exhaustive", () => {
+    const value = fixtureValue();
+    addDecisionDomains(value);
+    const expected = value.fixture.probes[0]!.expected as unknown as {
+      navigation: {
+        definition: Record<string, unknown>;
+        references: Record<string, unknown>;
+      };
+    };
+    const allowed = {
+      fileId: "main",
+      needle: "$x_0=1$",
+      selection: { length: 3, offset: 1 },
+    };
+    const locationEnvelope = {
+      allowed: [allowed],
+      excluded: [],
+      minimum: 0,
+      required: [],
+      status: "available",
+    };
+    expected.navigation.definition = structuredClone(locationEnvelope);
+    expected.navigation.references = structuredClone(locationEnvelope);
+    const release = finalize(value);
+    expect(() => validateFreshBlindRelease(release, validation(release)))
+      .not.toThrow();
+    const document = release.fixture.scenarios[0]!.snapshots[0]!.documents[0]!;
+    const startOffset = document.content.indexOf("x_0");
+    const observation = {
+      caseId: "probe-00",
+      decision: "partial" as const,
+      definitions: [{
+        fileId: document.fileId,
+        path: document.path,
+        range: { startOffset, endOffset: startOffset + 3 },
+      }],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: false,
+      references: [{
+        fileId: document.fileId,
+        path: document.path,
+        range: { startOffset, endOffset: startOffset + 3 },
+      }],
+      relations: [],
+      renameEdits: [],
+      symbol: "x_0",
+    };
+    expect(freshBlindSafetySummary(release.fixture, [observation]))
+      .toMatchObject({ unsafeNavigationOrEditLocations: 0 });
+    expect(freshBlindSafetySummary(release.fixture, [{
+      ...observation,
+      references: [{
+        ...observation.references[0]!,
+        range: { startOffset: startOffset + 1, endOffset: startOffset + 2 },
+      }],
+    }])).toMatchObject({ unsafeNavigationOrEditLocations: 1 });
+  });
+
+  test("rejects authorized-empty unavailable surfaces and divergent authorizations", () => {
+    const value = fixtureValue();
+    addDecisionDomains(value);
+    const release = finalize(value);
+    const probe = release.fixture.probes[0]!;
+    const refused = { refusalKind: "unsupported" as const, status: "refused" as const };
+    const focusOccurrenceId = {
+      documentVersion: 1,
+      fileId: "main",
+      localId: 1,
+    };
+    const authorized = {
+      entityId: {
+        anchor: focusOccurrenceId,
+        componentId: "component:a",
+        kind: "symbol",
+        scopePath: [],
+      },
+      focusOccurrenceId,
+      status: "authorized" as const,
+    };
+    const scenario = release.fixture.scenarios.find(
+      (candidate) => candidate.id === probe.scenarioId,
+    )!;
+    const document = scenario.snapshots[0]!.documents[0]!;
+    const startOffset = document.content.indexOf("x_0");
+    const observation: AuthoredScientificObservation = {
+      authoringContext: {
+        ...unsupportedAuthoringContext(),
+        notationOccurrences: [{
+          entityId: {
+            ...authorized.entityId,
+            componentId: "poisoned-authoring-projection",
+          },
+          location: {
+            fileId: document.fileId,
+            path: document.path,
+            range: { startOffset, endOffset: startOffset + 3 },
+          },
+          occurrenceId: { ...focusOccurrenceId, localId: 99 },
+          scopePath: [],
+          sourceNotation: "x_0",
+        }],
+      },
+      caseId: probe.id,
+      cursorSurfaceIdentity: {
+        entityId: authorized.entityId,
+        location: {
+          fileId: document.fileId,
+          path: document.path,
+          range: { startOffset, endOffset: startOffset + 3 },
+        },
+        occurrenceId: focusOccurrenceId,
+      },
+      decision: probe.expected.decision,
+      definitions: [],
+      diagnostics: [],
+      prepareRename: {},
+      proofGrounded: probe.expected.proofGrounded,
+      references: [],
+      relations: [],
+      renameEdits: [],
+      surfaceAuthorizations: {
+        definition: authorized,
+        prepareRename: refused,
+        references: refused,
+        rename: refused,
+      },
+      symbol: null,
+    };
+    expect(freshBlindSafetySummary(release.fixture, [observation]))
+      .toMatchObject({
+        unsafeNavigationOrEditCaseIds: [probe.id],
+        unsafeNavigationOrEditLocations: 1,
+      });
+
+    const navigation = probe.expected.navigation as unknown as {
+      definition: {
+        allowed?: unknown[];
+        minimum: number;
+        status: "available" | "unavailable";
+      };
+      prepareRename: { status: "available" | "unavailable" };
+      references: {
+        allowed?: unknown[];
+        minimum: number;
+        status: "available" | "unavailable";
+      };
+      rename: {
+        allowed?: unknown[];
+        minimum: number;
+        status: "available" | "unavailable";
+      };
+    };
+    navigation.definition.status = "available";
+    navigation.references.status = "available";
+    navigation.prepareRename.status = "available";
+    navigation.rename.status = "available";
+    navigation.definition.allowed = [probe.expected.cursorOccurrence];
+    navigation.references.allowed = [probe.expected.cursorOccurrence];
+    navigation.rename.allowed = [probe.expected.cursorOccurrence];
+    const availablePreparation = navigation.prepareRename as
+      typeof navigation.prepareRename & {
+        placeholder?: string;
+        range?: unknown;
+      };
+    availablePreparation.placeholder = "x_0";
+    availablePreparation.range = probe.expected.cursorOccurrence;
+    const consistent = {
+      ...observation,
+      definitions: [{
+        fileId: document.fileId,
+        path: document.path,
+        range: { startOffset, endOffset: startOffset + 3 },
+      }],
+      prepareRename: {
+        placeholder: "x_0",
+        range: { startOffset, endOffset: startOffset + 3 },
+      },
+      references: [{
+        fileId: document.fileId,
+        path: document.path,
+        range: { startOffset, endOffset: startOffset + 3 },
+      }],
+      renameEdits: [{
+        expectedText: "x_0",
+        fileId: document.fileId,
+        path: document.path,
+        range: { startOffset, endOffset: startOffset + 3 },
+        replacementText: "y_0",
+      }],
+      surfaceAuthorizations: {
+        definition: authorized,
+        prepareRename: authorized,
+        references: authorized,
+        rename: authorized,
+      },
+    };
+    expect(freshBlindSafetySummary(release.fixture, [consistent]))
+      .toMatchObject({ unsafeNavigationOrEditLocations: 0 });
+    expect(freshBlindSafetySummary(release.fixture, [{
+      ...consistent,
+      cursorSurfaceIdentity: {
+        ...consistent.cursorSurfaceIdentity!,
+        entityId: {
+          ...authorized.entityId,
+          componentId: "wrong-semantic-view-entity",
+        },
+      },
+    }])).toMatchObject({
+      unsafeNavigationOrEditCaseIds: [probe.id],
+      unsafeNavigationOrEditLocations: 1,
+    });
+    expect(freshBlindSafetySummary(release.fixture, [{
+      ...consistent,
+      surfaceAuthorizations: {
+        definition: authorized,
+        prepareRename: authorized,
+        references: {
+          ...authorized,
+          focusOccurrenceId: { ...focusOccurrenceId, localId: 2 },
+        },
+        rename: authorized,
+      },
+    }])).toMatchObject({
+      unsafeNavigationOrEditCaseIds: [probe.id],
+      unsafeNavigationOrEditLocations: 1,
+    });
+
+    const requiredNavigation = navigation as typeof navigation & {
+      definition: { minimum: number };
+      prepareRename: { placeholder?: string; range?: unknown };
+      references: { minimum: number };
+      rename: { minimum: number };
+    };
+    requiredNavigation.definition.minimum = 1;
+    requiredNavigation.references.minimum = 1;
+    requiredNavigation.rename.minimum = 1;
+    expect(freshBlindSafetySummary(release.fixture, [{
+      ...consistent,
+      definitions: [],
+      prepareRename: {},
+      references: [],
+      renameEdits: [],
+    }]))
+      .toMatchObject({
+        unsafeNavigationOrEditCaseIds: [probe.id],
+        unsafeNavigationOrEditLocations: 4,
+      });
   });
 
   test("gates only reviewed authoring authority, contradiction, and lifecycle boundaries", () => {
@@ -519,7 +987,7 @@ describe("fresh blind release evidence", () => {
     );
   });
 
-  test("requires one complete atomic entity surface from v0.35 onward", () => {
+  test("uses reviewed syntax-scoped entity envelopes from v0.35 onward", () => {
     const value = fixtureValue();
     value.release.id = "v0.35";
     const probe = value.fixture.probes[0]!;
@@ -569,8 +1037,38 @@ describe("fresh blind release evidence", () => {
       validateFreshBlindRelease(
         incompleteRelease,
         validation(incompleteRelease),
-      ),
-    ).toThrow("reference allowlist must enumerate every exact atomic source occurrence");
+      )
+    ).not.toThrow();
+
+    const nonOccurrence = fixtureValue();
+    nonOccurrence.release.id = "v0.35";
+    const nonOccurrenceExpected = nonOccurrence.fixture.probes[0]!.expected as
+      AuthoredProbeExpected;
+    nonOccurrenceExpected.symbol = "x_0";
+    const equals = {
+      fileId: "main",
+      needle: "$x_0=1$",
+      selection: { offset: 4, length: 1 },
+    };
+    nonOccurrenceExpected.navigation.definition = {
+      excluded: [],
+      minimum: 1,
+      required: [equals],
+      status: "available",
+    };
+    nonOccurrenceExpected.navigation.references = {
+      excluded: [],
+      minimum: 1,
+      required: [equals],
+      status: "available",
+    };
+    const nonOccurrenceRelease = finalize(nonOccurrence);
+    expect(() =>
+      validateFreshBlindRelease(
+        nonOccurrenceRelease,
+        validation(nonOccurrenceRelease),
+      )
+    ).toThrow("must equal one syntax occurrence");
   });
 
   test("rejects exact evidence reuse and suspicious prose lineage", () => {
@@ -956,25 +1454,12 @@ function validation(release: ReturnType<typeof fixture>) {
   );
   return {
     authoredSealDigest: sha256(authoredFixtureSealPayload(release.fixture)),
-    authoringSyntaxFacts: release.fixture.scenarios.map((scenario) => {
-      const snapshot = scenario.snapshots[0]!;
-      return {
-        documents: snapshot.documents.map((document) => {
-          const needle = document.content.match(/x_\d+=1/u)?.[0];
-          if (!needle) throw new Error("test fixture is missing its math root");
-          const startOffset = document.content.indexOf(needle);
-          return {
-            fileId: document.fileId,
-            mathRootContentRanges: [{
-              endOffset: startOffset + needle.length,
-              startOffset,
-            }],
-          };
-        }),
+    authoringSyntaxFacts: freshAuthoringSyntaxFactsForSelections(
+      release.fixture.scenarios.map((scenario) => ({
         scenarioId: scenario.id,
-        snapshotId: snapshot.id,
-      };
-    }),
+        snapshot: scenario.snapshots[0]!,
+      })),
+    ),
     freshIsolationProfiles: release.fixture.scenarios.map((scenario) => ({
       id: `${scenario.id}/initial/main`,
       mathFingerprints: [`math-${scenario.id}`],
@@ -999,11 +1484,64 @@ function validation(release: ReturnType<typeof fixture>) {
   };
 }
 
+function replaceFirstFormula(
+  value: FixtureValue,
+  formula: string,
+  composite: string,
+): void {
+  const scenario = value.fixture.scenarios[0]!;
+  const document = scenario.snapshots[0]!.documents[0]!;
+  document.content = document.content.replace("x_0=1", formula);
+  const probe = value.fixture.probes[0]!;
+  const cursor = probe.cursor as { needle: string; offset: number };
+  cursor.needle = `$${formula}$`;
+  cursor.offset = cursor.needle.indexOf("x");
+  const expected = probe.expected as {
+    cursorOccurrence: {
+      fileId: string;
+      needle: string;
+      selection: { length: number; offset: number };
+    };
+    formulaDecision: {
+      anchor: {
+        fileId: string;
+        needle: string;
+        selection: { length: number; offset: number };
+      };
+    };
+    symbol: string;
+  };
+  expected.cursorOccurrence = {
+    fileId: "main",
+    needle: cursor.needle,
+    selection: {
+      length: composite.length,
+      offset: cursor.needle.indexOf(composite),
+    },
+  };
+  expected.formulaDecision.anchor = {
+    fileId: "main",
+    needle: cursor.needle,
+    selection: { length: formula.length, offset: 1 },
+  };
+  expected.symbol = composite;
+  const navigation = expected as typeof expected & {
+    navigation: { rename: { newName: string } };
+  };
+  navigation.navigation.rename.newName = composite.replace("x", "y");
+  for (const selector of [
+    ...value.authoringSafety![0]!.allowedAuthority,
+    ...value.authoringSafety![0]!.requiredAuthority,
+  ] as Array<{ anchor: unknown }>) {
+    selector.anchor = structuredClone(expected.formulaDecision.anchor);
+  }
+}
+
 function addAuthoringExpectations(value: FixtureValue): void {
   value.fixture.probes.forEach((probe, index) => {
     const scenario = value.fixture.scenarios[index]!;
     const document = scenario.snapshots[0]!.documents[0]!;
-    const sourceNotation = `x_${index}=1`;
+    const sourceNotation = `${testSymbol(index)}=1`;
     const startOffset = document.content.indexOf(sourceNotation);
     const range = {
       endOffset: startOffset + sourceNotation.length,
@@ -1076,15 +1614,20 @@ function addDecisionDomains(value: FixtureValue): void {
     delete cursor.edge;
     cursor.offset = 1;
     const expected = probe.expected as Record<string, unknown>;
-    const formulaStatus = expected.decision;
-    expected.decision = "established";
+    const formulaStatus = schema3FormulaDecision(index);
     expected.proofGrounded = false;
-    expected.symbol = "x";
+    const symbol = testSymbol(index);
+    expected.symbol = symbol;
+    expected.cursorOccurrence = {
+      fileId: "main",
+      needle: `$${symbol}=1$`,
+      selection: { length: symbol.length, offset: 1 },
+    };
     expected.formulaDecision = {
       anchor: {
         fileId: "main",
-        needle: `$x_${index}=1$`,
-        selection: { length: `x_${index}=1`.length, offset: 1 },
+        needle: `$${symbol}=1$`,
+        selection: { length: `${symbol}=1`.length, offset: 1 },
       },
       status: formulaStatus,
     };
@@ -1093,8 +1636,8 @@ function addDecisionDomains(value: FixtureValue): void {
       const selector = {
         anchor: {
           fileId: "main",
-          needle: `$x_${index}=1$`,
-          selection: { length: `x_${index}=1`.length, offset: 1 },
+          needle: `$${symbol}=1$`,
+          selection: { length: `${symbol}=1`.length, offset: 1 },
         },
         kind: "source-meaning",
         relationId: null,
@@ -1106,8 +1649,8 @@ function addDecisionDomains(value: FixtureValue): void {
       const selector = {
         anchor: {
           fileId: "main",
-          needle: `$x_${index}=1$`,
-          selection: { length: `x_${index}=1`.length, offset: 1 },
+          needle: `$${symbol}=1$`,
+          selection: { length: `${symbol}=1`.length, offset: 1 },
         },
         kind: "source-meaning",
         relationId: null,
@@ -1119,8 +1662,16 @@ function addDecisionDomains(value: FixtureValue): void {
     const navigation = expected.navigation as {
       rename: Record<string, unknown>;
     };
-    navigation.rename.newName = "y";
+    navigation.rename.newName = symbol.replace("x", "y");
   });
+}
+
+function schema3FormulaDecision(index: number) {
+  if (index < 10) return "established" as const;
+  if (index < 20) return "partial" as const;
+  if (index < 30) return "ambiguous" as const;
+  if (index < 40) return "conflicting" as const;
+  return "unsupported" as const;
 }
 
 function unsupportedAuthoringContext(): MathAuthoringContext {
@@ -1168,8 +1719,12 @@ function fixtureValue(): FixtureValue {
     "conflicting",
     "unsupported",
   ] as const;
+  const fields = Object.entries(AUTHORED_AREA_ALLOCATION).flatMap(
+    ([field, allocation]) =>
+      Array.from({ length: allocation.holdout }, () => field as AuthoredArea),
+  );
   const scenarios = Array.from({ length: 48 }, (_, index) => ({
-    field: "cross-field",
+    field: fields[index]!,
     genre: "methods note",
     id: `fresh-${String(index).padStart(2, "0")}`,
     lawIds: ["test:law"],
@@ -1194,7 +1749,7 @@ function fixtureValue(): FixtureValue {
       {
         documents: [
           {
-            content: `Independent scientific scene ${index}. The reviewed value is $x_${index}=1$.`,
+            content: `Independent scientific scene ${index}. The reviewed value is $${testSymbol(index)}=1$.`,
             fileId: "main",
             path: "main.md",
           },
@@ -1232,7 +1787,7 @@ function fixtureValue(): FixtureValue {
         cursor: {
           edge: "before",
           fileId: "main",
-          needle: `$x_${index}=1$`,
+          needle: `$${testSymbol(index)}=1$`,
           snapshotId: "initial",
         },
         expected: {
@@ -1267,15 +1822,26 @@ function fixtureValue(): FixtureValue {
   };
 }
 
+function testSymbol(index: number): string {
+  return index < 10 ? `x_${index}` : `x_{${index}}`;
+}
+
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
 type FixtureValue = ReturnType<typeof fixtureValueShape>;
 type AuthoredProbeExpected = {
+  cursorOccurrence?: {
+    fileId: string;
+    needle: string;
+    selection?: { length: number; offset: number };
+  } | null;
   navigation: {
     definition: Record<string, unknown>;
+    prepareRename: Record<string, unknown>;
     references: Record<string, unknown>;
+    rename: Record<string, unknown>;
   };
   symbol?: string;
 };
@@ -1308,6 +1874,7 @@ function fixtureValueShape() {
       batch: Record<string, unknown> & { seal: string };
       probes: Record<string, unknown>[];
       scenarios: Array<{
+        field: AuthoredArea;
         id: string;
         provenance: {
           authorId: string;

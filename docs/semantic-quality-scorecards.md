@@ -122,6 +122,15 @@ summary instead of flattening it into case IDs. A new tranche is not
 commissioned while that oracle or a known public P0 safety regression is
 failing.
 
+The public recognition challenge applies the same split in its strict v4
+overlay without rewriting the frozen v2/v3 corpus. Every case declares whether
+its decision belongs to the cursor entity or selected formula. Formula
+relations are reviewed separately as candidates or authoritative results;
+authority requires a complete, grounded `typed` or `derived` role binding,
+verified conditions, and exact selected-root evidence. Relation visibility by
+itself is never authority. The overlay pins the predecessor fixture digests so
+the composition cannot silently change its historical base.
+
 The blind path is always explicit: set `SEMATH_FRESH_BLIND_FIXTURE` and
 `SEMATH_FRESH_BLIND_RECEIPT`, then run `bun run release:semantic` on the separate
 x86_64 Linux release host. All pre-blind checks—including the editable

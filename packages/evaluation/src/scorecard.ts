@@ -19,7 +19,9 @@ export interface CaseObservation {
   rolesCorrect: boolean;
   status?:
     | "ambiguous"
+    | "conventional"
     | "conflicting"
+    | "engine-limited"
     | "established"
     | "partial"
     | "unsupported";

@@ -1,13 +1,13 @@
 {
-  "schemaVersion": 1,
-  "baseline": {
-    "commit": "a978d2e",
-    "passed": 21,
-    "total": 24
+  "schemaVersion": 2,
+  "lineage": {
+    "previousCommit": "a978d2e",
+    "previousSchemaVersion": 1
   },
   "cases": [
     {
       "id": "eq-orientation-ohm",
+      "decisionDomain": "selected-formula",
       "family": "orientation",
       "documents": [
         {
@@ -29,6 +29,7 @@
     },
     {
       "id": "eq-orientation-power",
+      "decisionDomain": "selected-formula",
       "family": "orientation",
       "documents": [
         {
@@ -50,6 +51,7 @@
     },
     {
       "id": "eq-orientation-heat",
+      "decisionDomain": "selected-formula",
       "family": "orientation",
       "documents": [
         {
@@ -62,7 +64,7 @@
         "fileId": "main",
         "needle": "mcT=Q"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "conventional",
       "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
       "variationTags": [
         "equality-reversal",
@@ -71,6 +73,7 @@
     },
     {
       "id": "eq-orientation-flow",
+      "decisionDomain": "selected-formula",
       "family": "orientation",
       "documents": [
         {
@@ -92,6 +95,7 @@
     },
     {
       "id": "eq-permute-ohm",
+      "decisionDomain": "selected-formula",
       "family": "scalar-permutation",
       "documents": [
         {
@@ -113,6 +117,7 @@
     },
     {
       "id": "eq-permute-power",
+      "decisionDomain": "selected-formula",
       "family": "scalar-permutation",
       "documents": [
         {
@@ -134,6 +139,7 @@
     },
     {
       "id": "eq-permute-heat",
+      "decisionDomain": "selected-formula",
       "family": "scalar-permutation",
       "documents": [
         {
@@ -146,7 +152,7 @@
         "fileId": "main",
         "needle": "Q=Tcm"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "conventional",
       "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
       "variationTags": [
         "three-factor",
@@ -155,6 +161,7 @@
     },
     {
       "id": "eq-permute-flow",
+      "decisionDomain": "selected-formula",
       "family": "scalar-permutation",
       "documents": [
         {
@@ -176,6 +183,7 @@
     },
     {
       "id": "eq-isolate-current",
+      "decisionDomain": "selected-formula",
       "family": "factor-isolation",
       "documents": [
         {
@@ -197,6 +205,7 @@
     },
     {
       "id": "eq-isolate-resistance",
+      "decisionDomain": "selected-formula",
       "family": "factor-isolation",
       "documents": [
         {
@@ -218,6 +227,7 @@
     },
     {
       "id": "eq-isolate-density",
+      "decisionDomain": "selected-formula",
       "family": "factor-isolation",
       "documents": [
         {
@@ -239,6 +249,7 @@
     },
     {
       "id": "eq-isolate-temperature",
+      "decisionDomain": "selected-formula",
       "family": "factor-isolation",
       "documents": [
         {
@@ -251,7 +262,7 @@
         "fileId": "main",
         "needle": "T=Q/(mc)"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "conventional",
       "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
       "variationTags": [
         "three-factor",
@@ -260,6 +271,7 @@
     },
     {
       "id": "eq-reciprocal-period",
+      "decisionDomain": "selected-formula",
       "family": "reciprocal",
       "documents": [
         {
@@ -281,6 +293,7 @@
     },
     {
       "id": "eq-reciprocal-frequency",
+      "decisionDomain": "selected-formula",
       "family": "reciprocal",
       "documents": [
         {
@@ -302,6 +315,7 @@
     },
     {
       "id": "eq-reciprocal-medium",
+      "decisionDomain": "selected-formula",
       "family": "reciprocal",
       "documents": [
         {
@@ -323,6 +337,7 @@
     },
     {
       "id": "eq-reciprocal-medium-inverse",
+      "decisionDomain": "selected-formula",
       "family": "reciprocal",
       "documents": [
         {
@@ -344,6 +359,7 @@
     },
     {
       "id": "eq-group-ohm",
+      "decisionDomain": "selected-formula",
       "family": "grouping",
       "documents": [
         {
@@ -365,6 +381,7 @@
     },
     {
       "id": "eq-group-power",
+      "decisionDomain": "selected-formula",
       "family": "grouping",
       "documents": [
         {
@@ -377,7 +394,7 @@
         "fileId": "main",
         "needle": "P=(V)(I)"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "conventional",
       "expectedRelationId": "electromagnetism:electric-power-law",
       "variationTags": [
         "braces",
@@ -386,6 +403,7 @@
     },
     {
       "id": "eq-group-flow",
+      "decisionDomain": "selected-formula",
       "family": "grouping",
       "documents": [
         {
@@ -398,7 +416,7 @@
         "fileId": "main",
         "needle": "Q=(A)(v)"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "conventional",
       "expectedRelationId": "fluid-mechanics:volumetric-flow-rate",
       "variationTags": [
         "mixed-grouping",
@@ -407,6 +425,7 @@
     },
     {
       "id": "eq-group-heat",
+      "decisionDomain": "selected-formula",
       "family": "grouping",
       "documents": [
         {
@@ -419,7 +438,7 @@
         "fileId": "main",
         "needle": "Q=mcT"
       },
-      "expectedDecision": "partial",
+      "expectedDecision": "conventional",
       "expectedRelationId": "thermodynamics-heat-transfer:sensible-heat-relation",
       "variationTags": [
         "repeated-parentheses",
@@ -428,6 +447,7 @@
     },
     {
       "id": "eq-refuse-matrix-vector-order",
+      "decisionDomain": "cursor-entity",
       "family": "refusal",
       "documents": [
         {
@@ -449,6 +469,7 @@
     },
     {
       "id": "eq-refuse-matrix-matrix-order",
+      "decisionDomain": "cursor-entity",
       "family": "refusal",
       "documents": [
         {
@@ -470,6 +491,7 @@
     },
     {
       "id": "eq-refuse-state-order",
+      "decisionDomain": "cursor-entity",
       "family": "refusal",
       "documents": [
         {
@@ -491,6 +513,7 @@
     },
     {
       "id": "eq-refuse-inequality-direction",
+      "decisionDomain": "cursor-entity",
       "family": "refusal",
       "documents": [
         {

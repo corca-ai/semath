@@ -2,7 +2,9 @@ import { readFile } from "node:fs/promises";
 import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   classifyRecognitionFrontier,
+  formulaFrontierSignals,
   frontierSignals,
+  observeSelectedFormulaDecision,
   parseRecognitionFrontier,
   scoreRecognitionFrontier,
   type RecognitionFrontierObservation,
@@ -32,15 +34,33 @@ const observations = frontier.cases.map(
       throw new Error(`${item.id}: semanticView result is unavailable`);
     }
     const view = result.value.view;
-    const signals = frontierSignals(view, hasCursorSyntax(item));
+    const syntaxAvailable = hasCursorSyntax(item);
+    const cursorSignals = frontierSignals(view, syntaxAvailable);
+    const formulaSignals = formulaFrontierSignals(view, syntaxAvailable);
+    const signals =
+      item.target.decisionDomain === "cursor-entity"
+        ? cursorSignals
+        : formulaSignals;
+    const formula = observeSelectedFormulaDecision({
+      disposition: view.authoringContext.disposition,
+      formula: view.authoringContext.formula,
+      hypotheses: view.authoringContext.interpretations.hypotheses,
+    });
+    const cursorRelationId =
+      view.decision.status === "established" ||
+      view.decision.status === "partial"
+        ? view.decision.meaning.relationId
+        : null;
     return {
       caseId: item.id,
-      decision: view.decision.status,
-      relationId:
-        view.decision.status === "established" ||
-        view.decision.status === "partial"
-          ? view.decision.meaning.relationId
-          : null,
+      decision: signals.decision,
+      decisionDomain: item.target.decisionDomain,
+      relationIds:
+        item.target.decisionDomain === "cursor-entity"
+          ? cursorRelationId
+            ? [cursorRelationId]
+            : []
+          : [...new Set(formula.recognizedRelations.map((relation) => relation.relationId))].sort(),
       signals,
       stage: classifyRecognitionFrontier(signals),
     };
@@ -48,10 +68,16 @@ const observations = frontier.cases.map(
 );
 const score = scoreRecognitionFrontier(frontier, observations);
 const baselineMoved = frontier.cases.filter((item, index) => {
-  const observed = observations[index];
+  const result = results[index];
+  if (!result || result.value.kind !== "semanticView") return true;
+  const syntaxAvailable = hasCursorSyntax(item);
+  const signals =
+    item.baseline.decisionDomain === "cursor-entity"
+      ? frontierSignals(result.value.view, syntaxAvailable)
+      : formulaFrontierSignals(result.value.view, syntaxAvailable);
   return (
-    observed?.decision !== item.baseline.decision ||
-    observed.stage !== item.baseline.stage
+    signals.decision !== item.baseline.decision ||
+    classifyRecognitionFrontier(signals) !== item.baseline.stage
   );
 });
 

@@ -82,6 +82,8 @@ export interface AuthoredFirstLossAtlas {
   readonly failed: number;
   readonly passed: number;
   readonly byDecision: readonly AuthoredFirstLossCount[];
+  readonly byEntityDecision: readonly AuthoredFirstLossCount[];
+  readonly byFormulaDecision: readonly AuthoredFirstLossCount[];
   readonly byFamily: readonly AuthoredFirstLossCount[];
   readonly byField: readonly AuthoredFirstLossCount[];
   readonly byReason: readonly AuthoredFirstLossCount[];
@@ -120,16 +122,9 @@ export function classifyAuthoredFirstLoss(
   if (evidence.hostProjectionMismatch) {
     return {
       basis: "native semantic surfaces match but a host projection differs",
+      decisionDomain: "cursor-entity",
       reason: "host-projection-mismatch",
       stage: "host-projection",
-    };
-  }
-  if (evidence.formulaLocationMatched === false) {
-    return {
-      basis: "selected formula location differs from reviewed evidence",
-      decisionDomain: "selected-formula",
-      reason: "formula-selection-mismatch",
-      stage: "identity",
     };
   }
   const observedDecision = evidence.cursorSignals.decision;
@@ -142,6 +137,14 @@ export function classifyAuthoredFirstLoss(
       decisionDomain: "cursor-entity",
       reason: "unsafe-decision",
       stage: "decision",
+    };
+  }
+  if (evidence.formulaLocationMatched === false) {
+    return {
+      basis: "selected formula location differs from reviewed evidence",
+      decisionDomain: "selected-formula",
+      reason: "formula-selection-mismatch",
+      stage: "identity",
     };
   }
   if (
@@ -160,13 +163,20 @@ export function classifyAuthoredFirstLoss(
     };
   }
   if (!evidence.expectedRelationsMatched && evidence.relationSources.length) {
-    const candidates = evidence.relationSources
+    const candidates: Array<{
+      readonly basis: string;
+      readonly decisionDomain: "cursor-entity" | "selected-formula";
+      readonly reason: AuthoredFirstLossReason;
+      readonly relationId: string;
+      readonly stage: FirstLossStage;
+    }> = evidence.relationSources
       .filter((source) => !source.localRelationMatched)
       .map(relationSourceLoss);
     if (!candidates.length) {
       candidates.push({
         basis:
           "reviewed relations exist at their source equations but not at the observation boundary",
+        decisionDomain: "selected-formula",
         relationId: "",
         reason: "propagation-boundary-loss",
         stage: "propagation",
@@ -176,6 +186,7 @@ export function classifyAuthoredFirstLoss(
       const identity = identityLoss(evidence.identityFailures);
       candidates.push({
         basis: identity.basis,
+        decisionDomain: identity.decisionDomain,
         relationId: "",
         reason: identity.reason,
         stage: "identity",
@@ -184,7 +195,12 @@ export function classifyAuthoredFirstLoss(
     const first = candidates.reduce((left, right) =>
       STAGE_ORDER[left.stage] <= STAGE_ORDER[right.stage] ? left : right,
     );
-    return { basis: first.basis, reason: first.reason, stage: first.stage };
+    return {
+      basis: first.basis,
+      decisionDomain: first.decisionDomain,
+      reason: first.reason,
+      stage: first.stage,
+    };
   }
   if (evidence.identityFailures.length) {
     const identity = identityLoss(evidence.identityFailures);
@@ -211,12 +227,14 @@ export function classifyAuthoredFirstLoss(
   ) {
     return {
       basis: `cursor evidence is first unavailable at ${cursorStage}`,
+      decisionDomain: "cursor-entity",
       reason: reasonForFrontier(evidence.cursorSignals),
       stage: cursorStage,
     };
   }
   return {
     basis: "available semantic evidence does not produce the reviewed public decision",
+    decisionDomain: "cursor-entity",
     reason: "evidence-sufficiency-mismatch",
     stage: "decision",
   };
@@ -224,6 +242,7 @@ export function classifyAuthoredFirstLoss(
 
 function relationSourceLoss(source: AuthoredRelationSourceEvidence): {
   readonly basis: string;
+  readonly decisionDomain: "selected-formula";
   readonly reason: AuthoredFirstLossReason;
   readonly relationId: string;
   readonly stage: FirstLossStage;
@@ -231,6 +250,7 @@ function relationSourceLoss(source: AuthoredRelationSourceEvidence): {
   if (source.relationPresent && !source.rangeMatched) {
     return {
       basis: `${source.relationId} is recognized outside its reviewed source range`,
+      decisionDomain: "selected-formula",
       reason: "relation-range-mismatch",
       relationId: source.relationId,
       stage: "pack-unification",
@@ -239,6 +259,7 @@ function relationSourceLoss(source: AuthoredRelationSourceEvidence): {
   if (source.rangeMatched && !source.rolesMatched) {
     return {
       basis: `${source.relationId} has a reviewed source range but different role bindings`,
+      decisionDomain: "selected-formula",
       reason: "role-or-equivalent-form-miss",
       relationId: source.relationId,
       stage: "pack-unification",
@@ -247,6 +268,7 @@ function relationSourceLoss(source: AuthoredRelationSourceEvidence): {
   const reason = reasonForRelationFrontier(source.signals);
   return {
     basis: `${source.relationId} is first unavailable at ${stageForReason(reason)}`,
+    decisionDomain: "selected-formula",
     reason,
     relationId: source.relationId,
     stage: stageForReason(reason),
@@ -289,12 +311,38 @@ export function summarizeAuthoredFirstLoss(
   records: readonly AuthoredFirstLossRecord[],
 ): AuthoredFirstLossAtlas {
   const failed = records.filter((record) => record.stage !== null);
+  const missingDomain = failed.find(
+    (record) => record.decisionDomain === undefined,
+  );
+  if (missingDomain) {
+    throw new Error(
+      `${missingDomain.caseId}: failed first-loss record lacks a decision domain`,
+    );
+  }
+  const entityFailures = failed.filter(
+    (record) => record.decisionDomain === "cursor-entity",
+  );
+  const formulaFailures = failed.filter(
+    (record) => record.decisionDomain === "selected-formula",
+  );
   return {
     failed: failed.length,
     passed: records.length - failed.length,
     byDecision: counts(
       failed.map((record) =>
-        record.expectedFormulaDecision ?? record.expectedDecision
+        record.decisionDomain === "selected-formula"
+          ? record.expectedFormulaDecision ?? record.expectedDecision
+          : record.expectedDecision
+      ),
+    ),
+    byEntityDecision: counts(
+      entityFailures.map((record) => record.expectedDecision),
+    ),
+    byFormulaDecision: counts(
+      formulaFailures.flatMap((record) =>
+        record.expectedFormulaDecision === undefined
+          ? []
+          : [record.expectedFormulaDecision]
       ),
     ),
     byFamily: counts(failed.map((record) => record.family)),
@@ -316,19 +364,39 @@ function counts(values: readonly string[]): AuthoredFirstLossCount[] {
 
 function identityLoss(
   failures: readonly AuthoredIdentityFailure[],
-): Pick<AuthoredFirstLossObservation, "basis" | "reason"> {
+): {
+  readonly basis: string;
+  readonly decisionDomain: "cursor-entity" | "selected-formula";
+  readonly reason: AuthoredFirstLossReason;
+} {
   const areas = new Set(failures.map((failure) => failure.area));
   const basis = failures.map((failure) => failure.basis).join("; ");
   if (areas.has("cursor-symbol")) {
-    return { basis, reason: "cursor-occurrence-mismatch" };
+    return {
+      basis,
+      decisionDomain: "cursor-entity",
+      reason: "cursor-occurrence-mismatch",
+    };
   }
   if (areas.has("formula")) {
-    return { basis, reason: "formula-selection-mismatch" };
+    return {
+      basis,
+      decisionDomain: "selected-formula",
+      reason: "formula-selection-mismatch",
+    };
   }
   if (areas.has("definition") || areas.has("references")) {
-    return { basis, reason: "navigation-projection-mismatch" };
+    return {
+      basis,
+      decisionDomain: "cursor-entity",
+      reason: "navigation-projection-mismatch",
+    };
   }
-  return { basis, reason: "edit-projection-mismatch" };
+  return {
+    basis,
+    decisionDomain: "cursor-entity",
+    reason: "edit-projection-mismatch",
+  };
 }
 
 function reasonForFrontier(

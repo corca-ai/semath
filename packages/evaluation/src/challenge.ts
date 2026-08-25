@@ -1,4 +1,10 @@
+import { createHash } from "node:crypto";
 import type { CorpusDocument } from "./model";
+
+export const CHALLENGE_RECOGNITION_V2_SHA256 =
+  "b9a5691048b3292afae8d0c2296b6707f1c8b64f4223b9fc726cb3987808d4d7";
+export const CHALLENGE_RECOGNITION_V3_SHA256 =
+  "14b4bb40905567bc8f277fc117561a82e1aeb74e5002f03cd892b0845afda8f2";
 
 export const CHALLENGE_LAYERS = [
   "binding",
@@ -34,6 +40,21 @@ export const CHALLENGE_DOCUMENT_SHAPES = [
   "sectioned",
 ] as const;
 export const CHALLENGE_PROBLEM_POLICIES = ["none", "source-conflict"] as const;
+export const CHALLENGE_DECISION_DOMAINS = [
+  "cursor-entity",
+  "selected-formula",
+] as const;
+export const CHALLENGE_RELATION_AUTHORITIES = [
+  "authoritative",
+  "candidate",
+] as const;
+export const CHALLENGE_INTERPRETATION_SUPPORT = [
+  "explicit",
+  "derived",
+  "supported",
+  "tentative",
+  "contradicted",
+] as const;
 
 export type ChallengeLayer = (typeof CHALLENGE_LAYERS)[number];
 export type ChallengeMetric = (typeof CHALLENGE_METRICS)[number];
@@ -42,6 +63,19 @@ export type ChallengeDecision = (typeof CHALLENGE_DECISIONS)[number];
 export type ChallengeDocumentShape = (typeof CHALLENGE_DOCUMENT_SHAPES)[number];
 export type ChallengeProblemPolicy =
   (typeof CHALLENGE_PROBLEM_POLICIES)[number];
+export type ChallengeDecisionDomain =
+  (typeof CHALLENGE_DECISION_DOMAINS)[number];
+export type ChallengeRelationAuthority =
+  (typeof CHALLENGE_RELATION_AUTHORITIES)[number];
+export type ChallengeInterpretationSupport =
+  (typeof CHALLENGE_INTERPRETATION_SUPPORT)[number];
+
+export interface ChallengeRecognizedRelation {
+  readonly authority: ChallengeRelationAuthority;
+  readonly formulaAnchor: "selected-formula";
+  readonly relationId: string;
+  readonly support: ChallengeInterpretationSupport;
+}
 
 export interface ChallengeDecisionExpectation {
   readonly meaning: "absent" | "present";
@@ -75,18 +109,29 @@ export interface ChallengeCase {
   };
   readonly documents: readonly CorpusDocument[];
   readonly decisionExpectation?: ChallengeDecisionExpectation;
+  readonly decisionDomain?: ChallengeDecisionDomain;
   readonly documentShape?: ChallengeDocumentShape;
   readonly expectation: ChallengeExpectation;
   readonly id: string;
   readonly metric: ChallengeMetric;
   readonly outcome: ChallengeOutcome;
   readonly owner: ChallengeLayer;
+  readonly recognizedRelations?: readonly ChallengeRecognizedRelation[];
   readonly variationTags: readonly string[];
 }
 
 export interface ChallengeCorpus {
   readonly cases: readonly ChallengeCase[];
-  readonly schemaVersion: 2 | 3;
+  readonly schemaVersion: 2 | 3 | 4;
+}
+
+export interface ChallengeDecisionObservation {
+  readonly meaningLabel?: string;
+  readonly meaningRelationId?: string | null;
+  readonly problemCount: number;
+  readonly reasonKinds: readonly string[];
+  readonly sourceGrounded: boolean;
+  readonly status?: string;
 }
 
 export interface ChallengeObservation {
@@ -102,10 +147,13 @@ export interface ChallengeObservation {
     readonly ruleId: string;
     readonly symbol: string;
   }[];
+  readonly entityDecision?: ChallengeDecisionObservation;
+  readonly formulaDecision?: ChallengeDecisionObservation;
   readonly meaningLabel?: string;
   readonly meaningRelationId?: string | null;
   readonly problemCount: number;
   readonly reasonKinds: readonly string[];
+  readonly recognizedRelations?: readonly ChallengeRecognizedRelation[];
   readonly relationIds: readonly string[];
   readonly shapes: readonly string[];
   readonly sourceNotation?: string;
@@ -135,13 +183,20 @@ export interface ChallengeScorecard {
     Record<ChallengeProblemPolicy, { passed: number; total: number }>
   >;
   readonly reasonIntegrity: { passed: number; total: number };
-  readonly schemaVersion: 2 | 3;
+  readonly schemaVersion: 2 | 3 | 4;
 }
 
 interface ChallengeV3Profile {
   readonly caseId: string;
   readonly decision: ChallengeDecisionExpectation;
   readonly documentShape: ChallengeDocumentShape;
+}
+
+interface ChallengeV4Profile {
+  readonly caseId: string;
+  readonly decision: ChallengeDecisionExpectation;
+  readonly decisionDomain: ChallengeDecisionDomain;
+  readonly recognizedRelations: readonly ChallengeRecognizedRelation[];
 }
 
 export interface DevelopmentFixtureCase {
@@ -276,6 +331,120 @@ export function parseChallengeV3(
   return { cases, schemaVersion: 3 };
 }
 
+/**
+ * Composes the frozen v2 cases and v3 document shapes with a strict v4
+ * authority overlay. v4 separates cursor-entity decisions from selected-formula
+ * decisions and reviews every formula interpretation without changing either
+ * predecessor fixture.
+ */
+export function parseChallengeV4(
+  baseSource: string,
+  v3Source: string,
+  profileValue: unknown,
+): ChallengeCorpus {
+  const baseValue = parseJsonSource(baseSource, "challenge-v2 source");
+  const parsedBase = parseChallengeCorpus(baseValue);
+  if (parsedBase.cases.length !== 48) {
+    throw new Error("challenge-v4 base: must contain exactly 48 cases");
+  }
+  const v3Value = parseJsonSource(v3Source, "challenge-v3 source");
+  const base = parseChallengeV3(baseValue, v3Value);
+  const root = record(profileValue, "challenge-v4");
+  exact(
+    root,
+    ["schemaVersion", "baseSchemaVersion", "baseDigests", "profiles"],
+    "challenge-v4",
+  );
+  if (root.schemaVersion !== 4)
+    throw new Error("challenge-v4.schemaVersion: must be 4");
+  if (root.baseSchemaVersion !== 3) {
+    throw new Error("challenge-v4.baseSchemaVersion: must be 3");
+  }
+  const digests = record(root.baseDigests, "challenge-v4.baseDigests");
+  exact(
+    digests,
+    ["recognitionV2Sha256", "recognitionV3Sha256"],
+    "challenge-v4.baseDigests",
+  );
+  validatePinnedDigest(
+    digests.recognitionV2Sha256,
+    CHALLENGE_RECOGNITION_V2_SHA256,
+    sha256(baseSource),
+    "challenge-v4.baseDigests.recognitionV2Sha256",
+  );
+  validatePinnedDigest(
+    digests.recognitionV3Sha256,
+    CHALLENGE_RECOGNITION_V3_SHA256,
+    sha256(v3Source),
+    "challenge-v4.baseDigests.recognitionV3Sha256",
+  );
+  if (
+    !Array.isArray(root.profiles) ||
+    root.profiles.length !== base.cases.length
+  ) {
+    throw new Error(
+      `challenge-v4.profiles: must contain exactly ${base.cases.length} profiles`,
+    );
+  }
+  const profiles = root.profiles.map((value, index) =>
+    parseV4Profile(value, `challenge-v4.profiles[${index}]`),
+  );
+  unique(
+    profiles.map((profile) => profile.caseId),
+    "challenge-v4.profiles.caseId",
+  );
+  const baseIds = new Set(base.cases.map((item) => item.id));
+  const unknown = profiles
+    .map((profile) => profile.caseId)
+    .filter((caseId) => !baseIds.has(caseId))
+    .sort();
+  if (unknown.length)
+    throw new Error(`challenge-v4.profiles: unknown case ${unknown[0]}`);
+  const profileById = new Map(
+    profiles.map((profile) => [profile.caseId, profile]),
+  );
+  const cases = base.cases.map((item): ChallengeCase => {
+    const profile = profileById.get(item.id);
+    if (!profile)
+      throw new Error(`challenge-v4.profiles: missing case ${item.id}`);
+    const relationId = item.expectation.relationId;
+    const reviewedRelation = relationId
+      ? profile.recognizedRelations.find(
+          (recognized) => recognized.relationId === relationId,
+        )
+      : undefined;
+    if (relationId && !reviewedRelation) {
+      throw new Error(
+        `challenge-v4.profiles.${item.id}: relation ${relationId} must be reviewed`,
+      );
+    }
+    if (
+      (relationId || item.expectation.excludedRelationId) &&
+      profile.decisionDomain !== "selected-formula"
+    ) {
+      throw new Error(
+        `challenge-v4.profiles.${item.id}: relation decisions must use selected-formula`,
+      );
+    }
+    const expectation =
+      reviewedRelation?.authority === "candidate"
+        ? withoutRelationExpectation(item.expectation)
+        : item.expectation;
+    return {
+      ...item,
+      decisionDomain: profile.decisionDomain,
+      decisionExpectation: profile.decision,
+      expectation,
+      recognizedRelations: profile.recognizedRelations,
+      variationTags: [
+        ...item.variationTags,
+        `decision-domain:${profile.decisionDomain}`,
+      ],
+    };
+  });
+  return { cases, schemaVersion: 4 };
+}
+
 export function scoreChallenge(
   corpus: ChallengeCorpus,
   observations: readonly ChallengeObservation[],
@@ -297,28 +466,43 @@ export function scoreChallenge(
     }
     const expected = item.expectation;
     const decision = item.decisionExpectation;
+    const decisionObservation = projectedDecision(item, observation);
     const decisionMismatch =
-      decision && observation.status !== decision.status
+      decision && decisionObservation.status !== decision.status
         ? `decision ${decision.status}`
         : undefined;
-    const meaningPresent = observation.meaningLabel !== undefined;
+    const meaningPresent = decisionObservation.meaningLabel !== undefined;
+    const expectedMeaningRelationId =
+      expected.relationId ??
+      (decision?.meaning === "present" && item.recognizedRelations?.length === 1
+        ? item.recognizedRelations.at(0)?.relationId
+        : undefined);
     const explanationMismatch = decision
       ? meaningPresent !== (decision.meaning === "present")
         ? `meaning ${decision.meaning}`
-        : expected.relationId &&
-            observation.meaningRelationId !== expected.relationId
-          ? `meaning relation ${expected.relationId}`
-          : observation.meaningRelationId && !observation.sourceGrounded
+        : expectedMeaningRelationId &&
+            decisionObservation.meaningRelationId !== expectedMeaningRelationId
+          ? `meaning relation ${expectedMeaningRelationId}`
+          : decisionObservation.meaningRelationId &&
+              !decisionObservation.sourceGrounded
             ? "source-grounded meaning"
             : undefined
       : undefined;
     const problemMismatch =
-      decision && !problemPolicyMatches(decision.problems, observation)
+      decision && !problemPolicyMatches(decision.problems, decisionObservation)
         ? `problems ${decision.problems}`
         : undefined;
     const reasonMismatch =
-      decision && !reasonsAreValid(decision.status, observation)
+      decision && !reasonsAreValid(decision.status, decisionObservation)
         ? `reason integrity for ${decision.status}`
+        : undefined;
+    const recognitionMismatch =
+      item.recognizedRelations &&
+      (!sameRecognizedRelations(
+        item.recognizedRelations,
+        observation.recognizedRelations,
+      ) || !recognizedRelationAuthorityIsSupportCoherent(observation))
+        ? "recognized relations"
         : undefined;
     if (decision && !decisionMismatch) decisionPassed.add(item.id);
     if (decision && !explanationMismatch) explanationPassed.add(item.id);
@@ -374,11 +558,15 @@ export function scoreChallenge(
         ? `excluded definition ${expected.excludedDefinitionSymbol}`
         : undefined,
       expected.excludedRelationId &&
-      observation.relationIds.includes(expected.excludedRelationId)
+      authoritativeRelationObserved(
+        item,
+        observation,
+        expected.excludedRelationId,
+      )
         ? `excluded relation ${expected.excludedRelationId}`
         : undefined,
       expected.relationId &&
-      !observation.relationIds.includes(expected.relationId)
+      !authoritativeRelationObserved(item, observation, expected.relationId)
         ? `relation ${expected.relationId}`
         : undefined,
       expected.shape && !observation.shapes.includes(expected.shape)
@@ -388,7 +576,7 @@ export function scoreChallenge(
       observation.sourceNotation !== expected.sourceNotation
         ? `source notation ${expected.sourceNotation}`
         : undefined,
-      expected.status && observation.status !== expected.status
+      expected.status && decisionObservation.status !== expected.status
         ? `status ${expected.status}`
         : undefined,
       expected.symbol && !observation.symbols.includes(expected.symbol)
@@ -398,6 +586,7 @@ export function scoreChallenge(
       explanationMismatch,
       problemMismatch,
       reasonMismatch,
+      recognitionMismatch,
     ].filter((item): item is string => Boolean(item));
     if (mismatches.length)
       failures.push(`${item.id}: missing ${mismatches.join(", ")}`);
@@ -475,6 +664,90 @@ function parseV3Profile(value: unknown, path: string): ChallengeV3Profile {
   };
 }
 
+function parseV4Profile(value: unknown, path: string): ChallengeV4Profile {
+  const item = record(value, path);
+  const required = [
+    "caseId",
+    "decision",
+    "decisionDomain",
+    "recognizedRelations",
+  ] as const;
+  exact(item, required, path);
+  for (const key of required) {
+    if (!(key in item))
+      throw new Error(`${path}: unknown or missing field ${key}`);
+  }
+  const decision = record(item.decision, `${path}.decision`);
+  exact(decision, ["meaning", "problems", "status"], `${path}.decision`);
+  if (!Array.isArray(item.recognizedRelations)) {
+    throw new Error(`${path}.recognizedRelations: must be an array`);
+  }
+  const recognizedRelations = item.recognizedRelations.map((value, index) => {
+    const relationPath = `${path}.recognizedRelations[${index}]`;
+    const relation = record(value, relationPath);
+    exact(
+      relation,
+      ["authority", "formulaAnchor", "relationId", "support"],
+      relationPath,
+    );
+    return {
+      authority: oneOf(
+        relation.authority,
+        CHALLENGE_RELATION_AUTHORITIES,
+        `${relationPath}.authority`,
+      ),
+      formulaAnchor: oneOf(
+        relation.formulaAnchor,
+        ["selected-formula"] as const,
+        `${relationPath}.formulaAnchor`,
+      ),
+      relationId: text(relation.relationId, `${relationPath}.relationId`),
+      support: oneOf(
+        relation.support,
+        CHALLENGE_INTERPRETATION_SUPPORT,
+        `${relationPath}.support`,
+      ),
+    };
+  });
+  unique(
+    recognizedRelations.map((relation) => relation.relationId),
+    `${path}.recognizedRelations.relationId`,
+  );
+  return {
+    caseId: text(item.caseId, `${path}.caseId`),
+    decision: {
+      meaning: oneOf(
+        decision.meaning,
+        ["absent", "present"] as const,
+        `${path}.decision.meaning`,
+      ),
+      problems: oneOf(
+        decision.problems,
+        CHALLENGE_PROBLEM_POLICIES,
+        `${path}.decision.problems`,
+      ),
+      status: oneOf(
+        decision.status,
+        CHALLENGE_DECISIONS,
+        `${path}.decision.status`,
+      ),
+    },
+    decisionDomain: oneOf(
+      item.decisionDomain,
+      CHALLENGE_DECISION_DOMAINS,
+      `${path}.decisionDomain`,
+    ),
+    recognizedRelations,
+  };
+}
+
+function withoutRelationExpectation(
+  expectation: ChallengeExpectation,
+): ChallengeExpectation {
+  const { relationId: _relationId, ...rest } = expectation;
+  return rest;
+}
+
 function shapeChallengeCase(
   item: ChallengeCase,
   profile: ChallengeV3Profile,
@@ -545,7 +818,7 @@ function shapeChallengeCase(
 
 function problemPolicyMatches(
   policy: ChallengeProblemPolicy,
-  observation: ChallengeObservation,
+  observation: ChallengeDecisionObservation,
 ): boolean {
   return policy === "none"
     ? observation.problemCount === 0
@@ -555,7 +828,7 @@ function problemPolicyMatches(
 
 function reasonsAreValid(
   status: ChallengeDecision,
-  observation: ChallengeObservation,
+  observation: ChallengeDecisionObservation,
 ): boolean {
   const allowed: Readonly<Record<ChallengeDecision, ReadonlySet<string>>> = {
     ambiguous: new Set(["uncertainty", "engine-limit"]),
@@ -578,6 +851,69 @@ function reasonsAreValid(
     );
   }
   return status === "partial" || observation.reasonKinds.length > 0;
+}
+
+function projectedDecision(
+  item: ChallengeCase,
+  observation: ChallengeObservation,
+): ChallengeDecisionObservation {
+  if (item.decisionDomain === "cursor-entity") {
+    return observation.entityDecision ?? missingDecisionObservation();
+  }
+  if (item.decisionDomain === "selected-formula") {
+    return observation.formulaDecision ?? missingDecisionObservation();
+  }
+  return observation;
+}
+
+function missingDecisionObservation(): ChallengeDecisionObservation {
+  return {
+    problemCount: 0,
+    reasonKinds: [],
+    sourceGrounded: false,
+  };
+}
+
+function sameRecognizedRelations(
+  expected: readonly ChallengeRecognizedRelation[],
+  actual: readonly ChallengeRecognizedRelation[] | undefined,
+): boolean {
+  if (!actual || expected.length !== actual.length) return false;
+  const key = (item: ChallengeRecognizedRelation) =>
+    `${item.relationId}\u0000${item.support}\u0000${item.authority}\u0000${item.formulaAnchor}`;
+  const expectedKeys = expected.map(key).sort();
+  const actualKeys = actual.map(key).sort();
+  return expectedKeys.every((value, index) => value === actualKeys[index]);
+}
+
+function recognizedRelationAuthorityIsSupportCoherent(
+  observation: ChallengeObservation,
+): boolean {
+  return Boolean(
+    observation.recognizedRelations?.every(
+      (recognized) =>
+        recognized.authority !== "authoritative" ||
+        recognized.support === "explicit" ||
+        recognized.support === "derived",
+    ),
+  );
+}
+
+function authoritativeRelationObserved(
+  item: ChallengeCase,
+  observation: ChallengeObservation,
+  relationId: string,
+): boolean {
+  if (item.recognizedRelations) {
+    return Boolean(
+      observation.recognizedRelations?.some(
+        (recognized) =>
+          recognized.authority === "authoritative" &&
+          recognized.relationId === relationId,
+      ),
+    );
+  }
+  return observation.relationIds.includes(relationId);
 }
 
 function countedExpected(
@@ -745,6 +1081,29 @@ function validateBoundaryPairs(cases: readonly ChallengeCase[]): void {
 
 function normalizedSource(source: string): string {
   return source.replace(/\s+/gu, " ").trim();
+}
+
+function parseJsonSource(source: string, path: string): unknown {
+  try {
+    return JSON.parse(source) as unknown;
+  } catch {
+    throw new Error(`${path}: must be valid JSON`);
+  }
+}
+
+function validatePinnedDigest(
+  value: unknown,
+  pinned: string,
+  actual: string,
+  path: string,
+): void {
+  const declared = text(value, path);
+  if (declared !== pinned) throw new Error(`${path}: must equal ${pinned}`);
+  if (actual !== declared) throw new Error(`${path}: source digest mismatch`);
+}
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
 }
 
 function tally<

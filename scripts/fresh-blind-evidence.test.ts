@@ -3,6 +3,7 @@ import { LatexSyntaxService } from "wasmtex/syntax";
 import {
   authoredMathFingerprints,
   authoredProseShingles,
+  selectFreshBlindOccurrence,
   spentHoldoutProfile,
 } from "../packages/evaluation/src/index";
 import {
@@ -70,6 +71,105 @@ describe("fresh blind reference isolation", () => {
       const range = document.mathRootContentRanges[0]!;
       expect(content.slice(range.startOffset, range.endOffset)).toBe(notation);
     }
+  });
+
+  test("extracts neutral composite owners without collapsing to their nucleus", () => {
+    const content = "😀 The value is $\\mathbf{\\hat{x}}_i=0$.";
+    const snapshot = {
+      documents: [{ content, fileId: "main", path: "main.tex" }],
+      id: "initial",
+    };
+    const [facts] = freshAuthoringSyntaxFactsForSelections([
+      { scenarioId: "composite", snapshot },
+    ]);
+    const document = facts!.documents[0]!;
+    const x = content.indexOf("x");
+    const formulaStart = content.indexOf("\\mathbf");
+    const scalarFormulaStart = [...content].findIndex(
+      (character) => character === "\\",
+    );
+    expect(document.mathRootContentRanges[0]!.startOffset).toBe(formulaStart);
+    // Public source ranges are UTF-16 offsets, so the astral prefix contributes
+    // two code units even though it is one Unicode scalar.
+    expect(formulaStart).toBe(scalarFormulaStart + 1);
+    const occurrences = document.occurrences;
+    if (!occurrences) throw new Error("missing occurrence syntax facts");
+    const owners = occurrences.filter((occurrence) =>
+      occurrence.selectionRange.startOffset <= x &&
+      x < occurrence.selectionRange.endOffset
+    );
+    expect(owners.map((occurrence) =>
+      content.slice(occurrence.range.startOffset, occurrence.range.endOffset)
+    )).toContain("\\mathbf{\\hat{x}}_i");
+    expect(owners).toHaveLength(1);
+  });
+
+  test("extracts real atoms and complete-application cursor edges", () => {
+    const content = "The map is $f(x)+\\sin(y)$.";
+    const snapshot = {
+      documents: [{ content, fileId: "main", path: "main.md" }],
+      id: "initial",
+    };
+    const [facts] = freshAuthoringSyntaxFactsForSelections([
+      { scenarioId: "application", snapshot },
+    ]);
+    const occurrences = facts!.documents[0]!.occurrences!;
+    const f = occurrences.find((occurrence) => occurrence.surface === "f")!;
+    const sin = occurrences.find((occurrence) => occurrence.surface === "sin")!;
+    expect(f.range).toEqual({
+      startOffset: content.indexOf("f"),
+      endOffset: content.indexOf("f") + 1,
+    });
+    expect(f.applicationEndOffset).toBe(content.indexOf("x)") + 2);
+    expect(sin.applicationEndOffset).toBe(content.indexOf("y)") + 2);
+    expect(content.slice(sin.range.startOffset, sin.range.endOffset)).toBe("\\sin");
+  });
+
+  test("keeps operator focus and nested script ownership syntax-backed", () => {
+    const content = "The indexed operator is $\\sum_i x_i$.";
+    const snapshot = {
+      documents: [{ content, fileId: "main", path: "main.md" }],
+      id: "initial",
+    };
+    const [facts] = freshAuthoringSyntaxFactsForSelections([
+      { scenarioId: "operator-focus", snapshot },
+    ]);
+    const occurrences = facts!.documents[0]!.occurrences!;
+    const sumStart = content.indexOf("\\sum");
+    const firstIndex = content.indexOf("_i", sumStart) + 1;
+    const xStart = content.indexOf("x_i");
+    const secondIndex = content.indexOf("i", xStart);
+    const sum = selectFreshBlindOccurrence(occurrences, sumStart + 1)!;
+    const indexedX = selectFreshBlindOccurrence(occurrences, xStart)!;
+    const index = selectFreshBlindOccurrence(occurrences, secondIndex)!;
+    expect(content.slice(sum.range.startOffset, sum.range.endOffset)).toBe("\\sum");
+    expect(selectFreshBlindOccurrence(occurrences, firstIndex)?.surface).toBe("i");
+    expect(content.slice(indexedX.range.startOffset, indexedX.range.endOffset)).toBe("x_i");
+    expect(index.surface).toBe("i");
+    expect(index.range).toEqual({
+      startOffset: secondIndex,
+      endOffset: secondIndex + 1,
+    });
+
+    const namedContent = "The op is $\\operatorname{sin}_i(y)$.";
+    const [namedFacts] = freshAuthoringSyntaxFactsForSelections([{
+      scenarioId: "named-operator-focus",
+      snapshot: {
+        documents: [{
+          content: namedContent,
+          fileId: "main",
+          path: "main.md",
+        }],
+        id: "initial",
+      },
+    }]);
+    const namedOccurrences = namedFacts!.documents[0]!.occurrences!;
+    const nameOffset = namedContent.indexOf("sin");
+    const namedIndexOffset = namedContent.indexOf("_i") + 1;
+    expect(selectFreshBlindOccurrence(namedOccurrences, nameOffset)?.surface)
+      .toBe("\\operatorname{sin}_i");
+    expect(selectFreshBlindOccurrence(namedOccurrences, namedIndexOffset)?.surface)
+      .toBe("i");
   });
 
   test("versions the exact document, math, and prose lineage algorithms", () => {

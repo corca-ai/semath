@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 4,
+  "baseSchemaVersion": 3,
+  "baseDigests": {
+    "recognitionV2Sha256": "b9a5691048b3292afae8d0c2296b6707f1c8b64f4223b9fc726cb3987808d4d7",
+    "recognitionV3Sha256": "14b4bb40905567bc8f277fc117561a82e1aeb74e5002f03cd892b0845afda8f2"
+  },
+  "profiles": [
+    {
+      "caseId": "binding-metric-long-short",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "binding-hedged-name-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "binding-respectively-circuit",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "circuits:ohm-law",
+          "support": "tentative",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "binding-role-collision-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "absent",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "constraint-matrix-vector-compatible",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "linear-algebra:matrix-vector-product",
+          "support": "explicit",
+          "authority": "authoritative",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "constraint-matrix-vector-mismatch",
+      "decision": {
+        "status": "partial",
+        "meaning": "absent",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "constraint-explicit-vector-shape",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "constraint-incompatible-role-refusal",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "discrete-math:set-intersection",
+          "support": "explicit",
+          "authority": "authoritative",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "pack-unfamiliar-ohm-symbols",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "circuits:ohm-law",
+          "support": "tentative",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "pack-cross-field-product-refusal",
+      "decision": {
+        "status": "conflicting",
+        "meaning": "absent",
+        "problems": "source-conflict"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "pack-event-intersection",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "probability:event-intersection",
+          "support": "explicit",
+          "authority": "authoritative",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "pack-set-event-collision",
+      "decision": {
+        "status": "ambiguous",
+        "meaning": "absent",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "probability:event-intersection",
+          "support": "supported",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        },
+        {
+          "relationId": "discrete-math:set-intersection",
+          "support": "supported",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "presentation-decorated-source",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "presentation-plain-not-decorated",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "presentation-named-surface",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "presentation-opaque-command-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-resource-navigation",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-future-definition-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-included-definition",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-disconnected-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-partial-candidate",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-unknown-differential-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-integral-binder",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-index-family",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "binding-asserted-ece-name",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "binding-quoted-ece-name-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "binding-shared-matrix-declaration",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "binding-alternative-matrix-refusal",
+      "decision": {
+        "status": "unsupported",
+        "meaning": "absent",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "constraint-events-same-context",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "probability:event-intersection",
+          "support": "explicit",
+          "authority": "authoritative",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "constraint-events-different-context-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "absent",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "constraint-passive-sign-asserted",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "circuits:capacitor-current-law",
+          "support": "explicit",
+          "authority": "authoritative",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "constraint-passive-sign-negated-refusal",
+      "decision": {
+        "status": "conflicting",
+        "meaning": "absent",
+        "problems": "source-conflict"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "circuits:capacitor-current-law",
+          "support": "contradicted",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "pack-electric-force-typed",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "electromagnetism:electric-force-law",
+          "support": "tentative",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "pack-electric-force-cross-field-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "classical-mechanics:linear-momentum-definition",
+          "support": "tentative",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "pack-sensible-heat-typed",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": [
+        {
+          "relationId": "thermodynamics-heat-transfer:sensible-heat-relation",
+          "support": "tentative",
+          "authority": "candidate",
+          "formulaAnchor": "selected-formula"
+        }
+      ]
+    },
+    {
+      "caseId": "pack-sensible-heat-untyped-refusal",
+      "decision": {
+        "status": "unsupported",
+        "meaning": "absent",
+        "problems": "none"
+      },
+      "decisionDomain": "selected-formula",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "presentation-hat-source-preserved",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "presentation-style-not-decoration",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "presentation-declared-ece-command",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "presentation-plain-ece-not-command",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-prior-section-binding",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-sibling-section-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-prior-include-binding",
+      "decision": {
+        "status": "established",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "resolution-later-include-refusal",
+      "decision": {
+        "status": "unsupported",
+        "meaning": "absent",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-second-partial-structure",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-opaque-second-partial-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-complete-sum-binder",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    },
+    {
+      "caseId": "syntax-malformed-sum-refusal",
+      "decision": {
+        "status": "partial",
+        "meaning": "present",
+        "problems": "none"
+      },
+      "decisionDomain": "cursor-entity",
+      "recognizedRelations": []
+    }
+  ]
+}

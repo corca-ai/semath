@@ -6,8 +6,10 @@ import {
   findChallengeFixtureLeaks,
   parseChallengeCorpus,
   parseChallengeV3,
+  parseChallengeV4,
   scoreChallenge,
   type ChallengeCase,
+  type ChallengeCorpus,
   type ChallengeObservation,
   type DevelopmentFixtureCase,
 } from "./challenge";
@@ -120,6 +122,282 @@ describe("independent recognition challenge", () => {
     );
   });
 
+  test("composes the strict v4 authority overlay without changing v2 or v3", async () => {
+    const [baseText, v3Text, v4Text] = await Promise.all([
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v2.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v3.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v4.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ]);
+    const challenge = parseChallengeV4(
+      baseText,
+      v3Text,
+      JSON.parse(v4Text),
+    );
+    expect(challenge.schemaVersion).toBe(4);
+    expect(challenge.cases).toHaveLength(48);
+    expect(challenge.cases.every((item) => item.decisionDomain)).toBe(true);
+    expect(challenge.cases.every((item) => item.recognizedRelations)).toBe(
+      true,
+    );
+    const baseRelations = new Set<string>(
+      JSON.parse(baseText).cases.flatMap(
+        (item: { id: string; expectation: { relationId?: string } }) =>
+          item.expectation.relationId ? [item.id] : [],
+      ),
+    );
+    const reviewedRelationCases = challenge.cases.filter((item) =>
+      baseRelations.has(item.id),
+    );
+    expect(
+      reviewedRelationCases.filter(
+        (item) => item.expectation.relationId === undefined,
+      ),
+    ).toHaveLength(4);
+    expect(
+      reviewedRelationCases.filter(
+        (item) => item.expectation.relationId !== undefined,
+      ),
+    ).toHaveLength(4);
+    expect(JSON.parse(baseText).schemaVersion).toBe(2);
+    expect(JSON.parse(v3Text).schemaVersion).toBe(3);
+  });
+
+  test("rejects incomplete, domain-mixed, and non-exact v4 policy", async () => {
+    const [base, v3, v4Text] = await Promise.all([
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v2.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v3.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../../../fixtures/challenge/recognition-v4.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ]);
+    const complete: unknown = JSON.parse(v4Text);
+    const missingDomain = structuredClone(complete);
+    delete profileRecords(missingDomain)[0]!.decisionDomain;
+    expect(() => parseChallengeV4(base, v3, missingDomain)).toThrow(
+      "unknown or missing field decisionDomain",
+    );
+
+    const wrongAnchor = structuredClone(complete);
+    profileRecords(wrongAnchor)[0]!.recognizedRelations = [
+      {
+        authority: "candidate",
+        formulaAnchor: "cursor-formula",
+        relationId: "test:relation",
+        support: "supported",
+      },
+    ];
+    expect(() => parseChallengeV4(base, v3, wrongAnchor)).toThrow(
+      "formulaAnchor",
+    );
+
+    const invalidSupport = structuredClone(complete);
+    profileRecords(invalidSupport)[0]!.recognizedRelations = [
+      {
+        authority: "candidate",
+        formulaAnchor: "selected-formula",
+        relationId: "test:relation",
+        support: "certain",
+      },
+    ];
+    expect(() => parseChallengeV4(base, v3, invalidSupport)).toThrow(
+      "support",
+    );
+
+    const extra = structuredClone(complete);
+    profileRecords(extra)[0]!.runtimeCaseId = "case-0";
+    expect(() => parseChallengeV4(base, v3, extra)).toThrow(
+      "unknown field runtimeCaseId",
+    );
+
+    const wrongDigest = structuredClone(complete);
+    const wrongDigestRoot = recordFixture(wrongDigest, "v4 fixture");
+    const digests = recordFixture(wrongDigestRoot.baseDigests, "baseDigests");
+    digests.recognitionV2Sha256 = "0".repeat(64);
+    expect(() => parseChallengeV4(base, v3, wrongDigest)).toThrow(
+      "baseDigests.recognitionV2Sha256: must equal",
+    );
+    expect(() => parseChallengeV4(`${base} `, v3, complete)).toThrow(
+      "baseDigests.recognitionV2Sha256: source digest mismatch",
+    );
+
+    const parsedBase = parseChallengeCorpus(JSON.parse(base));
+    const excluded = parsedBase.cases.find(
+      (item) => item.expectation.excludedRelationId,
+    );
+    if (!excluded) throw new Error("expected an excluded relation fixture");
+    const wrongExcludedDomain = structuredClone(complete);
+    const excludedProfile = profileRecords(wrongExcludedDomain).find(
+      (profile) => profile.caseId === excluded.id,
+    );
+    if (!excludedProfile) throw new Error("missing excluded relation profile");
+    excludedProfile.decisionDomain = "cursor-entity";
+    expect(() => parseChallengeV4(base, v3, wrongExcludedDomain)).toThrow(
+      "relation decisions must use selected-formula",
+    );
+
+    const tooManyBase: unknown = JSON.parse(base);
+    const tooManyCases = fixtureCases(tooManyBase);
+    recordFixture(tooManyBase, "v2 fixture").cases = [
+      ...tooManyCases,
+      { ...tooManyCases[0]!, id: "extra-v4-case" },
+    ];
+    expect(() =>
+      parseChallengeV4(JSON.stringify(tooManyBase), v3, complete),
+    ).toThrow("base: must contain exactly 48 cases");
+  });
+
+  test("scores v4 decisions in the declared domain and keeps relation authority exact", () => {
+    const baseCases = cases();
+    const corpus: ChallengeCorpus = {
+      cases: baseCases.map(
+        (item, index): ChallengeCase =>
+          index === 0
+            ? {
+                ...item,
+                decisionDomain: "selected-formula",
+                decisionExpectation: {
+                  meaning: "present",
+                  problems: "source-conflict",
+                  status: "conflicting",
+                },
+                expectation: { symbol: "x" },
+                recognizedRelations: [
+                  {
+                    authority: "candidate",
+                    formulaAnchor: "selected-formula",
+                    relationId: "test:law",
+                    support: "contradicted",
+                  },
+                ],
+              }
+            : {
+                ...item,
+                decisionDomain: "cursor-entity",
+                decisionExpectation: {
+                  meaning: "absent",
+                  problems: "none",
+                  status: "partial",
+                },
+                recognizedRelations: [],
+              },
+      ),
+      schemaVersion: 4,
+    };
+    const observations = corpus.cases.map(
+      (item): ChallengeObservation => ({
+        ...observation(item),
+        entityDecision:
+          item.id === "case-0"
+            ? {
+                meaningLabel: "Wrong entity decision",
+                meaningRelationId: "wrong:entity",
+                problemCount: 0,
+                reasonKinds: ["proof"],
+                sourceGrounded: true,
+                status: "established",
+              }
+            : {
+                problemCount: 0,
+                reasonKinds: ["uncertainty"],
+                sourceGrounded: false,
+                status: "partial",
+              },
+        formulaDecision: {
+          meaningLabel: "Test law",
+          meaningRelationId: "test:law",
+          problemCount: 1,
+          reasonKinds: ["source-conflict"],
+          sourceGrounded: true,
+          status: "conflicting",
+        },
+        recognizedRelations: [],
+      }),
+    );
+    observations[0] = {
+      ...observations[0]!,
+      recognizedRelations: [
+        {
+          authority: "candidate",
+          formulaAnchor: "selected-formula",
+          relationId: "test:law",
+          support: "contradicted",
+        },
+      ],
+    };
+
+    expect(scoreChallenge(corpus, observations).passed).toBe(48);
+
+    observations[0] = {
+      ...observations[0]!,
+      relationIds: ["test:law"],
+    };
+    expect(scoreChallenge(corpus, observations).passed).toBe(48);
+
+    observations[0] = {
+      ...observations[0]!,
+      formulaDecision: {
+        ...observations[0]!.formulaDecision!,
+        sourceGrounded: false,
+      },
+    };
+    expect(scoreChallenge(corpus, observations).failures[0]).toContain(
+      "source-grounded",
+    );
+
+    observations[0] = {
+      ...observations[0]!,
+      formulaDecision: {
+        ...observations[0]!.formulaDecision!,
+        sourceGrounded: true,
+      },
+      recognizedRelations: [
+        {
+          authority: "authoritative",
+          formulaAnchor: "selected-formula",
+          relationId: "test:law",
+          support: "contradicted",
+        },
+      ],
+    };
+    expect(scoreChallenge(corpus, observations).failures[0]).toContain(
+      "recognized relations",
+    );
+  });
+
   test("parses a strict frozen matrix with every layer, outcome, and metric", () => {
     expect(parseChallengeCorpus(source(cases())).cases).toHaveLength(48);
     expect(() =>
@@ -229,6 +507,34 @@ function parseDevelopmentCases(value: unknown): DevelopmentFixtureCase[] {
       ? [{ documents, id: item.id }]
       : [];
   });
+}
+
+function recordFixture(
+  value: unknown,
+  path: string,
+): Record<string, unknown> {
+  if (!isRecord(value)) throw new Error(`${path}: expected an object`);
+  return value;
+}
+
+function profileRecords(value: unknown): Record<string, unknown>[] {
+  const root = recordFixture(value, "v4 fixture");
+  if (!Array.isArray(root.profiles)) {
+    throw new Error("v4 fixture: expected profiles");
+  }
+  return root.profiles.map((profile, index) =>
+    recordFixture(profile, `v4 fixture profile ${index}`),
+  );
+}
+
+function fixtureCases(value: unknown): Record<string, unknown>[] {
+  const root = recordFixture(value, "v2 fixture");
+  if (!Array.isArray(root.cases)) {
+    throw new Error("v2 fixture: expected cases");
+  }
+  return root.cases.map((item, index) =>
+    recordFixture(item, `v2 fixture case ${index}`),
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

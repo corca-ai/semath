@@ -228,6 +228,14 @@ pub(crate) enum DiscourseConstruction {
         candidate: AttachmentCandidate,
         frame: DiscourseFrame,
     },
+    AlternativeSelection {
+        alternatives_clause_index: usize,
+        selection_clause_index: usize,
+        target_mention_index: usize,
+        selected: bool,
+        evidence_start: usize,
+        evidence_end: usize,
+    },
 }
 
 impl ProseEventStream {
@@ -490,7 +498,69 @@ impl ProseEventStream {
             &equation_flows,
         ));
         constructions.extend(equation_flows);
+        constructions.extend(self.alternative_selection_constructions(mentions, clauses));
         constructions
+    }
+
+    fn alternative_selection_constructions(
+        &self,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        clauses
+            .iter()
+            .enumerate()
+            .filter_map(|(selection_clause_index, clause)| {
+                let words = clause
+                    .text
+                    .to_ascii_lowercase()
+                    .split(|character: char| !character.is_ascii_alphabetic())
+                    .filter(|word| !word.is_empty())
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>();
+                let selected = if words
+                    .iter()
+                    .any(|word| matches!(word.as_str(), "neither" | "none"))
+                    && words.iter().any(|word| {
+                        word.starts_with("select")
+                            || word.starts_with("choos")
+                            || word.starts_with("adopt")
+                    }) {
+                    false
+                } else {
+                    return None;
+                };
+                let alternatives_clause_index = selection_clause_index.checked_sub(1)?;
+                let alternative_events = self
+                    .events
+                    .iter()
+                    .filter(|event| {
+                        event.clause_index == alternatives_clause_index
+                            && event.kind
+                                == ProseEventKind::Connective(DiscourseConnective::Alternative)
+                    })
+                    .count();
+                if alternative_events < 2 {
+                    return None;
+                }
+                let (target_mention_index, target) = mentions
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, mention)| {
+                        clause.end <= mention.start
+                            && mention.start - clause.end <= MAX_ATTACHMENT_DISTANCE_BYTES
+                    })
+                    .min_by_key(|(_, mention)| mention.start)?;
+                Some(DiscourseConstruction::AlternativeSelection {
+                    alternatives_clause_index,
+                    selection_clause_index,
+                    target_mention_index,
+                    selected,
+                    evidence_start: clause.start,
+                    evidence_end: target.start,
+                })
+            })
+            .collect()
     }
 
     fn output_definition_constructions(
@@ -1539,7 +1609,8 @@ fn classify_discourse_frame(
             " have been withdrawn",
             " had been withdrawn",
         ],
-    );
+    )
+    .or_else(|| active_demonstrative_formula_refusal_marker(&lower));
     let explicit_negative_action_marker = first_marker(
         &lower,
         &[
@@ -1765,6 +1836,51 @@ fn first_marker(value: &str, markers: &[&str]) -> Option<(usize, usize)> {
                 .map(|start| (start, start + marker.len()))
         })
         .min_by_key(|(start, _)| *start)
+}
+
+fn active_demonstrative_formula_refusal_marker(value: &str) -> Option<(usize, usize)> {
+    let mut words = Vec::new();
+    let mut start = None;
+    for (offset, character) in value.char_indices() {
+        if character.is_ascii_alphabetic() {
+            start.get_or_insert(offset);
+        } else if let Some(start) = start.take() {
+            words.push((start, offset, &value[start..offset]));
+        }
+    }
+    if let Some(start) = start {
+        words.push((start, value.len(), &value[start..]));
+    }
+    words.windows(3).find_map(|window| {
+        matches!(
+            window[0].2,
+            "reject"
+                | "rejects"
+                | "rejected"
+                | "withdraw"
+                | "withdraws"
+                | "withdrew"
+                | "discard"
+                | "discards"
+                | "discarded"
+        )
+        .then_some(())?;
+        matches!(window[1].2, "this" | "that").then_some(())?;
+        matches!(
+            window[2].2,
+            "formula"
+                | "equation"
+                | "identity"
+                | "law"
+                | "model"
+                | "relation"
+                | "balance"
+                | "estimate"
+                | "calculation"
+                | "proposal"
+        )
+        .then_some((window[0].0, window[0].1))
+    })
 }
 
 fn first_bounded_marker(value: &str, markers: &[&str]) -> Option<(usize, usize)> {

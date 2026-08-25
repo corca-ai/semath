@@ -1,5 +1,10 @@
 import { readFile } from "node:fs/promises";
-import { parseDomainRoutingChallenge, scoreDomainRoutingChallenge } from "../packages/evaluation/src/index";
+import {
+  parseDomainRoutingChallenge,
+  scoreDomainRoutingChallenge,
+  selectDomainRoutingDecision,
+  observeSelectedFormulaDecision,
+} from "../packages/evaluation/src/index";
 import { runSemanticEvaluation } from "./semantic-evaluation-runner";
 
 const challenge = parseDomainRoutingChallenge(JSON.parse(await readFile(new URL("../fixtures/challenge/domain-routing-v1.json", import.meta.url), "utf8")));
@@ -7,11 +12,28 @@ const results = runSemanticEvaluation(challenge.cases, "domain-routing-challenge
 const observations = challenge.cases.map((item, index) => {
   const result = results[index];
   const view = result?.value.kind === "semanticView" ? result.value.view : undefined;
+  const formula = observeSelectedFormulaDecision({
+    disposition: view?.authoringContext.disposition,
+    formula: view?.authoringContext.formula,
+    hypotheses: view?.authoringContext.interpretations.hypotheses ?? [],
+  });
+  const diagnosticProblems = (view?.diagnostics ?? []).filter(
+    (diagnostic) => diagnostic.severity === "error" || diagnostic.severity === "warning",
+  ).length;
   return {
     caseId: item.id,
-    decision: view?.decision.status ?? "unsupported",
+    decision: selectDomainRoutingDecision(
+      item.decisionDomain,
+      view?.decision.status ?? "unsupported",
+      view?.authoringContext.disposition ?? "unsupported",
+    ),
+    decisionDomain: item.decisionDomain,
     domains: (view?.domains ?? []).map((domain) => ({ packId: domain.packId, support: domain.support })),
-    problemCount: (view?.decision.status === "conflicting" ? view.decision.conflicts.length : 0) + (view?.diagnostics ?? []).filter((diagnostic) => diagnostic.severity === "error" || diagnostic.severity === "warning").length,
+    problemCount: (item.decisionDomain === "selected-formula"
+      ? formula.decision.problemCount
+      : view?.decision.status === "conflicting" ? view.decision.conflicts.length : 0) + diagnosticProblems,
+    recognizedRelations: item.decisionDomain === "selected-formula" ? formula.recognizedRelations : [],
+    sourceGrounded: item.decisionDomain === "selected-formula" ? formula.decision.sourceGrounded : false,
   };
 });
 const score = scoreDomainRoutingChallenge(challenge, observations);

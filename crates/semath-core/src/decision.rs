@@ -170,7 +170,7 @@ fn typed_conflicts(
     (typed, rejected)
 }
 
-fn formula_has_establishment_proof(formula: &LawRecognition) -> bool {
+pub(crate) fn formula_has_establishment_proof(formula: &LawRecognition) -> bool {
     matches!(
         formula.status,
         LawRecognitionStatus::Recognized | LawRecognitionStatus::Verified

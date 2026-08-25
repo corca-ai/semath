@@ -1,5 +1,6 @@
 import {
   type FoundationObservation,
+  observedQualityRelations,
   scoreFoundation,
 } from "../packages/evaluation/src/index";
 import {
@@ -49,8 +50,14 @@ const observations = planned.map((item, index): FoundationObservation => {
     quantityKindIds: [...new Set(quantities.flatMap((entry) =>
       entry.quantityKindId ? [entry.quantityKindId] : [],
     ))],
-    relationIds: [...new Set((view?.context.relations ?? []).map((entry) => entry.relationId))],
-    ...(view ? { status: view.decision.status } : {}),
+    relationIds: [
+      ...new Set(
+        observedQualityRelations(view?.authoringContext).map(
+          (entry) => entry.relationId,
+        ),
+      ),
+    ],
+    ...(view ? { status: view.authoringContext.disposition } : {}),
     suiteId: item.suite.id,
     symbols: [...new Set([
       ...quantities.map((entry) => entry.symbol),

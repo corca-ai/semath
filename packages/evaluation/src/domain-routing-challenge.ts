@@ -1,4 +1,5 @@
 import type { CorpusDocument } from "./model";
+import type { ChallengeRecognizedRelation } from "./challenge";
 
 export const DOMAIN_CHALLENGE_FAMILIES = [
   "document-context",
@@ -11,13 +12,25 @@ export const DOMAIN_CHALLENGE_FAMILIES = [
 
 export type DomainChallengeFamily = (typeof DOMAIN_CHALLENGE_FAMILIES)[number];
 export type DomainChallengeSupport = "explicit" | "supported" | "tentative";
+export type DomainRoutingDecisionDomain = "cursor-entity" | "selected-formula";
+export type DomainRoutingDecision =
+  | "ambiguous"
+  | "conflicting"
+  | "conventional"
+  | "engine-limited"
+  | "established"
+  | "partial"
+  | "unsupported";
 
 export interface DomainRoutingChallengeCase {
   readonly cursor: { readonly fileId: string; readonly needle: string };
+  readonly decisionDomain: DomainRoutingDecisionDomain;
   readonly documents: readonly CorpusDocument[];
-  readonly expectedDecision: "ambiguous" | "conflicting" | "established" | "partial" | "unsupported";
+  readonly expectedDecision: DomainRoutingDecision;
   readonly expectedDomains: readonly { readonly packId: string; readonly support: DomainChallengeSupport }[];
   readonly expectedProblems: number;
+  readonly expectedRelations: readonly ChallengeRecognizedRelation[];
+  readonly expectedSourceGrounded: boolean;
   readonly family: DomainChallengeFamily;
   readonly id: string;
   readonly variationTags: readonly string[];
@@ -35,24 +48,27 @@ export interface DomainRoutingChallenge {
     readonly disposition: "covered" | "inapplicable";
     readonly reason: string;
   }[];
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
 }
 
 export interface DomainRoutingObservation {
   readonly caseId: string;
-  readonly decision: string;
+  readonly decision: DomainRoutingDecision;
+  readonly decisionDomain: DomainRoutingDecisionDomain;
   readonly domains: readonly { readonly packId: string; readonly support: string }[];
   readonly problemCount: number;
+  readonly recognizedRelations: readonly ChallengeRecognizedRelation[];
+  readonly sourceGrounded: boolean;
 }
 
 export function parseDomainRoutingChallenge(value: unknown): DomainRoutingChallenge {
   const root = record(value, "domain challenge");
   exact(root, ["schemaVersion", "baseline", "reviewedCollisionComponents", "cases"], "domain challenge");
-  if (root.schemaVersion !== 1) throw new Error("domain challenge.schemaVersion: must be 1");
+  if (root.schemaVersion !== 2) throw new Error("domain challenge.schemaVersion: must be 2");
   const baseline = record(root.baseline, "domain challenge.baseline");
   exact(baseline, ["commit", "protocolVersion", "note"], "domain challenge.baseline");
-  if (!Array.isArray(root.cases) || root.cases.length < 24) {
-    throw new Error("domain challenge.cases: must contain at least 24 independently authored cases");
+  if (!Array.isArray(root.cases) || root.cases.length !== 30) {
+    throw new Error("domain challenge.cases: must contain exactly 30 independently authored cases");
   }
   const cases = root.cases.map(parseCase);
   unique(cases.map((item) => item.id), "domain challenge.cases.id");
@@ -87,7 +103,7 @@ export function parseDomainRoutingChallenge(value: unknown): DomainRoutingChalle
     },
     cases,
     reviewedCollisionComponents,
-    schemaVersion: 1,
+    schemaVersion: 2,
   };
 }
 
@@ -98,6 +114,15 @@ export function scoreDomainRoutingChallenge(
   const byId = new Map(observations.map((item) => [item.caseId, item]));
   const failures: string[] = [];
   if (byId.size !== observations.length) failures.push("duplicate observations");
+  const expectedIds = new Set(challenge.cases.map((item) => item.id));
+  if (observations.length !== challenge.cases.length) {
+    failures.push(`observation count ${observations.length}; expected ${challenge.cases.length}`);
+  }
+  for (const observation of observations) {
+    if (!expectedIds.has(observation.caseId)) {
+      failures.push(`${observation.caseId}: unexpected observation`);
+    }
+  }
   for (const item of challenge.cases) {
     const observed = byId.get(item.id);
     if (!observed) {
@@ -107,12 +132,20 @@ export function scoreDomainRoutingChallenge(
     if (observed.decision !== item.expectedDecision) {
       failures.push(`${item.id}: decision ${observed.decision}; expected ${item.expectedDecision}`);
     }
-    const prefix = observed.domains.slice(0, item.expectedDomains.length);
-    if (JSON.stringify(prefix) !== JSON.stringify(item.expectedDomains)) {
-      failures.push(`${item.id}: domains ${JSON.stringify(prefix)}; expected ${JSON.stringify(item.expectedDomains)}`);
+    if (observed.decisionDomain !== item.decisionDomain) {
+      failures.push(`${item.id}: decision domain ${observed.decisionDomain}; expected ${item.decisionDomain}`);
+    }
+    if (JSON.stringify(observed.domains) !== JSON.stringify(item.expectedDomains)) {
+      failures.push(`${item.id}: domains ${JSON.stringify(observed.domains)}; expected ${JSON.stringify(item.expectedDomains)}`);
     }
     if (observed.problemCount !== item.expectedProblems) {
       failures.push(`${item.id}: problems ${observed.problemCount}; expected ${item.expectedProblems}`);
+    }
+    if (JSON.stringify(observed.recognizedRelations) !== JSON.stringify(item.expectedRelations)) {
+      failures.push(`${item.id}: relations ${JSON.stringify(observed.recognizedRelations)}; expected ${JSON.stringify(item.expectedRelations)}`);
+    }
+    if (observed.sourceGrounded !== item.expectedSourceGrounded) {
+      failures.push(`${item.id}: source grounded ${observed.sourceGrounded}; expected ${item.expectedSourceGrounded}`);
     }
   }
   return {
@@ -122,10 +155,19 @@ export function scoreDomainRoutingChallenge(
   };
 }
 
+export function selectDomainRoutingDecision(
+  decisionDomain: DomainRoutingDecisionDomain,
+  cursorDecision: DomainRoutingDecision,
+  formulaDecision: DomainRoutingDecision,
+): DomainRoutingDecision {
+  return decisionDomain === "cursor-entity" ? cursorDecision : formulaDecision;
+}
+
 function parseCase(value: unknown, index: number): DomainRoutingChallengeCase {
   const path = `domain challenge.cases[${index}]`;
   const item = record(value, path);
-  exact(item, ["id", "family", "documents", "cursor", "expectedDomains", "expectedDecision", "expectedProblems", "variationTags"], path);
+  const selectedFormula = item.decisionDomain === "selected-formula";
+  exact(item, ["id", "family", "documents", "cursor", "decisionDomain", "expectedDomains", "expectedDecision", "expectedProblems", ...(selectedFormula ? ["expectedRelations", "expectedSourceGrounded"] : []), "variationTags"], path);
   const family = text(item.family, `${path}.family`);
   if (!(DOMAIN_CHALLENGE_FAMILIES as readonly string[]).includes(family)) throw new Error(`${path}.family: unknown family`);
   if (!Array.isArray(item.documents) || !item.documents.length) throw new Error(`${path}.documents: must not be empty`);
@@ -146,15 +188,56 @@ function parseCase(value: unknown, index: number): DomainRoutingChallengeCase {
     if (!(["explicit", "supported", "tentative"] as const).includes(support as DomainChallengeSupport)) throw new Error(`${domainPath}.support: invalid support`);
     return { packId: text(domain.packId, `${domainPath}.packId`), support: support as DomainChallengeSupport };
   });
+  const decisionDomain = text(item.decisionDomain, `${path}.decisionDomain`);
+  if (decisionDomain !== "cursor-entity" && decisionDomain !== "selected-formula") {
+    throw new Error(`${path}.decisionDomain: invalid decision domain`);
+  }
   const decision = text(item.expectedDecision, `${path}.expectedDecision`);
-  if (!(["ambiguous", "conflicting", "established", "partial", "unsupported"] as const).includes(decision as DomainRoutingChallengeCase["expectedDecision"])) throw new Error(`${path}.expectedDecision: invalid decision`);
+  if (!(["ambiguous", "conflicting", "conventional", "engine-limited", "established", "partial", "unsupported"] as const).includes(decision as DomainRoutingDecision)) throw new Error(`${path}.expectedDecision: invalid decision`);
+  if (decisionDomain === "cursor-entity" && (decision === "conventional" || decision === "engine-limited")) {
+    throw new Error(`${path}.expectedDecision: invalid cursor-entity decision`);
+  }
+  if (selectedFormula && !Array.isArray(item.expectedRelations)) {
+    throw new Error(`${path}.expectedRelations: must be an array`);
+  }
+  const expectedRelations = (selectedFormula ? item.expectedRelations as unknown[] : []).map((value, relationIndex) => {
+    const relationPath = `${path}.expectedRelations[${relationIndex}]`;
+    const relation = record(value, relationPath);
+    exact(relation, ["authority", "formulaAnchor", "relationId", "support"], relationPath);
+    const authority = text(relation.authority, `${relationPath}.authority`);
+    if (authority !== "authoritative" && authority !== "candidate") {
+      throw new Error(`${relationPath}.authority: invalid authority`);
+    }
+    const support = text(relation.support, `${relationPath}.support`);
+    if (!( ["explicit", "derived", "supported", "tentative"] as const).includes(support as never)) {
+      throw new Error(`${relationPath}.support: invalid support`);
+    }
+    if (relation.formulaAnchor !== "selected-formula") {
+      throw new Error(`${relationPath}.formulaAnchor: must be selected-formula`);
+    }
+    return {
+      authority: authority as "authoritative" | "candidate",
+      formulaAnchor: "selected-formula" as const,
+      relationId: text(relation.relationId, `${relationPath}.relationId`),
+      support: support as "explicit" | "derived" | "supported" | "tentative",
+    };
+  });
+  if (selectedFormula !== (expectedRelations.length > 0)) {
+    throw new Error(`${path}.expectedRelations: selected-formula cases require a nonempty exact relation set`);
+  }
+  if (selectedFormula && typeof item.expectedSourceGrounded !== "boolean") {
+    throw new Error(`${path}.expectedSourceGrounded: must be boolean`);
+  }
   if (!Array.isArray(item.variationTags) || !item.variationTags.length) throw new Error(`${path}.variationTags: must not be empty`);
   return {
     cursor: { fileId: text(cursor.fileId, `${path}.cursor.fileId`), needle: text(cursor.needle, `${path}.cursor.needle`) },
+    decisionDomain: decisionDomain as DomainRoutingDecisionDomain,
     documents,
-    expectedDecision: decision as DomainRoutingChallengeCase["expectedDecision"],
+    expectedDecision: decision as DomainRoutingDecision,
     expectedDomains,
     expectedProblems: integer(item.expectedProblems, `${path}.expectedProblems`),
+    expectedRelations,
+    expectedSourceGrounded: selectedFormula ? item.expectedSourceGrounded as boolean : false,
     family: family as DomainChallengeFamily,
     id: text(item.id, `${path}.id`),
     variationTags: item.variationTags.map((tag, tagIndex) => text(tag, `${path}.variationTags[${tagIndex}]`)),

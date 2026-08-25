@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import type { SemanticViewInfo } from "../../../packages/protocol/src/index";
 import {
   classifyRecognitionFrontier,
+  formulaFrontierSignals,
   frontierSignals,
   parseRecognitionFrontier,
   scoreRecognitionFrontier,
@@ -91,6 +92,17 @@ describe("recognition frontier", () => {
     });
   });
 
+  test("keeps selected-formula disposition separate from the cursor entity", () => {
+    const view = semanticView();
+    view.decision = {
+      meaning: { label: "defined symbol", relationId: null },
+      reasons: [],
+      status: "established",
+    };
+    expect(frontierSignals(view, true).decision).toBe("established");
+    expect(formulaFrontierSignals(view, true).decision).toBe("partial");
+  });
+
   test("counts source-linked relation evidence as discourse evidence", () => {
     const view = semanticView();
     view.context.claims = [];
@@ -151,8 +163,12 @@ describe("recognition frontier", () => {
   });
 
   test("weights false certainty above missed coverage", () => {
-    const cases = Array.from({ length: 24 }, (_, index) => ({
-      baseline: { decision: "unsupported", stage: "canonical-unsupported" },
+    const cases = Array.from({ length: 32 }, (_, index) => ({
+      baseline: {
+        decision: "unsupported",
+        decisionDomain: "cursor-entity",
+        stage: "canonical-unsupported",
+      },
       cursor: { fileId: "main", needle: `x_${index}` },
       documents: [
         { content: `$x_${index}$`, fileId: "main", path: "main.tex" },
@@ -161,6 +177,7 @@ describe("recognition frontier", () => {
       id: `case-${index}`,
       target: {
         decision: index === 0 ? "ambiguous" : "established",
+        decisionDomain: "cursor-entity",
         relationId: null,
         stage: index === 0 ? "genuine-ambiguity" : "established",
       },
@@ -169,14 +186,15 @@ describe("recognition frontier", () => {
     const frontier = parseRecognitionFrontier({
       baseline: { commit: "abc", note: "frozen", protocolVersion: 11 },
       cases,
-      schemaVersion: 1,
+      schemaVersion: 2,
     });
     const observations = cases.map((item, index) => ({
       caseId: item.id,
       decision: (index === 0 ? "established" : "unsupported") as
         | "established"
         | "unsupported",
-      relationId: null,
+      decisionDomain: "cursor-entity" as const,
+      relationIds: [],
       signals,
       stage: (index === 0
         ? "established"
@@ -188,8 +206,8 @@ describe("recognition frontier", () => {
     expect(score.risk).toEqual({
       falseConflict: 0,
       falseEstablishment: 1,
-      missedCoverage: 23,
-      total: 54,
+      missedCoverage: 31,
+      total: 70,
     });
     expect(score.firstFailure).toStartWith("case-0:");
   });

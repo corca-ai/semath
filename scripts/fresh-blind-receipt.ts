@@ -443,7 +443,7 @@ function parseTerminalResult(
       "fresh blind receipt safety counts disagree with failure ids",
     );
   }
-  parseValidation(result.validation);
+  parseValidation(result.validation, receiptPolicyVersion);
   const unsafe =
     authoringSafety.failures > 0 || facetFailures.length > 0 ||
     unsafeCounts.some((count) => count > 0);
@@ -507,12 +507,17 @@ function parseAuthoringSafety(
   return { cases, failures: summary.failures.length };
 }
 
-function parseValidation(value: unknown): void {
+function parseValidation(value: unknown, receiptPolicyVersion: 2 | 3): void {
   const validation = record(value, "fresh blind receipt.result.validation");
+  const currentKeys = ["entityDecisions", "fields", "formulaDecisions"];
+  const decisionDomainKeys = receiptPolicyVersion === 3
+    ? currentKeys
+    : currentKeys.filter((key) => key in validation);
   exact(
     validation,
     [
       "decisions",
+      ...decisionDomainKeys,
       "families",
       "laws",
       "maximumMathSimilarity",
@@ -524,6 +529,7 @@ function parseValidation(value: unknown): void {
   );
   for (const [label, value] of [
     ["decisions", validation.decisions],
+    ...decisionDomainKeys.map((key) => [key, validation[key]] as const),
     ["families", validation.families],
   ] as const) {
     const counts = record(

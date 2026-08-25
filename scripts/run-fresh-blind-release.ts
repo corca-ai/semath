@@ -124,7 +124,11 @@ async function runFreshBlindRelease(): Promise<void> {
                 id: probe.id,
               }]
         ),
-        { formulaDecisionRequired: evidence.release.schemaVersion === 3 },
+        {
+          cursorSurfaceIdentityRequired: evidence.release.schemaVersion === 3,
+          formulaDecisionRequired: evidence.release.schemaVersion === 3,
+          surfaceAuthorizationsRequired: evidence.release.schemaVersion === 3,
+        },
       ),
     };
     run("bun", ["scripts/check-fresh-blind-lifecycle.ts"], {
@@ -218,7 +222,11 @@ interface ParsedEvaluation {
 export function parseFreshBlindEvaluation(
   value: unknown,
   expectedProbes: readonly MathAuthoringExpectationProbe[],
-  options: { readonly formulaDecisionRequired?: boolean } = {},
+  options: {
+    readonly cursorSurfaceIdentityRequired?: boolean;
+    readonly formulaDecisionRequired?: boolean;
+    readonly surfaceAuthorizationsRequired?: boolean;
+  } = {},
 ): ParsedEvaluation {
   const report = record(value, "fresh blind evaluation");
   exact(report, ["results"], "fresh blind evaluation");
@@ -245,7 +253,9 @@ export function parseFreshBlindEvaluation(
     parseObservation(
       item,
       `fresh blind evaluation observations[${index}]`,
+      options.cursorSurfaceIdentityRequired === true,
       options.formulaDecisionRequired === true,
+      options.surfaceAuthorizationsRequired === true,
     ),
   );
   if (
@@ -559,16 +569,20 @@ function parseScore(value: unknown): AuthoredScientificScorecard {
 function parseObservation(
   value: unknown,
   label: string,
+  cursorSurfaceIdentityRequired: boolean,
   formulaDecisionRequired: boolean,
+  surfaceAuthorizationsRequired: boolean,
 ): AuthoredScientificObservation {
   const item = record(value, label);
   const requiredKeys = [
     "authoringContext",
     "caseId",
+    ...(cursorSurfaceIdentityRequired ? ["cursorSurfaceIdentity"] : []),
     "decision",
     "definitions",
     "diagnostics",
     ...(formulaDecisionRequired ? ["formulaDecision"] : []),
+    ...(surfaceAuthorizationsRequired ? ["surfaceAuthorizations"] : []),
     "prepareRename",
     "proofGrounded",
     "references",
@@ -579,13 +593,21 @@ function parseObservation(
   ];
   const allowedKeys = new Set([
     ...requiredKeys,
+    "cursorSurfaceIdentity",
     "renameSafety",
     "symbolLocation",
+    "surfaceAuthorizations",
   ]);
   const missing = requiredKeys.filter((key) => !(key in item));
   const unknown = Object.keys(item).filter((key) => !allowedKeys.has(key));
   if (formulaDecisionRequired && !("formulaDecision" in item)) {
     throw new Error(`${label}.formulaDecision is required`);
+  }
+  if (cursorSurfaceIdentityRequired && !("cursorSurfaceIdentity" in item)) {
+    throw new Error(`${label}.cursorSurfaceIdentity is required`);
+  }
+  if (surfaceAuthorizationsRequired && !("surfaceAuthorizations" in item)) {
+    throw new Error(`${label}.surfaceAuthorizations is required`);
   }
   if (missing.length || unknown.length)
     throw new Error(`${label} has unexpected or missing fields`);
@@ -787,11 +809,38 @@ function parseObservation(
     item.symbol === null
       ? null
       : nonemptyString(item.symbol, `${label}.symbol`);
+  const cursorSurfaceIdentity = item.cursorSurfaceIdentity === undefined
+    ? undefined
+    : parseCursorSurfaceIdentity(
+        item.cursorSurfaceIdentity,
+        `${label}.cursorSurfaceIdentity`,
+      );
+  if (
+    cursorSurfaceIdentity !== undefined &&
+    (symbol === null) !== (cursorSurfaceIdentity === null)
+  ) {
+    throw new Error(`${label}.cursorSurfaceIdentity must match symbol availability`);
+  }
+  if (
+    cursorSurfaceIdentityRequired && cursorSurfaceIdentity !== null &&
+    item.symbolLocation === undefined
+  ) {
+    throw new Error(`${label}.cursorSurfaceIdentity requires symbolLocation`);
+  }
+  if (
+    cursorSurfaceIdentity && item.symbolLocation !== undefined &&
+    !isDeepStrictEqual(cursorSurfaceIdentity.location, item.symbolLocation)
+  ) {
+    throw new Error(`${label}.cursorSurfaceIdentity must match symbolLocation`);
+  }
   return {
     ...(authoringContext === undefined
       ? {}
       : { authoringContext }),
     caseId,
+    ...(cursorSurfaceIdentity === undefined
+      ? {}
+      : { cursorSurfaceIdentity }),
     decision,
     definitions,
     diagnostics,
@@ -825,6 +874,137 @@ function parseObservation(
             `${label}.symbolLocation`,
           ),
         }),
+    ...(item.surfaceAuthorizations === undefined
+      ? {}
+      : {
+          surfaceAuthorizations: parseSurfaceAuthorizations(
+            item.surfaceAuthorizations,
+            `${label}.surfaceAuthorizations`,
+          ),
+        }),
+  };
+}
+
+function parseCursorSurfaceIdentity(
+  value: unknown,
+  label: string,
+): NonNullable<AuthoredScientificObservation["cursorSurfaceIdentity"]> | null {
+  if (value === null) return null;
+  const item = record(value, label);
+  exact(item, ["entityId", "location", "occurrenceId"], label);
+  const occurrenceId = parseSourceOccurrenceId(
+    item.occurrenceId,
+    `${label}.occurrenceId`,
+  );
+  const identity = {
+    entityId: item.entityId === null
+      ? null
+      : parseEntityId(item.entityId, `${label}.entityId`),
+    location: location(item.location, `${label}.location`),
+    occurrenceId,
+  };
+  if (identity.location.fileId !== occurrenceId.fileId) {
+    throw new Error(`${label}.occurrenceId must match location.fileId`);
+  }
+  return identity;
+}
+
+function parseSurfaceAuthorizations(
+  value: unknown,
+  label: string,
+): NonNullable<AuthoredScientificObservation["surfaceAuthorizations"]> {
+  const item = record(value, label);
+  exact(
+    item,
+    ["definition", "prepareRename", "references", "rename"],
+    label,
+  );
+  return {
+    definition: parseSurfaceAuthorization(item.definition, `${label}.definition`),
+    prepareRename: parseSurfaceAuthorization(
+      item.prepareRename,
+      `${label}.prepareRename`,
+    ),
+    references: parseSurfaceAuthorization(item.references, `${label}.references`),
+    rename: parseSurfaceAuthorization(item.rename, `${label}.rename`),
+  };
+}
+
+function parseSurfaceAuthorization(
+  value: unknown,
+  label: string,
+): NonNullable<
+  AuthoredScientificObservation["surfaceAuthorizations"]
+>["definition"] {
+  const item = record(value, label);
+  const status = checked(
+    item.status,
+    /^(?:authorized|refused)$/u,
+    `${label}.status`,
+  ) as "authorized" | "refused";
+  if (status === "authorized") {
+    exact(item, ["entityId", "focusOccurrenceId", "status"], label);
+    return {
+      entityId: parseEntityId(item.entityId, `${label}.entityId`),
+      focusOccurrenceId: parseSourceOccurrenceId(
+        item.focusOccurrenceId,
+        `${label}.focusOccurrenceId`,
+      ),
+      status,
+    };
+  }
+  exact(item, ["refusalKind", "status"], label);
+  return {
+    refusalKind: checked(
+      item.refusalKind,
+      /^(?:unsupported|ambiguous|conflicting|engine-limit|incomplete-source|non-editable|invalid-replacement|capture)$/u,
+      `${label}.refusalKind`,
+    ) as Extract<
+      NonNullable<
+        AuthoredScientificObservation["surfaceAuthorizations"]
+      >["definition"],
+      { readonly status: "refused" }
+    >["refusalKind"],
+    status,
+  };
+}
+
+function parseEntityId(
+  value: unknown,
+  label: string,
+): Extract<
+  NonNullable<
+    AuthoredScientificObservation["surfaceAuthorizations"]
+  >["definition"],
+  { readonly status: "authorized" }
+>["entityId"] {
+  const item = record(value, label);
+  exact(item, ["anchor", "componentId", "kind", "scopePath"], label);
+  return {
+    anchor: parseSourceOccurrenceId(item.anchor, `${label}.anchor`),
+    componentId: nonemptyString(item.componentId, `${label}.componentId`),
+    kind: nonemptyString(item.kind, `${label}.kind`),
+    scopePath: array(item.scopePath, `${label}.scopePath`).map((value, index) =>
+      integer(value, `${label}.scopePath[${index}]`)
+    ),
+  };
+}
+
+function parseSourceOccurrenceId(
+  value: unknown,
+  label: string,
+): Extract<
+  NonNullable<
+    AuthoredScientificObservation["surfaceAuthorizations"]
+  >["definition"],
+  { readonly status: "authorized" }
+>["focusOccurrenceId"] {
+  const item = record(value, label);
+  exact(item, ["documentVersion", "fileId", "localId"], label);
+  return {
+    documentVersion: integer(item.documentVersion, `${label}.documentVersion`),
+    fileId: nonemptyString(item.fileId, `${label}.fileId`),
+    localId: integer(item.localId, `${label}.localId`),
   };
 }
 

@@ -1119,7 +1119,10 @@ pub(crate) fn observe_laws(
             recognized.conventional_candidate = context_only_admission
                 || (activation.is_none()
                     && role_context_activated
-                    && !attached_role_support
+                    && (!attached_role_support
+                        || relevance.as_ref().is_some_and(|relevance| {
+                            relevance.support == DomainSupportTier::Tentative
+                        }))
                     && recognized.bindings.iter().any(|binding| {
                         binding.proof == LawBindingProof::Asserted
                             && compiled.law.roles.iter().any(|role| {
@@ -1776,9 +1779,25 @@ fn unify_exact_all(
     placeholders: &BTreeSet<String>,
     bindings: &BTreeMap<String, SemanticExpr>,
 ) -> Vec<BTreeMap<String, SemanticExpr>> {
+    unify_exact_all_with_polarity(template, actual, placeholders, bindings, false)
+}
+
+fn unify_exact_all_with_polarity(
+    template: &SemanticExpr,
+    actual: &SemanticExpr,
+    placeholders: &BTreeSet<String>,
+    bindings: &BTreeMap<String, SemanticExpr>,
+    allow_signed_placeholder: bool,
+) -> Vec<BTreeMap<String, SemanticExpr>> {
     if let SemanticExprKind::Symbol(name) = &template.kind
         && placeholders.contains(name)
     {
+        // A standalone law role is an operand, not permission to absorb a
+        // polarity-changing wrapper. Product factors are the exception: a
+        // coefficient role must be able to bind a signed scalar such as `-3`.
+        if !allow_signed_placeholder && matches!(actual.kind, SemanticExprKind::Negate(_)) {
+            return Vec::new();
+        }
         return match bindings.get(name) {
             Some(bound) if equivalent(bound, actual) => vec![bindings.clone()],
             Some(_) => Vec::new(),
@@ -1889,7 +1908,7 @@ fn unify_exact_all(
         (SemanticExprKind::Product(left), SemanticExprKind::Product(right))
             if left.len() == right.len() =>
         {
-            unify_sequence(left.iter(), right.iter(), placeholders, bindings)
+            unify_product_sequence(left.iter(), right.iter(), placeholders, bindings)
         }
         (
             SemanticExprKind::Apply {
@@ -2426,6 +2445,26 @@ fn unify_sequence<'a>(
             candidates
                 .into_iter()
                 .flat_map(|candidate| unify_exact_all(template, actual, placeholders, &candidate))
+                .take(MAX_UNIFICATION_CANDIDATES)
+                .collect()
+        },
+    )
+}
+
+fn unify_product_sequence<'a>(
+    template: impl IntoIterator<Item = &'a SemanticExpr>,
+    actual: impl IntoIterator<Item = &'a SemanticExpr>,
+    placeholders: &BTreeSet<String>,
+    bindings: &BTreeMap<String, SemanticExpr>,
+) -> Vec<BTreeMap<String, SemanticExpr>> {
+    template.into_iter().zip(actual).fold(
+        vec![bindings.clone()],
+        |candidates, (template, actual)| {
+            candidates
+                .into_iter()
+                .flat_map(|candidate| {
+                    unify_exact_all_with_polarity(template, actual, placeholders, &candidate, true)
+                })
                 .take(MAX_UNIFICATION_CANDIDATES)
                 .collect()
         },
@@ -4101,6 +4140,9 @@ fn condition_evidence(
     if let Some(condition_evidence) = &semantic_condition.refuting {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
+    if let Some(condition_evidence) = &semantic_condition.unselected {
+        push_evidence(&mut evidence, condition_evidence.clone());
+    }
     let structural_condition =
         structural_condition_evidence(condition, roles, bindings, actual, role_support);
     if let Some(condition_evidence) = &structural_condition {
@@ -4182,10 +4224,11 @@ fn condition_evidence(
     }
     (
         evidence,
-        semantic_condition.supporting.is_some()
-            || structural_condition.is_some()
-            || formula_fact.is_some()
-            || proved_subjects == subjects.len(),
+        semantic_condition.unselected.is_none()
+            && (semantic_condition.supporting.is_some()
+                || structural_condition.is_some()
+                || formula_fact.is_some()
+                || proved_subjects == subjects.len()),
         semantic_condition.refuting.is_some(),
     )
 }
@@ -4604,6 +4647,7 @@ fn typed_assumption(assumption: &AssumptionInfo) -> TypedAssumption {
 struct AssumptionConditionEvidence {
     supporting: Option<Evidence>,
     refuting: Option<Evidence>,
+    unselected: Option<Evidence>,
 }
 
 fn assumption_condition_evidence(
@@ -4698,6 +4742,15 @@ fn assumption_condition_evidence(
         })
         .chain(external_assumptions.iter().filter(subjects_match))
     {
+        if condition.kind == PackConditionKind::SignConvention
+            && assumption.kind == "alternative-selection"
+            && assumption_value_and_target(&assumption.value).0 == condition.id
+        {
+            resolution.supporting = None;
+            resolution.refuting = None;
+            resolution.unselected = Some(assumption_public_evidence(assumption));
+            break;
+        }
         if resolution.supporting.is_none() && assumption_supports_condition(condition, assumption) {
             resolution.supporting = Some(assumption_public_evidence(assumption));
         }
