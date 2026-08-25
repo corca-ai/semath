@@ -383,14 +383,19 @@ fn formula_support(
     {
         return MathInterpretationSupportTier::Contradicted;
     }
-    if formula.conditions.iter().any(|condition| {
-        condition.kind == crate::ScientificConstraintKind::SignConvention
-            && condition.status != ConstraintStatus::Verified
-            && condition
-                .evidence
-                .iter()
-                .any(|evidence| evidence.rule_id == "scientific-prose/sign-convention-unselected")
-    }) {
+    if formula.conventional_candidate
+        || formula.status == LawRecognitionStatus::ConditionMissing
+        || formula.bindings.iter().any(|binding| {
+            !matches!(
+                binding.proof,
+                LawBindingProof::Typed | LawBindingProof::Derived | LawBindingProof::Asserted
+            )
+        })
+        || formula
+            .conditions
+            .iter()
+            .any(|condition| condition.status != ConstraintStatus::Verified)
+    {
         return MathInterpretationSupportTier::Tentative;
     }
     match decision {

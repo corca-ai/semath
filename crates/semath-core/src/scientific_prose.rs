@@ -228,6 +228,14 @@ pub(crate) enum DiscourseConstruction {
         candidate: AttachmentCandidate,
         frame: DiscourseFrame,
     },
+    AlternativeSelection {
+        alternatives_clause_index: usize,
+        selection_clause_index: usize,
+        target_mention_index: usize,
+        selected: bool,
+        evidence_start: usize,
+        evidence_end: usize,
+    },
 }
 
 impl ProseEventStream {
@@ -490,7 +498,69 @@ impl ProseEventStream {
             &equation_flows,
         ));
         constructions.extend(equation_flows);
+        constructions.extend(self.alternative_selection_constructions(mentions, clauses));
         constructions
+    }
+
+    fn alternative_selection_constructions(
+        &self,
+        mentions: &[ScientificMention],
+        clauses: &[ScientificClause<'_>],
+    ) -> Vec<DiscourseConstruction> {
+        clauses
+            .iter()
+            .enumerate()
+            .filter_map(|(selection_clause_index, clause)| {
+                let words = clause
+                    .text
+                    .to_ascii_lowercase()
+                    .split(|character: char| !character.is_ascii_alphabetic())
+                    .filter(|word| !word.is_empty())
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>();
+                let selected = if words
+                    .iter()
+                    .any(|word| matches!(word.as_str(), "neither" | "none"))
+                    && words.iter().any(|word| {
+                        word.starts_with("select")
+                            || word.starts_with("choos")
+                            || word.starts_with("adopt")
+                    }) {
+                    false
+                } else {
+                    return None;
+                };
+                let alternatives_clause_index = selection_clause_index.checked_sub(1)?;
+                let alternative_events = self
+                    .events
+                    .iter()
+                    .filter(|event| {
+                        event.clause_index == alternatives_clause_index
+                            && event.kind
+                                == ProseEventKind::Connective(DiscourseConnective::Alternative)
+                    })
+                    .count();
+                if alternative_events < 2 {
+                    return None;
+                }
+                let (target_mention_index, target) = mentions
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, mention)| {
+                        clause.end <= mention.start
+                            && mention.start - clause.end <= MAX_ATTACHMENT_DISTANCE_BYTES
+                    })
+                    .min_by_key(|(_, mention)| mention.start)?;
+                Some(DiscourseConstruction::AlternativeSelection {
+                    alternatives_clause_index,
+                    selection_clause_index,
+                    target_mention_index,
+                    selected,
+                    evidence_start: clause.start,
+                    evidence_end: target.start,
+                })
+            })
+            .collect()
     }
 
     fn output_definition_constructions(

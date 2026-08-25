@@ -4104,7 +4104,7 @@ fn condition_evidence(
     if let Some(condition_evidence) = &semantic_condition.refuting {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
-    if let Some(condition_evidence) = &semantic_condition.withheld {
+    if let Some(condition_evidence) = &semantic_condition.unselected {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
     let structural_condition =
@@ -4188,7 +4188,7 @@ fn condition_evidence(
     }
     (
         evidence,
-        semantic_condition.withheld.is_none()
+        semantic_condition.unselected.is_none()
             && (semantic_condition.supporting.is_some()
                 || structural_condition.is_some()
                 || formula_fact.is_some()
@@ -4611,7 +4611,7 @@ fn typed_assumption(assumption: &AssumptionInfo) -> TypedAssumption {
 struct AssumptionConditionEvidence {
     supporting: Option<Evidence>,
     refuting: Option<Evidence>,
-    withheld: Option<Evidence>,
+    unselected: Option<Evidence>,
 }
 
 fn assumption_condition_evidence(
@@ -4706,6 +4706,15 @@ fn assumption_condition_evidence(
         })
         .chain(external_assumptions.iter().filter(subjects_match))
     {
+        if condition.kind == PackConditionKind::SignConvention
+            && assumption.kind == "alternative-selection"
+            && assumption_value_and_target(&assumption.value).0 == condition.id
+        {
+            resolution.supporting = None;
+            resolution.refuting = None;
+            resolution.unselected = Some(assumption_public_evidence(assumption));
+            break;
+        }
         if resolution.supporting.is_none() && assumption_supports_condition(condition, assumption) {
             resolution.supporting = Some(assumption_public_evidence(assumption));
         }
@@ -4715,17 +4724,7 @@ fn assumption_condition_evidence(
         {
             resolution.refuting = Some(assumption_public_evidence(assumption));
         }
-        if resolution.withheld.is_none()
-            && condition.kind == PackConditionKind::SignConvention
-            && assumption.kind == "sign-convention-selection"
-            && assumption_value_and_target(&assumption.value).0 == condition.id
-        {
-            resolution.withheld = Some(assumption_public_evidence(assumption));
-        }
-        if resolution.supporting.is_some()
-            && resolution.refuting.is_some()
-            && resolution.withheld.is_some()
-        {
+        if resolution.supporting.is_some() && resolution.refuting.is_some() {
             break;
         }
     }

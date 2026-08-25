@@ -429,7 +429,10 @@ pub(crate) fn observe_prose(
         &clauses,
         &mentions,
         &events,
-        &construction_targets,
+        AssumptionDiscourse {
+            constructions: &discourse_constructions,
+            targets: &construction_targets,
+        },
         &mut analysis,
     );
 
@@ -3162,6 +3165,48 @@ fn construction_formula_targets(
             }
         }
     }
+    for construction in constructions {
+        let DiscourseConstruction::AlternativeSelection {
+            selection_clause_index,
+            target_mention_index,
+            evidence_start,
+            evidence_end,
+            ..
+        } = construction
+        else {
+            continue;
+        };
+        let Some((clause, mention)) = clauses
+            .get(*selection_clause_index)
+            .zip(mentions.get(*target_mention_index))
+        else {
+            continue;
+        };
+        let evidence_range = SourceRange {
+            start_offset: index.utf16_for_byte(*evidence_start),
+            end_offset: index.utf16_for_byte(*evidence_end),
+        };
+        let target_range = SourceRange {
+            start_offset: index.utf16_for_byte(mention.start),
+            end_offset: index.utf16_for_byte(mention.end),
+        };
+        if attachment.permits(&evidence_range, &target_range) {
+            targets
+                .entry(clause.start)
+                .or_default()
+                .push(ConstructionFormulaTarget {
+                    relation_centered: canonical_expressions.iter().any(|expression| {
+                        ranges_overlap(&expression.range, &target_range)
+                            && matches!(
+                                expression.kind,
+                                SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
+                            )
+                    }),
+                    range: target_range,
+                    identifies_formula: false,
+                });
+        }
+    }
     for values in targets.values_mut() {
         values.sort_by_key(|target| {
             (
@@ -3876,13 +3921,18 @@ fn collect_ordered_clause_definition(
     }
 }
 
+struct AssumptionDiscourse<'a> {
+    constructions: &'a [DiscourseConstruction],
+    targets: &'a BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
+}
+
 fn collect_assumptions(
     source: &str,
     index: &SourceIndex,
     clauses: &[ScientificClause<'_>],
     mentions: &[ScientificMention],
     events: &ProseEventStream,
-    construction_targets: &BTreeMap<usize, Vec<ConstructionFormulaTarget>>,
+    discourse: AssumptionDiscourse<'_>,
     output: &mut ProseObservations,
 ) {
     let condition_phrases = built_in_packs()
@@ -3919,7 +3969,8 @@ fn collect_assumptions(
     condition_formula_descriptors.sort();
     condition_formula_descriptors.dedup();
     for (clause_index, clause) in clauses.iter().enumerate() {
-        let clause_targets = construction_targets
+        let clause_targets = discourse
+            .targets
             .get(&clause.start)
             .into_iter()
             .flatten()
@@ -3988,84 +4039,59 @@ fn collect_assumptions(
             });
         }
     }
-    for clause in clauses {
-        let words = clause
-            .text
-            .to_ascii_lowercase()
-            .split(|character: char| !character.is_ascii_alphabetic())
-            .filter(|word| !word.is_empty())
-            .map(str::to_owned)
-            .collect::<Vec<_>>();
-        let explicitly_unselected = words
-            .iter()
-            .any(|word| matches!(word.as_str(), "neither" | "without" | "not"))
-            && words
-                .iter()
-                .any(|word| matches!(word.as_str(), "convention" | "conventions"))
-            && words.iter().any(|word| {
-                word.starts_with("select") || word.starts_with("choos") || word.starts_with("adopt")
-            });
-        if !explicitly_unselected {
+    for construction in discourse.constructions {
+        let DiscourseConstruction::AlternativeSelection {
+            alternatives_clause_index,
+            selection_clause_index,
+            selected: false,
+            ..
+        } = construction
+        else {
             continue;
-        }
+        };
+        let Some(clause) = clauses.get(*selection_clause_index) else {
+            continue;
+        };
+        let Some(alternatives_clause) = clauses.get(*alternatives_clause_index) else {
+            continue;
+        };
+        let alternatives_range = SourceRange {
+            start_offset: index.utf16_for_byte(alternatives_clause.start),
+            end_offset: index.utf16_for_byte(alternatives_clause.end),
+        };
         let Some(prior) = output
             .assumptions
             .iter()
             .filter(|assumption| assumption.kind == "sign-convention")
-            .filter_map(|assumption| {
-                let phrase = assumption.evidence.source_ranges.last()?;
-                (phrase.end_offset <= index.utf16_for_byte(clause.start))
-                    .then_some((phrase.end_offset, assumption))
+            .find(|assumption| {
+                assumption.evidence.source_ranges.iter().any(|range| {
+                    alternatives_range.start_offset <= range.start_offset
+                        && range.end_offset <= alternatives_range.end_offset
+                })
             })
-            .max_by_key(|(end, _)| *end)
-            .map(|(_, assumption)| assumption)
         else {
             continue;
         };
-        let prior_phrase = prior
-            .evidence
-            .source_ranges
-            .last()
-            .expect("filtered phrase");
-        let comparison_start = index.byte_for_utf16(prior_phrase.start_offset.saturating_sub(48));
-        let comparison = source[comparison_start..clause.start].to_ascii_lowercase();
-        let comparison_words = comparison
-            .split(|character: char| !character.is_ascii_alphabetic())
-            .filter(|word| !word.is_empty())
-            .collect::<Vec<_>>();
-        if !comparison_words
-            .iter()
-            .any(|word| word.starts_with("compar") || word.starts_with("contrast"))
-            || !comparison_words
-                .iter()
-                .any(|word| matches!(*word, "with" | "against" | "versus" | "or"))
-        {
-            continue;
-        }
-        let Some(target) = mentions
-            .iter()
-            .filter(|mention| clause.end <= mention.start && mention.start - clause.end <= 96)
-            .min_by_key(|mention| mention.start)
+        let Some(target) = discourse
+            .targets
+            .get(&clause.start)
+            .and_then(|targets| targets.first())
         else {
             continue;
-        };
-        let target_range = SourceRange {
-            start_offset: index.utf16_for_byte(target.start),
-            end_offset: index.utf16_for_byte(target.end),
         };
         let phrase_range = SourceRange {
             start_offset: index.utf16_for_byte(clause.start),
             end_offset: index.utf16_for_byte(clause.end),
         };
         output.assumptions.push(AssumptionInfo {
-            kind: "sign-convention-selection".into(),
+            kind: "alternative-selection".into(),
             value: assumption_value_and_target(&prior.value).0.to_owned(),
             subjects: Vec::new(),
             evidence: Evidence {
-                rule_id: "scientific-prose/sign-convention-unselected".into(),
-                kind: "attached-prose".into(),
+                rule_id: "scientific-prose/alternative-selection".into(),
+                kind: "discourse-target".into(),
                 strength: "strong".into(),
-                source_ranges: vec![target_range, phrase_range],
+                source_ranges: vec![target.range.clone(), phrase_range],
                 source_anchors: Vec::new(),
             },
         });
