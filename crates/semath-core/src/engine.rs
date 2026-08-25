@@ -81,6 +81,10 @@ fn formula_meaning_owns_relation_head(fact: &crate::prose::FormulaMeaningFact) -
     fact.ownership == crate::prose::FormulaMeaningOwnership::RelationHead
 }
 
+fn formula_meaning_is_adopted(fact: &crate::prose::FormulaMeaningFact) -> bool {
+    fact.authority == crate::prose::FormulaMeaningAuthority::Adopted
+}
+
 #[derive(Debug, Error)]
 pub enum EngineError {
     #[error("unsupported protocol version {0}")]
@@ -4088,7 +4092,9 @@ impl SemathEngine {
                 observations
                     .formula_meanings
                     .iter()
-                    .filter(|fact| fact.target_range == root.range)
+                    .filter(|fact| {
+                        fact.target_range == root.range && formula_meaning_is_adopted(fact)
+                    })
                     .map(|fact| fact.evidence.clone())
                     .collect::<Vec<_>>()
             })
@@ -4398,7 +4404,12 @@ impl SemathEngine {
                 (context.clone(), Vec::new())
             };
         if let Some(root) = selected_root {
-            self.append_formula_index_claims(document, root, &mut formula_context);
+            self.append_formula_index_claims(
+                document,
+                root,
+                display_focus.as_ref(),
+                &mut formula_context,
+            );
         }
         let (mut interpretation_domains, formula_domains_truncated) = queried_formula_range
             .map_or_else(
@@ -4456,9 +4467,15 @@ impl SemathEngine {
             truncated: formula_truncated,
         });
         if !queried_formula_is_rejected
+            && !formula_retracted
             && !formula_engine_limited
             && matches!(formula_decision, MeaningDecision::Unsupported { .. })
-            && !formula_context.claims.is_empty()
+            && formula_context.claims.iter().any(|claim| {
+                claim
+                    .evidence
+                    .iter()
+                    .any(|evidence| evidence.rule_id != "semath/canonical-symbol-identity")
+            })
         {
             formula_decision = MeaningDecision::Partial {
                 meaning: crate::MeaningConclusion {
@@ -5443,37 +5460,23 @@ impl SemathEngine {
         &self,
         document: &AnalyzedDocument,
         root: &SemanticExpr,
+        focus: Option<&CursorFocus>,
         context: &mut SemanticContextInfo,
     ) {
-        let owner_range = relation_head(root)
-            .map(|(_, range)| range)
-            .unwrap_or_else(|| root.range.clone());
-        let Some((entity, occurrence_id)) = document
-            .semantic_occurrences
-            .iter()
-            .filter(|seed| ranges_overlap(&seed.selection_range, &owner_range))
-            .filter_map(|seed| {
-                let focus = self.index.cursor_focus(&document.document.file_id, seed)?;
-                let entity = self.resolved_entity(&focus.occurrence_id)?;
-                Some((
-                    entity,
-                    focus.occurrence_id,
-                    (
-                        u8::from(seed.selection_range != owner_range),
-                        seed.selection_range.start_offset,
-                        seed.selection_range.end_offset - seed.selection_range.start_offset,
-                    ),
-                ))
-            })
-            .min_by_key(|(_, _, order)| *order)
-            .map(|(entity, occurrence_id, _)| (entity, occurrence_id))
-        else {
+        let Some(focus) = focus.filter(|focus| {
+            root.range.start_offset <= focus.range.start_offset
+                && focus.range.end_offset <= root.range.end_offset
+        }) else {
             return;
         };
+        let Some(entity) = self.resolved_entity(&focus.occurrence_id) else {
+            return;
+        };
+        let occurrence_id = focus.occurrence_id.clone();
         let Some(occurrence) = self.index.semantic.occurrence(&occurrence_id) else {
             return;
         };
-        let claims = index_claims_matching(
+        let mut claims = index_claims_matching(
             &self.index.semantic,
             &self.index.documents,
             &entity,
@@ -5490,6 +5493,23 @@ impl SemathEngine {
                     )
             },
         );
+        if claims.is_empty() {
+            claims = index_claims_matching(
+                &self.index.semantic,
+                &self.index.documents,
+                &entity,
+                occurrence,
+                |claim, evidence| {
+                    evidence.source.file_id == document.document.file_id
+                        && evidence.source == occurrence.id
+                        && evidence.origin == EvidenceOrigin::Explicit
+                        && evidence.polarity == EvidencePolarity::Positive
+                        && evidence.modality == EvidenceModality::Asserted
+                        && evidence.rule_id == "semath/canonical-symbol-identity"
+                        && claim.predicate == ClaimPredicate::Names
+                },
+            );
+        }
         append_context_claims(context, claims);
     }
 

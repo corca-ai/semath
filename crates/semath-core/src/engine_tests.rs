@@ -2,8 +2,9 @@ use std::collections::{BTreeSet, HashMap};
 
 use super::{
     EngineError, SemathEngine, canonical_expression_owner, expression_carries_formula_fact,
-    formula_meaning_owns_relation_head, index_occurrence_range, notation_occurrence_range,
-    occurrence_id_at_range, relation_expression_at_cursor, stable_text_digest,
+    formula_meaning_is_adopted, formula_meaning_owns_relation_head, index_occurrence_range,
+    notation_occurrence_range, occurrence_id_at_range, relation_expression_at_cursor,
+    stable_text_digest,
 };
 use crate::canonical::{
     SemanticExpr, SemanticExprKind, SemanticReference, lower_document_region, relation_head,
@@ -28,6 +29,7 @@ fn formula_meaning_ownership_is_independent_of_provenance_rule_id() {
             end_offset: 9,
         },
         ownership: crate::prose::FormulaMeaningOwnership::RelationHead,
+        authority: crate::prose::FormulaMeaningAuthority::Adopted,
         evidence: Evidence {
             rule_id: "public/notation-provenance-v1".into(),
             kind: "attached-prose".into(),
@@ -41,8 +43,10 @@ fn formula_meaning_ownership_is_independent_of_provenance_rule_id() {
     };
 
     assert!(formula_meaning_owns_relation_head(&fact));
+    assert!(formula_meaning_is_adopted(&fact));
     fact.evidence.rule_id = "public/notation-provenance-v2".into();
     assert!(formula_meaning_owns_relation_head(&fact));
+    assert!(formula_meaning_is_adopted(&fact));
 }
 
 fn document(file_id: &str, path: &str, content: &str, version: u64) -> ProjectDocument {
@@ -2654,6 +2658,23 @@ fn formula_metadescription_does_not_escalate_an_existing_source_meaning() {
 }
 
 #[test]
+fn descriptive_formula_labels_do_not_establish_an_unrecognized_root() {
+    for content in [
+        "Under the recorded model, the governing equation is $a=b$.",
+        "The previous assertion was removed. The remaining untyped expression is $a=b$. No current source adopts a meaning for either symbol.",
+    ] {
+        let view = semantic_view_at(content, content.find("a=b").unwrap() as u32);
+
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Unsupported,
+            "{content}: {view:#?}"
+        );
+        assert!(view.context.relations.is_empty(), "{content}: {view:#?}");
+    }
+}
+
+#[test]
 fn attributed_formula_metadescription_cannot_establish_at_trailing_punctuation() {
     let content = "The attributed firmware formula is\n\\[J=-D\\nabla c.\\]";
     let offset = content.rfind("c.").unwrap() as u32 + 2;
@@ -3113,6 +3134,51 @@ fn authoring_claim_evidence_emits_one_link_for_one_authored_claim() {
     assert_eq!(
         view.authoring_context.claim_evidence[0].claim_id,
         "main:1:definition-claim:0"
+    );
+}
+
+#[test]
+fn formula_claim_projection_follows_the_selected_root_entity() {
+    let content = "The source calls $x$ the unique sample. Let $g$ be a function. Inspect\n\\[\ng=x,\\qquad x\\in I.\n\\]";
+    let trailing_formula_gap = content.rfind("\\]").unwrap() as u32 - 1;
+    let view = semantic_view_at(content, trailing_formula_gap);
+
+    assert_eq!(view.authoring_context.claim_evidence.len(), 1, "{view:#?}");
+    assert_eq!(
+        view.authoring_context.claim_evidence[0].claim_id,
+        "main:1:definition-claim:0"
+    );
+}
+
+#[test]
+fn formula_claim_projection_does_not_substitute_a_declared_relation_head() {
+    let content = "Let $i$ be electric current. Inspect $i=Ct$.";
+    let selected_t = content.rfind('t').unwrap() as u32;
+    let view = semantic_view_at(content, selected_t);
+
+    assert!(
+        view.authoring_context.claim_evidence.is_empty(),
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn exact_formula_selector_anchor_does_not_increase_semantic_certainty() {
+    let content = "Inspect\n\\[\ng=x,\\qquad x\\in I.\n\\]";
+    let trailing_formula_gap = content.rfind("\\]").unwrap() as u32 - 1;
+    let view = semantic_view_at(content, trailing_formula_gap);
+
+    assert_eq!(view.authoring_context.claim_evidence.len(), 1, "{view:#?}");
+    assert!(
+        view.authoring_context.claim_evidence[0]
+            .evidence
+            .iter()
+            .all(|evidence| evidence.rule_id == "semath/canonical-symbol-identity")
+    );
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Unsupported,
+        "{view:#?}"
     );
 }
 

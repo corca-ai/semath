@@ -100,6 +100,7 @@ pub(crate) struct ProseObservations {
 pub(crate) struct FormulaMeaningFact {
     pub target_range: SourceRange,
     pub ownership: FormulaMeaningOwnership,
+    pub authority: FormulaMeaningAuthority,
     pub evidence: Evidence,
 }
 
@@ -107,6 +108,12 @@ pub(crate) struct FormulaMeaningFact {
 pub(crate) enum FormulaMeaningOwnership {
     ExactTarget,
     RelationHead,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum FormulaMeaningAuthority {
+    Adopted,
+    Descriptive,
 }
 
 pub(crate) fn assumption_formula_targets(assumption: &AssumptionInfo) -> &[SourceRange] {
@@ -1735,6 +1742,7 @@ fn collect_equation_flow_definitions(
                 output.formula_meanings.push(FormulaMeaningFact {
                     target_range: target.range.clone(),
                     ownership: formula_meaning_ownership(&description),
+                    authority: formula_meaning_authority(&description),
                     evidence: Evidence {
                         rule_id: formula_meaning_rule_id(&description).into(),
                         kind: "attached-prose".into(),
@@ -1779,6 +1787,7 @@ fn collect_equation_flow_definitions(
             output.formula_meanings.push(FormulaMeaningFact {
                 target_range: symbol_range,
                 ownership: formula_meaning_ownership(&description),
+                authority: formula_meaning_authority(&description),
                 evidence: Evidence {
                     rule_id: formula_meaning_rule_id(&description).into(),
                     kind: "attached-prose".into(),
@@ -2011,6 +2020,22 @@ fn formula_meaning_ownership(description: &str) -> FormulaMeaningOwnership {
         FormulaMeaningOwnership::RelationHead
     } else {
         FormulaMeaningOwnership::ExactTarget
+    }
+}
+
+fn formula_meaning_authority(description: &str) -> FormulaMeaningAuthority {
+    let words = formula_description_words(description).collect::<Vec<_>>();
+    if words.last().is_some_and(|word| word == "notation")
+        || words.iter().any(|word| {
+            matches!(
+                word.as_str(),
+                "accepted" | "adopted" | "approved" | "chosen" | "selected"
+            )
+        })
+    {
+        FormulaMeaningAuthority::Adopted
+    } else {
+        FormulaMeaningAuthority::Descriptive
     }
 }
 
@@ -4766,6 +4791,7 @@ fn push_formula_metadescription(
     analysis.formula_meanings.push(FormulaMeaningFact {
         target_range: expression.range.clone(),
         ownership: formula_meaning_ownership(description),
+        authority: formula_meaning_authority(description),
         evidence: Evidence {
             rule_id: formula_meaning_rule_id(description).into(),
             kind: "attached-prose".into(),
