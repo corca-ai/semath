@@ -139,6 +139,13 @@ describe("fresh blind versioned receipt", () => {
     const current = completedReceipt(startedReceipt());
     const result = { ...(current.result as Record<string, unknown>) };
     delete result.authoringSafety;
+    const validation = {
+      ...(result.validation as Record<string, unknown>),
+    };
+    delete validation.entityDecisions;
+    delete validation.fields;
+    delete validation.formulaDecisions;
+    result.validation = validation;
     const legacy = {
       ...current,
       contracts: { ...current.contracts, receiptPolicyVersion: 2 as const },
@@ -161,6 +168,17 @@ describe("fresh blind versioned receipt", () => {
       receiptPolicyVersion: 3,
       schemaVersion: 3,
     });
+    const currentResult = current.result as Record<string, unknown>;
+    const validation = {
+      ...(currentResult.validation as Record<string, unknown>),
+    };
+    delete validation.entityDecisions;
+    expect(() =>
+      parseFreshBlindReceipt({
+        ...current,
+        result: { ...currentResult, validation },
+      })
+    ).toThrow("result.validation has unexpected or missing fields");
   });
 
   test("terminalizes a reserved execution without claiming evaluation evidence", () => {
@@ -241,7 +259,10 @@ function completedReceipt(
       },
       validation: {
         decisions: { partial: 1 },
+        entityDecisions: { partial: 1 },
         families: { "single-document": 1 },
+        fields: { "cross-field": 1 },
+        formulaDecisions: { partial: 1 },
         laws: 1,
         maximumMathSimilarity: 0.2,
         maximumProseSimilarity: 0.3,

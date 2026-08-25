@@ -1,12 +1,15 @@
 import type { SourceRange } from "../../protocol/src/index";
 import {
+  AUTHORED_AREA_ALLOCATION,
   DOCUMENT_REASONING_FAMILIES,
+  authoredRenameNotationFamilyMatches,
   authoredScenarioFor,
   authoredSnapshotFor,
   parseAuthoredScientificFixture,
   resolveAuthoredAnchor,
   scoreAuthoredScientificFixture,
   type AuthoredLawCatalogEntry,
+  type AuthoredArea,
   type AuthoredLocationExpectation,
   type AuthoredScientificFixture,
   type AuthoredScientificObservation,
@@ -80,19 +83,20 @@ export interface FreshBlindValidationInput {
 
 export interface FreshBlindSnapshotSyntaxFacts {
   readonly documents: readonly {
-    readonly compositeOccurrences?: readonly FreshBlindCompositeOccurrenceFact[];
     readonly fileId: string;
     readonly mathRootContentRanges: readonly SourceRange[];
+    readonly occurrences?: readonly FreshBlindOccurrenceFact[];
   }[];
   readonly scenarioId: string;
   readonly snapshotId: string;
 }
 
-export interface FreshBlindCompositeOccurrenceFact {
-  readonly kind: "modifier" | "named-operator" | "script" | "style";
+export interface FreshBlindOccurrenceFact {
+  readonly applicationEndOffset?: number;
+  readonly kind: "command" | "identifier" | "named-operator";
   readonly range: SourceRange;
-  /** Cursor-owning subrange; for scripts this is the exact nucleus. */
   readonly selectionRange: SourceRange;
+  readonly surface: string;
 }
 
 export interface FreshBlindValidationSummary {
@@ -100,6 +104,7 @@ export interface FreshBlindValidationSummary {
   readonly entityDecisions: Readonly<Record<string, number>>;
   readonly families: Readonly<Record<string, number>>;
   readonly formulaDecisions: Readonly<Record<string, number>>;
+  readonly fields: Readonly<Record<string, number>>;
   readonly laws: number;
   readonly maximumMathSimilarity: number;
   readonly maximumProseSimilarity: number;
@@ -390,7 +395,10 @@ export function validateFreshBlindRelease(
     if (
       rename.status === "available" &&
       (rename.newName !== rename.replacementText ||
-        !sameRenameNotationFamily(rename.expectedText!, rename.newName!))
+        !authoredRenameNotationFamilyMatches(
+          rename.expectedText!,
+          rename.newName!,
+        ))
     ) {
       throw new Error(
         `${probe.id}: rename must preserve one exact editable notation family`,
@@ -408,7 +416,18 @@ export function validateFreshBlindRelease(
       );
     }
     if (semanticReleaseNumber(release.release.id) >= 35) {
-      validateEntitySurfaceCommissioning(probe.id, probe.expected, snapshot);
+      const syntaxFact = input.authoringSyntaxFacts.find(
+        (fact) =>
+          fact.scenarioId === scenario.id &&
+          fact.snapshotId === snapshot.id,
+      );
+      validateEntitySurfaceCommissioning(
+        probe.id,
+        probe.expected,
+        snapshot,
+        syntaxFact,
+        release.schemaVersion,
+      );
     }
   }
   const families = count(primary.map((probe) => probe.family));
@@ -416,6 +435,15 @@ export function validateFreshBlindRelease(
     if (families[family] !== REQUIRED_FAMILY_SCENARIOS) {
       throw new Error(
         `${family}: fresh blind fixture requires ${REQUIRED_FAMILY_SCENARIOS} primary probes`,
+      );
+    }
+  }
+  const fields = count(fixture.scenarios.map((scenario) => scenario.field));
+  for (const field of Object.keys(AUTHORED_AREA_ALLOCATION) as AuthoredArea[]) {
+    const required = AUTHORED_AREA_ALLOCATION[field].holdout;
+    if (fields[field] !== required) {
+      throw new Error(
+        `${field}: fresh blind fixture requires exactly ${required} holdout scenarios`,
       );
     }
   }
@@ -480,6 +508,7 @@ export function validateFreshBlindRelease(
     decisions,
     entityDecisions,
     families,
+    fields,
     formulaDecisions,
     laws,
     maximumMathSimilarity: isolation.maximumMath,
@@ -666,30 +695,44 @@ function validateFormulaDecisionExpectations(
           );
         }
       }
-      if (release.schemaVersion === 3 && document.compositeOccurrences === undefined) {
+      if (release.schemaVersion === 3 && document.occurrences === undefined) {
         throw new Error(
-          `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: schema 3 requires composite syntax facts`,
+          `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: schema 3 requires complete occurrence syntax facts`,
         );
       }
-      const compositeKeys = new Set<string>();
-      for (const occurrence of document.compositeOccurrences ?? []) {
-        const key = `${occurrence.kind}:${occurrence.range.startOffset}:${occurrence.range.endOffset}:${occurrence.selectionRange.startOffset}:${occurrence.selectionRange.endOffset}`;
-        if (compositeKeys.has(key)) {
+      const occurrenceKeys = new Set<string>();
+      for (const occurrence of document.occurrences ?? []) {
+        const occurrenceKey = stableJson(occurrence);
+        if (occurrenceKeys.has(occurrenceKey)) {
           throw new Error(
-            `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: duplicate composite syntax fact`,
+            `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: duplicate occurrence syntax fact`,
           );
         }
-        compositeKeys.add(key);
+        occurrenceKeys.add(occurrenceKey);
         if (
           !validSourceRange(occurrence.range, source.content.length) ||
           !validSourceRange(occurrence.selectionRange, source.content.length) ||
           occurrence.selectionRange.startOffset < occurrence.range.startOffset ||
-          occurrence.selectionRange.endOffset > occurrence.range.endOffset
+          occurrence.selectionRange.endOffset > occurrence.range.endOffset ||
+          occurrence.surface.length === 0 ||
+          (occurrence.applicationEndOffset !== undefined &&
+            (!Number.isInteger(occurrence.applicationEndOffset) ||
+              occurrence.applicationEndOffset < 0 ||
+              occurrence.applicationEndOffset > source.content.length))
         ) {
           throw new Error(
-            `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: invalid composite syntax fact`,
+            `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: invalid occurrence syntax fact`,
           );
         }
+      }
+      if (
+        document.occurrences !== undefined &&
+        stableJson(document.occurrences) !==
+          stableJson([...document.occurrences].sort(compareOccurrenceFacts))
+      ) {
+        throw new Error(
+          `${fact.scenarioId}/${fact.snapshotId}/${document.fileId}: occurrence syntax facts are not canonical`,
+        );
       }
     }
     factsByKey.set(key, fact);
@@ -737,32 +780,27 @@ function validateFormulaDecisionExpectations(
         `${probe.id}: cursor and formulaDecision.anchor must select the same math root`,
       );
     }
-    const cursorDocument = snapshot.documents.find(
-      (candidate) => candidate.fileId === cursorAnchor.fileId,
-    )!;
-    const composite = selectFreshBlindCompositeOccurrence(
-      document?.compositeOccurrences ?? [],
+    const occurrence = selectFreshBlindOccurrence(
+      document?.occurrences ?? [],
       cursorOffset,
     );
-    if (composite) {
-      const expectedOccurrence = probe.expected.cursorOccurrence === undefined ||
-          probe.expected.cursorOccurrence === null
-        ? undefined
-        : resolveAuthoredAnchor(snapshot, probe.expected.cursorOccurrence);
-      const expectedSymbol = cursorDocument.content.slice(
-        composite.range.startOffset,
-        composite.range.endOffset,
+    if (probe.expected.cursorOccurrence === undefined) {
+      throw new Error(`${probe.id}: schema 3 requires an explicit cursorOccurrence`);
+    }
+    const expectedOccurrence = probe.expected.cursorOccurrence === null
+      ? null
+      : resolveAuthoredAnchor(snapshot, probe.expected.cursorOccurrence);
+    if (
+      occurrence === undefined
+        ? expectedOccurrence !== null
+        : expectedOccurrence === null ||
+          expectedOccurrence.fileId !== cursorAnchor.fileId ||
+          !sameRange(expectedOccurrence.range, occurrence.range) ||
+          probe.expected.symbol !== occurrence.surface
+    ) {
+      throw new Error(
+        `${probe.id}: cursorOccurrence and symbol must equal syntax-selected cursor ownership`,
       );
-      if (
-        !expectedOccurrence ||
-        expectedOccurrence.fileId !== cursorAnchor.fileId ||
-        !sameRange(expectedOccurrence.range, composite.range) ||
-        probe.expected.symbol !== expectedSymbol
-      ) {
-        throw new Error(
-          `${probe.id}: cursorOccurrence and symbol must equal the exact syntax composite occurrence`,
-        );
-      }
     }
     const safety = safetyById.get(probe.id)!;
     if (safety.forbiddenDispositions.includes(expected.status)) {
@@ -786,23 +824,95 @@ function validateFormulaDecisionExpectations(
   }
 }
 
-export function selectFreshBlindCompositeOccurrence(
-  occurrences: readonly FreshBlindCompositeOccurrenceFact[],
+function compareOccurrenceFacts(
+  left: FreshBlindOccurrenceFact,
+  right: FreshBlindOccurrenceFact,
+): number {
+  return left.selectionRange.startOffset - right.selectionRange.startOffset ||
+    left.selectionRange.endOffset - right.selectionRange.endOffset ||
+    left.range.startOffset - right.range.startOffset ||
+    left.range.endOffset - right.range.endOffset ||
+    compareOccurrenceText(left.surface, right.surface) ||
+    compareOccurrenceText(left.kind, right.kind) ||
+    (left.applicationEndOffset ?? -1) - (right.applicationEndOffset ?? -1);
+}
+
+function compareOccurrenceText(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+export function selectFreshBlindOccurrence(
+  occurrences: readonly FreshBlindOccurrenceFact[],
   cursorOffset: number,
-): FreshBlindCompositeOccurrenceFact | undefined {
-  const eligible = occurrences.filter((occurrence) =>
-    occurrence.selectionRange.startOffset <= cursorOffset &&
-    cursorOffset < occurrence.selectionRange.endOffset
+): FreshBlindOccurrenceFact | undefined {
+  const eligible = occurrences.flatMap((occurrence, index) => {
+    const priority = occurrenceOwnershipPriority(occurrence, cursorOffset);
+    return priority === undefined ? [] : [{ index, occurrence, priority }];
+  });
+  const shadowedByNestedTrailingEdge = (index: number, priority: number) =>
+    priority === 0 && eligible.some((candidate) =>
+      candidate.priority === 1 && candidate.index !== index &&
+      strictlyContains(
+        occurrences[index]!.range,
+        occurrences[candidate.index]!.range,
+      )
+    );
+  const unshadowed = eligible.filter((candidate) =>
+    !shadowedByNestedTrailingEdge(candidate.index, candidate.priority)
   );
-  const scripts = eligible.filter((occurrence) => occurrence.kind === "script");
-  const candidates = scripts.length > 0 ? scripts : eligible;
-  return [...candidates].sort((left, right) => {
-    const leftWidth = left.range.endOffset - left.range.startOffset;
-    const rightWidth = right.range.endOffset - right.range.startOffset;
-    return (scripts.length > 0 ? rightWidth - leftWidth : leftWidth - rightWidth) ||
-      left.range.startOffset - right.range.startOffset ||
-      left.range.endOffset - right.range.endOffset;
-  })[0];
+  const bestPriority = Math.min(...unshadowed.map((candidate) => candidate.priority));
+  if (!Number.isFinite(bestPriority)) return undefined;
+  const candidates = unshadowed
+    .filter((candidate) => candidate.priority === bestPriority)
+    .sort((left, right) => {
+      const leftOccurrence = left.occurrence;
+      const rightOccurrence = right.occurrence;
+      const leftWidth = leftOccurrence.range.endOffset -
+        leftOccurrence.range.startOffset;
+      const rightWidth = rightOccurrence.range.endOffset -
+        rightOccurrence.range.startOffset;
+      const occurrenceOrder = bestPriority === 1
+        ? rightWidth - leftWidth
+        : leftWidth - rightWidth;
+      const leftSelectionWidth = leftOccurrence.selectionRange.endOffset -
+        leftOccurrence.selectionRange.startOffset;
+      const rightSelectionWidth = rightOccurrence.selectionRange.endOffset -
+        rightOccurrence.selectionRange.startOffset;
+      return occurrenceOrder || leftSelectionWidth - rightSelectionWidth ||
+        leftOccurrence.selectionRange.startOffset -
+          rightOccurrence.selectionRange.startOffset;
+    });
+  const selected = candidates[0]?.occurrence;
+  const next = candidates[1]?.occurrence;
+  if (
+    selected && next && sameRange(selected.range, next.range) &&
+    !sameRange(selected.selectionRange, next.selectionRange)
+  ) return undefined;
+  return selected;
+}
+
+function occurrenceOwnershipPriority(
+  occurrence: FreshBlindOccurrenceFact,
+  offset: number,
+): number | undefined {
+  if (rangeContains(occurrence.range, offset)) return 0;
+  if (nonemptyTrailingEdge(occurrence.range, offset)) return 1;
+  if (rangeContains(occurrence.selectionRange, offset)) return 2;
+  if (nonemptyTrailingEdge(occurrence.selectionRange, offset)) return 3;
+  return occurrence.applicationEndOffset === offset ? 4 : undefined;
+}
+
+function rangeContains(range: SourceRange, offset: number): boolean {
+  return range.startOffset <= offset && offset < range.endOffset;
+}
+
+function nonemptyTrailingEdge(range: SourceRange, offset: number): boolean {
+  return range.startOffset < range.endOffset && range.endOffset === offset;
+}
+
+function strictlyContains(container: SourceRange, child: SourceRange): boolean {
+  return container.startOffset <= child.startOffset &&
+    child.endOffset + 1 < container.endOffset;
 }
 
 function validSourceRange(range: SourceRange, contentLength: number): boolean {
@@ -817,6 +927,8 @@ function validateEntitySurfaceCommissioning(
   probeId: string,
   expected: AuthoredScientificFixture["probes"][number]["expected"],
   snapshot: ReturnType<typeof authoredSnapshotFor>,
+  syntaxFact: FreshBlindSnapshotSyntaxFacts | undefined,
+  releaseSchemaVersion: FreshBlindReleaseFixture["schemaVersion"],
 ): void {
   const { definition, prepareRename, references, rename } = expected.navigation;
   if (definition.status !== references.status) {
@@ -830,6 +942,14 @@ function validateEntitySurfaceCommissioning(
     );
   }
   if (definition.status === "available") {
+    if (
+      releaseSchemaVersion === 3 &&
+      (definition.allowed === undefined || references.allowed === undefined)
+    ) {
+      throw new Error(
+        `${probeId}: schema 3 available navigation requires explicit allowed envelopes`,
+      );
+    }
     const definitions = resolvedLocationKeys(
       definition.allowed ?? definition.required,
       snapshot,
@@ -844,21 +964,23 @@ function validateEntitySurfaceCommissioning(
       );
     }
     const symbol = expected.symbol;
-    if (!symbol || !referenceAnchors.every((anchor) =>
-      selectedAnchorText(anchor, snapshot) === symbol
+    const referenceOccurrences = referenceAnchors.map((anchor) =>
+      reviewedSyntaxOccurrence(probeId, anchor, snapshot, syntaxFact)
+    );
+    if (!symbol || referenceOccurrences.some((occurrence) =>
+      occurrence.surface !== symbol
     )) {
       throw new Error(
-        `${probeId}: authorized references require one exact atomic source spelling`,
-      );
-    }
-    const authoredOccurrences = exactAtomicOccurrences(snapshot, symbol);
-    if (authoredOccurrences.length !== referenceAnchors.length) {
-      throw new Error(
-        `${probeId}: reference allowlist must enumerate every exact atomic source occurrence`,
+        `${probeId}: authorized references must select one reviewed syntax occurrence identity`,
       );
     }
   }
   if (rename.status === "available") {
+    if (releaseSchemaVersion === 3 && rename.allowed === undefined) {
+      throw new Error(
+        `${probeId}: schema 3 available rename requires an explicit allowed envelope`,
+      );
+    }
     const referenceKeys = resolvedLocationKeys(
       references.allowed ?? references.required,
       snapshot,
@@ -890,6 +1012,27 @@ function validateEntitySurfaceCommissioning(
   }
 }
 
+function reviewedSyntaxOccurrence(
+  probeId: string,
+  anchor: AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["references"]["required"][number],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
+  syntaxFact: FreshBlindSnapshotSyntaxFacts | undefined,
+): FreshBlindOccurrenceFact {
+  const resolved = resolveAuthoredAnchor(snapshot, anchor);
+  const document = syntaxFact?.documents.find(
+    (candidate) => candidate.fileId === resolved.fileId,
+  );
+  const matches = document?.occurrences?.filter((occurrence) =>
+    sameRange(occurrence.range, resolved.range)
+  ) ?? [];
+  if (matches.length !== 1) {
+    throw new Error(
+      `${probeId}: reviewed navigation anchor must equal one syntax occurrence`,
+    );
+  }
+  return matches[0]!;
+}
+
 function semanticReleaseNumber(releaseId: string): number {
   return Number.parseInt(releaseId.slice("v0.".length), 10);
 }
@@ -904,35 +1047,6 @@ function resolvedLocationKeys(
       return `${resolved.fileId}:${resolved.range.startOffset}:${resolved.range.endOffset}`;
     })
     .sort();
-}
-
-function selectedAnchorText(
-  anchor: AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["references"]["required"][number],
-  snapshot: ReturnType<typeof authoredSnapshotFor>,
-): string {
-  const document = snapshot.documents.find((candidate) => candidate.fileId === anchor.fileId)!;
-  const range = resolveAuthoredAnchor(snapshot, anchor).range;
-  return document.content.slice(range.startOffset, range.endOffset);
-}
-
-function exactAtomicOccurrences(
-  snapshot: ReturnType<typeof authoredSnapshotFor>,
-  symbol: string,
-): string[] {
-  const output: string[] = [];
-  const identifier = /[\p{L}\p{N}_]/u;
-  for (const document of snapshot.documents) {
-    for (let start = document.content.indexOf(symbol); start >= 0;) {
-      const end = start + symbol.length;
-      const before = document.content.slice(Math.max(0, start - 1), start);
-      const after = document.content.slice(end, end + 1);
-      if (!identifier.test(before) && !identifier.test(after)) {
-        output.push(`${document.fileId}:${start}:${end}`);
-      }
-      start = document.content.indexOf(symbol, start + Math.max(symbol.length, 1));
-    }
-  }
-  return output.sort();
 }
 
 function validateExactLocationContract(
@@ -975,14 +1089,6 @@ function validateExactLocationContract(
   if (expected.minimum > envelope.length) {
     throw new Error(`${probeId}: ${surface} minimum exceeds its allowed envelope`);
   }
-}
-
-function sameRenameNotationFamily(current: string, replacement: string): boolean {
-  const controlSequence = /^\\\p{L}+$/u;
-  const plainIdentifier = /^\p{L}$/u;
-  return controlSequence.test(current)
-    ? controlSequence.test(replacement)
-    : plainIdentifier.test(current) && plainIdentifier.test(replacement);
 }
 
 /** Keep similarity policy pure; the effectful validator supplies fingerprints
@@ -1098,6 +1204,9 @@ export function freshBlindSafetySummary(
     const unsafeAuthorizations = unsafeSurfaceAuthorizations(
       observed.surfaceAuthorizations,
       probe.expected.navigation,
+      probe.expected.cursorOccurrence,
+      observed.cursorSurfaceIdentity,
+      snapshot,
     );
     const unsafeCaseLocations =
       unsafeDefinitions +
@@ -1240,6 +1349,9 @@ function rejectExactLeakage(
 function unsafeSurfaceAuthorizations(
   observed: AuthoredScientificObservation["surfaceAuthorizations"],
   expected: AuthoredScientificFixture["probes"][number]["expected"]["navigation"],
+  expectedCursorOccurrence: AuthoredScientificFixture["probes"][number]["expected"]["cursorOccurrence"],
+  cursorSurfaceIdentity: AuthoredScientificObservation["cursorSurfaceIdentity"],
+  snapshot: ReturnType<typeof authoredSnapshotFor>,
 ): number {
   // Retained legacy observations predate public authorization capture.
   if (!observed) return 0;
@@ -1261,32 +1373,34 @@ function unsafeSurfaceAuthorizations(
         }]
       : []
   );
-  const identities = new Set(
-    authorized.map(authorizationIdentityKey),
-  );
-  // One case-level failure records that independently safe-looking surfaces
-  // disagree about the exact cursor occurrence or resolved entity.
-  if (identities.size > 1) failures += 1;
+  // One case-level failure records every identity inconsistency without
+  // multiplying one bad surface across pairwise comparisons.
+  let unsafeIdentity = false;
+  if (authorized.length > 0) {
+    const expectedLocation = expectedCursorOccurrence === undefined ||
+        expectedCursorOccurrence === null
+      ? undefined
+      : resolveAuthoredAnchor(snapshot, expectedCursorOccurrence);
+    if (
+      expectedLocation === undefined || cursorSurfaceIdentity == null ||
+      cursorSurfaceIdentity.entityId === null ||
+      cursorSurfaceIdentity.location.fileId !== expectedLocation.fileId ||
+      cursorSurfaceIdentity.location.path !== expectedLocation.path ||
+      !sameRange(cursorSurfaceIdentity.location.range, expectedLocation.range) ||
+      cursorSurfaceIdentity.occurrenceId.fileId !== expectedLocation.fileId
+    ) {
+      unsafeIdentity = true;
+    } else {
+      if (authorized.some((authorization) =>
+        stableJson(authorization.focusOccurrenceId) !==
+            stableJson(cursorSurfaceIdentity.occurrenceId) ||
+        stableJson(authorization.entityId) !==
+            stableJson(cursorSurfaceIdentity.entityId)
+      )) unsafeIdentity = true;
+    }
+  }
+  failures += Number(unsafeIdentity);
   return failures;
-}
-
-function authorizationIdentityKey(
-  authorization: {
-    readonly entityId: Extract<
-      NonNullable<
-        AuthoredScientificObservation["surfaceAuthorizations"]
-      >["definition"],
-      { readonly status: "authorized" }
-    >["entityId"];
-    readonly focusOccurrenceId: Extract<
-      NonNullable<
-        AuthoredScientificObservation["surfaceAuthorizations"]
-      >["definition"],
-      { readonly status: "authorized" }
-    >["focusOccurrenceId"];
-  },
-): string {
-  return stableJson(authorization);
 }
 
 function unsafeLocations<
@@ -1312,6 +1426,7 @@ function unsafeLocations<
       readonly occurrence?: number;
       readonly selection?: { readonly length: number; readonly offset: number };
     }[];
+    readonly minimum: number;
     readonly status: "available" | "unavailable";
   },
   snapshot: ReturnType<typeof authoredSnapshotFor>,
@@ -1324,7 +1439,7 @@ function unsafeLocations<
   const excluded = expected.excluded.map((anchor) =>
     resolveAuthoredAnchor(snapshot, anchor),
   );
-  return observed.filter(
+  const unsafe = observed.filter(
     (location) =>
       additionalUnsafe(location) ||
       !allowed.some(
@@ -1338,6 +1453,10 @@ function unsafeLocations<
           sameRange(location.range, anchor.range),
       ),
   ).length;
+  const requiredCount = expected.status === "available"
+    ? Math.max(1, expected.minimum)
+    : expected.minimum;
+  return unsafe + Math.max(0, requiredCount - observed.length);
 }
 
 function unsafePrepareRenameLocation(
@@ -1345,7 +1464,11 @@ function unsafePrepareRenameLocation(
   expected: AuthoredScientificFixture["probes"][number]["expected"]["navigation"]["prepareRename"],
   snapshot: ReturnType<typeof authoredSnapshotFor>,
 ): number {
-  if (!observed.range) return 0;
+  if (!observed.range) {
+    return expected.status === "available" || observed.placeholder !== undefined
+      ? 1
+      : 0;
+  }
   if (expected.status === "unavailable") return 1;
   if (
     expected.range &&

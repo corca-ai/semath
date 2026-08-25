@@ -1,7 +1,12 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve } from "node:path";
-import { LatexSyntaxService } from "wasmtex/syntax";
+import {
+  LatexSyntaxService,
+  type LatexFileSyntax,
+  type LatexNotationNode,
+  type LatexSyntaxRange,
+} from "wasmtex/syntax";
 import {
   authoredFixtureSealPayload,
   authoredMathFingerprints,
@@ -117,27 +122,11 @@ export function freshAuthoringSyntaxFactsForSelections(
         const syntax = service.getFile(document.fileId);
         if (!syntax) throw new Error(`${scenarioId}: missing wasmtex syntax`);
         return {
-          compositeOccurrences: syntax.nodes.flatMap((node) => {
-            if (
-              node.kind !== "modifier" && node.kind !== "named-operator" &&
-              node.kind !== "script" && node.kind !== "style"
-            ) {
-              return [];
-            }
-            return [{
-              kind: node.kind,
-              range: { ...node.ranges.full },
-              selectionRange: {
-                ...(node.kind === "script"
-                  ? node.ranges.nucleus ?? node.ranges.full
-                  : node.ranges.full),
-              },
-            }];
-          }),
           fileId: document.fileId,
           mathRootContentRanges: syntax.mathRoots.map((root) => ({
             ...root.contentRange,
           })),
+          occurrences: neutralOccurrenceFacts(document.content, syntax),
         };
       }),
       scenarioId,
@@ -145,6 +134,280 @@ export function freshAuthoringSyntaxFactsForSelections(
     });
   }
   return [...selected.values()];
+}
+
+function neutralOccurrenceFacts(
+  content: string,
+  syntax: LatexFileSyntax,
+): NonNullable<
+  FreshBlindSnapshotSyntaxFacts["documents"][number]["occurrences"]
+> {
+  const structuralCommands = new Set([
+    "dfrac",
+    "frac",
+    "sqrt",
+    "tfrac",
+  ]);
+  const structuralOnlyCommands = new Set([
+    "exists",
+    "forall",
+    "int",
+    "lim",
+    "sum",
+  ]);
+  const ignoredCommands = new Set([
+    " ", ",", ":", ";", "!", "quad", "qquad", "enspace", "thinspace",
+    "medspace", "thickspace", "negthinspace", "big", "Big", "bigl", "bigr",
+    "Bigl", "Bigr", "displaystyle", "textstyle", "scriptstyle",
+    "scriptscriptstyle", "rm", "label", "tag", "tag*", "notag", "nonumber",
+    "mathord", "mathop", "mathbin", "mathrel", "mathopen", "mathclose",
+    "mathinner",
+  ]);
+  const occurrences = syntax.nodes.flatMap((node, nodeId) => {
+    if (ancestorHasKind(syntax.nodes, nodeId, "named-operator")) return [];
+    const atom = node.kind === "token" && node.lexicalClass === "identifier" &&
+        node.text
+      ? {
+          kind: "identifier" as const,
+          selectionRange: node.ranges.full,
+          surface: node.text,
+        }
+      : node.kind === "named-operator" && node.name
+      ? {
+          kind: "named-operator" as const,
+          selectionRange: node.ranges.name ?? node.ranges.full,
+          surface: node.name,
+        }
+      : node.kind === "command" && node.name &&
+          !structuralCommands.has(node.name) && !ignoredCommands.has(node.name) &&
+          (!structuralOnlyCommands.has(node.name) || node.state === "complete")
+      ? {
+          kind: "command" as const,
+          selectionRange: node.ranges.command ?? node.ranges.full,
+          surface: `\\${node.name}`,
+        }
+      : undefined;
+    if (!atom) return [];
+    const range = atom.kind === "command" && node.name &&
+        structuralOnlyCommands.has(node.name)
+      ? node.ranges.full
+      : notationOccurrenceRange(syntax.nodes, atom.selectionRange);
+    const surface = compositionalOccurrenceSurface(
+      content,
+      syntax.nodes,
+      atom.selectionRange,
+      range,
+      atom.surface,
+    );
+    const applicationEndOffset = applicationEnd(
+      syntax.nodes,
+      atom.selectionRange,
+      range,
+    );
+    return [{
+      ...(applicationEndOffset === undefined ? {} : { applicationEndOffset }),
+      kind: atom.kind,
+      range: { ...range },
+      selectionRange: { ...atom.selectionRange },
+      surface,
+    }];
+  });
+  const unique = new Map(
+    occurrences.map((occurrence) => [JSON.stringify(occurrence), occurrence]),
+  );
+  return [...unique.values()].sort((left, right) =>
+    left.selectionRange.startOffset - right.selectionRange.startOffset ||
+    left.selectionRange.endOffset - right.selectionRange.endOffset ||
+    left.range.startOffset - right.range.startOffset ||
+    left.range.endOffset - right.range.endOffset ||
+    compareOccurrenceText(left.surface, right.surface) ||
+    compareOccurrenceText(left.kind, right.kind) ||
+    (left.applicationEndOffset ?? -1) - (right.applicationEndOffset ?? -1)
+  );
+}
+
+function compositionalOccurrenceSurface(
+  content: string,
+  nodes: readonly LatexNotationNode[],
+  selection: LatexSyntaxRange,
+  occurrence: LatexSyntaxRange,
+  surface: string,
+): string {
+  const path = nodes
+    .filter((node) => rangeContainsRange(node.ranges.full, selection))
+    .sort((left, right) =>
+      (right.ranges.full.endOffset - right.ranges.full.startOffset) -
+      (left.ranges.full.endOffset - left.ranges.full.startOffset)
+    );
+  const hasCompositeComponent = path.some((node) => {
+    if ((node.kind === "modifier" || node.kind === "style") && node.name) {
+      return true;
+    }
+    if (node.kind !== "script") return false;
+    if (node.name === "superscript") return true;
+    if (node.name !== "subscript") return false;
+    const base = node.children[0] === undefined
+      ? ""
+      : boundedNotationText(nodes, node.children[0], 0);
+    const index = node.children[1] === undefined
+      ? ""
+      : boundedNotationText(nodes, node.children[1], 0);
+    return base.length > 0 && index.length > 0;
+  });
+  if (hasCompositeComponent) {
+    return content.slice(occurrence.startOffset, occurrence.endOffset);
+  }
+  return path.find((node) => node.kind === "named-operator")?.name ?? surface;
+}
+
+function boundedNotationText(
+  nodes: readonly LatexNotationNode[],
+  nodeId: number,
+  depth: number,
+): string {
+  if (depth === 8) return "";
+  const node = nodes[nodeId];
+  if (!node) return "";
+  if (node.text !== undefined) return node.text;
+  if (node.children.length === 0) return node.name ?? "";
+  return node.children
+    .map((child) => boundedNotationText(nodes, child, depth + 1))
+    .join("");
+}
+
+function notationOccurrenceRange(
+  nodes: readonly LatexNotationNode[],
+  selection: LatexSyntaxRange,
+): LatexSyntaxRange {
+  let widest: LatexNotationNode | undefined;
+  for (const node of nodes) {
+    if (!notationIdentityContains(nodes, node, selection, 0)) continue;
+    const width = node.ranges.full.endOffset - node.ranges.full.startOffset;
+    const widestWidth = widest === undefined
+      ? -1
+      : widest.ranges.full.endOffset - widest.ranges.full.startOffset;
+    // Rust Iterator::max_by_key returns the last equal maximum.
+    if (width >= widestWidth) widest = node;
+  }
+  return widest?.ranges.full ?? selection;
+}
+
+function compareOccurrenceText(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function notationIdentityContains(
+  nodes: readonly LatexNotationNode[],
+  node: LatexNotationNode,
+  selection: LatexSyntaxRange,
+  depth: number,
+): boolean {
+  if (depth === 16) return false;
+  const identity = node.kind === "named-operator"
+    ? node.ranges.name
+    : node.kind === "modifier" || node.kind === "script"
+    ? node.ranges.nucleus ?? node.arguments?.find((argument) =>
+      argument.role === "nucleus"
+    )?.range
+    : node.kind === "style"
+    ? node.arguments?.find((argument) => argument.role === "body")?.range
+    : undefined;
+  if (!identity || !rangeContainsRange(identity, selection)) return false;
+  const child = node.children
+    .map((childId) => nodes[childId])
+    .find((candidate) => candidate &&
+      rangeContainsRange(identity, candidate.ranges.full) &&
+      rangeContainsRange(candidate.ranges.full, selection)
+    );
+  return child === undefined ||
+    identityDescendantContains(nodes, child, selection, depth + 1);
+}
+
+function identityDescendantContains(
+  nodes: readonly LatexNotationNode[],
+  node: LatexNotationNode,
+  selection: LatexSyntaxRange,
+  depth: number,
+): boolean {
+  if (
+    node.kind === "named-operator" || node.kind === "modifier" ||
+    node.kind === "script" || node.kind === "style"
+  ) return notationIdentityContains(nodes, node, selection, depth);
+  if (depth === 16) return false;
+  const child = node.children
+    .map((childId) => nodes[childId])
+    .find((candidate) => candidate &&
+      rangeContainsRange(candidate.ranges.full, selection)
+    );
+  return child === undefined ||
+    identityDescendantContains(nodes, child, selection, depth + 1);
+}
+
+function applicationEnd(
+  nodes: readonly LatexNotationNode[],
+  selection: LatexSyntaxRange,
+  occurrence: LatexSyntaxRange,
+): number | undefined {
+  const path = nodes
+    .map((node, nodeId) => ({ node, nodeId }))
+    .filter(({ node }) => rangeContainsRange(node.ranges.full, selection))
+    .sort((left, right) =>
+      (right.node.ranges.full.endOffset - right.node.ranges.full.startOffset) -
+      (left.node.ranges.full.endOffset - left.node.ranges.full.startOffset)
+    );
+  for (const { node, nodeId } of path) {
+    if (
+      (node.kind !== "named-operator" && node.kind !== "token") ||
+      node.ranges.full.startOffset < occurrence.startOffset ||
+      node.ranges.full.endOffset > occurrence.endOffset
+    ) continue;
+    const sibling = nextMeaningfulSibling(nodes, nodeId);
+    if (
+      sibling && (sibling.kind === "delimiter" || sibling.kind === "group") &&
+      sibling.state === "complete" &&
+      sibling.ranges.full.startOffset < sibling.ranges.full.endOffset
+    ) return sibling.ranges.full.endOffset;
+  }
+  return undefined;
+}
+
+function nextMeaningfulSibling(
+  nodes: readonly LatexNotationNode[],
+  nodeId: number,
+): LatexNotationNode | undefined {
+  const parentId = nodes[nodeId]?.parent;
+  if (parentId === null || parentId === undefined) return undefined;
+  const parent = nodes[parentId];
+  const position = parent?.children.indexOf(nodeId) ?? -1;
+  if (!parent || position < 0) return undefined;
+  return parent.children.slice(position + 1)
+    .map((siblingId) => nodes[siblingId])
+    .find((sibling) =>
+      sibling !== undefined &&
+      (sibling.text === undefined || sibling.text.trim() !== "")
+    );
+}
+
+function ancestorHasKind(
+  nodes: readonly LatexNotationNode[],
+  nodeId: number,
+  kind: LatexNotationNode["kind"],
+): boolean {
+  for (let parent = nodes[nodeId]?.parent; parent !== null && parent !== undefined;) {
+    const node = nodes[parent];
+    if (!node) return false;
+    if (node.kind === kind) return true;
+    parent = node.parent;
+  }
+  return false;
+}
+
+function rangeContainsRange(
+  container: LatexSyntaxRange,
+  contained: LatexSyntaxRange,
+): boolean {
+  return container.startOffset <= contained.startOffset &&
+    contained.endOffset <= container.endOffset;
 }
 
 export function sha256(value: string | Uint8Array): string {

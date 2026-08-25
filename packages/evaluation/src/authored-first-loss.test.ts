@@ -54,6 +54,7 @@ describe("authored first-loss localization", () => {
         ],
       }),
     ).toMatchObject({
+      decisionDomain: "selected-formula",
       reason: "propagation-boundary-loss",
       stage: "propagation",
     });
@@ -79,6 +80,7 @@ describe("authored first-loss localization", () => {
         ],
       }),
     ).toMatchObject({
+      decisionDomain: "selected-formula",
       reason: "structural-dispatch-miss",
       stage: "pack-unification",
     });
@@ -276,7 +278,9 @@ describe("authored first-loss localization", () => {
       {
         basis: "missing event",
         caseId: "failure-b",
+        decisionDomain: "selected-formula",
         expectedDecision: "established",
+        expectedFormulaDecision: "established",
         family: "discourse-reference",
         field: "probability",
         reason: "discourse-evidence-missing",
@@ -286,6 +290,7 @@ describe("authored first-loss localization", () => {
       {
         basis: "wrong cursor",
         caseId: "failure-a",
+        decisionDomain: "cursor-entity",
         expectedDecision: "partial",
         expectedFormulaDecision: "ambiguous",
         family: "scope-comparison",
@@ -299,15 +304,14 @@ describe("authored first-loss localization", () => {
       failed: 2,
       passed: 1,
       byDecision: [
-        { key: "ambiguous", count: 1 },
-        { key: "established", count: 1 },
-      ],
-      byEntityDecision: [
         { key: "established", count: 1 },
         { key: "partial", count: 1 },
       ],
+      byEntityDecision: [
+        { key: "partial", count: 1 },
+      ],
       byFormulaDecision: [
-        { key: "ambiguous", count: 1 },
+        { key: "established", count: 1 },
       ],
       byFamily: [
         { key: "discourse-reference", count: 1 },
@@ -331,5 +335,16 @@ describe("authored first-loss localization", () => {
       ],
       total: 3,
     });
+
+    expect(() => summarizeAuthoredFirstLoss([{
+      basis: "unattributed",
+      caseId: "invalid",
+      expectedDecision: "partial",
+      family: "scope-comparison",
+      field: "calculus-analysis",
+      reason: "evidence-sufficiency-mismatch",
+      split: "holdout",
+      stage: "decision",
+    }])).toThrow("lacks a decision domain");
   });
 });

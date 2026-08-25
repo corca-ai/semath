@@ -1,4 +1,5 @@
 import type {
+  EntityId,
   EntitySurfaceAuthorization,
   MathAuthoringContext,
   MathAuthoringDisposition,
@@ -7,6 +8,7 @@ import type {
   QueryResult,
   RelationInfo,
   SemanticViewInfo,
+  SourceOccurrenceId,
   SourceRange,
 } from "../../protocol/src/index";
 import {
@@ -246,6 +248,12 @@ export type AuthoredObservedSurfaceAuthorization =
 export interface AuthoredScientificObservation {
   readonly authoringContext?: MathAuthoringContext;
   readonly caseId: string;
+  /** Exact cursor identity from semanticView; required by current fresh schema 3. */
+  readonly cursorSurfaceIdentity?: {
+    readonly entityId: EntityId | null;
+    readonly location: ObservedLocation;
+    readonly occurrenceId: SourceOccurrenceId;
+  } | null;
   readonly decision: ScientificDecision;
   readonly definitions: readonly ObservedLocation[];
   readonly diagnostics: readonly {
@@ -861,6 +869,13 @@ export function observeAuthoredScientificProbe(
   return {
     authoringContext: view.authoringContext,
     caseId: probe.id,
+    cursorSurfaceIdentity: view.symbol
+      ? {
+          entityId: view.symbol.entityId ?? null,
+          location: view.symbol.location,
+          occurrenceId: view.symbol.occurrenceId,
+        }
+      : null,
     decision: view.decision.status,
     definitions: results.definition.value.locations,
     diagnostics: results.diagnostics.value.diagnostics.map((diagnostic) => ({
@@ -1519,7 +1534,10 @@ function validateProbe(
     if (
       rename.status === "unavailable" &&
       (!rename.newName || !probe.expected.symbol ||
-        !sameRenameNotationFamily(probe.expected.symbol, rename.newName))
+        !authoredRenameNotationFamilyMatches(
+          probe.expected.symbol,
+          rename.newName,
+        ))
     ) {
       throw new Error(
         `${probe.id}: unavailable rename requires a same-family newName`,
@@ -1542,7 +1560,7 @@ function validateProbe(
   }
 }
 
-function sameRenameNotationFamily(
+export function authoredRenameNotationFamilyMatches(
   current: string,
   replacement: string,
 ): boolean {

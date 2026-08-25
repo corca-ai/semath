@@ -73,6 +73,20 @@ function surfaceAuthorizations() {
   };
 }
 
+function cursorSurfaceIdentity() {
+  const definition = surfaceAuthorizations().definition;
+  if (definition.status !== "authorized") throw new Error("missing identity");
+  return {
+    entityId: definition.entityId,
+    location: {
+      fileId: "main",
+      path: "main.md",
+      range: { startOffset: 10, endOffset: 11 },
+    },
+    occurrenceId: definition.focusOccurrenceId,
+  };
+}
+
 function evaluation() {
   return {
     results: [
@@ -382,6 +396,36 @@ describe("fresh blind retained report parsers", () => {
     };
     expect(() => parseFreshBlindEvaluation(raw, expectedProbes()))
       .toThrow("unexpected or missing fields");
+  });
+
+  test("requires the closed schema-3 cursor surface identity", () => {
+    const raw = evaluation();
+    const observation = raw.results[0]!.observations[0]! as Record<string, unknown>;
+    observation.symbol = "x";
+    observation.symbolLocation = cursorSurfaceIdentity().location;
+    observation.cursorSurfaceIdentity = cursorSurfaceIdentity();
+    expect(
+      parseFreshBlindEvaluation(raw, expectedProbes(), {
+        cursorSurfaceIdentityRequired: true,
+      }).observations[0]!.cursorSurfaceIdentity,
+    ).toEqual(cursorSurfaceIdentity());
+
+    delete observation.cursorSurfaceIdentity;
+    expect(() =>
+      parseFreshBlindEvaluation(raw, expectedProbes(), {
+        cursorSurfaceIdentityRequired: true,
+      })
+    ).toThrow("cursorSurfaceIdentity is required");
+
+    observation.cursorSurfaceIdentity = {
+      ...cursorSurfaceIdentity(),
+      occurrenceId: {
+        ...cursorSurfaceIdentity().occurrenceId,
+        fileId: "wrong-file",
+      },
+    };
+    expect(() => parseFreshBlindEvaluation(raw, expectedProbes()))
+      .toThrow("occurrenceId must match location.fileId");
   });
 
   test("recomputes exact authoring results and rejects malformed nested unions", () => {

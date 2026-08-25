@@ -125,6 +125,7 @@ async function runFreshBlindRelease(): Promise<void> {
               }]
         ),
         {
+          cursorSurfaceIdentityRequired: evidence.release.schemaVersion === 3,
           formulaDecisionRequired: evidence.release.schemaVersion === 3,
           surfaceAuthorizationsRequired: evidence.release.schemaVersion === 3,
         },
@@ -222,6 +223,7 @@ export function parseFreshBlindEvaluation(
   value: unknown,
   expectedProbes: readonly MathAuthoringExpectationProbe[],
   options: {
+    readonly cursorSurfaceIdentityRequired?: boolean;
     readonly formulaDecisionRequired?: boolean;
     readonly surfaceAuthorizationsRequired?: boolean;
   } = {},
@@ -251,6 +253,7 @@ export function parseFreshBlindEvaluation(
     parseObservation(
       item,
       `fresh blind evaluation observations[${index}]`,
+      options.cursorSurfaceIdentityRequired === true,
       options.formulaDecisionRequired === true,
       options.surfaceAuthorizationsRequired === true,
     ),
@@ -566,6 +569,7 @@ function parseScore(value: unknown): AuthoredScientificScorecard {
 function parseObservation(
   value: unknown,
   label: string,
+  cursorSurfaceIdentityRequired: boolean,
   formulaDecisionRequired: boolean,
   surfaceAuthorizationsRequired: boolean,
 ): AuthoredScientificObservation {
@@ -573,6 +577,7 @@ function parseObservation(
   const requiredKeys = [
     "authoringContext",
     "caseId",
+    ...(cursorSurfaceIdentityRequired ? ["cursorSurfaceIdentity"] : []),
     "decision",
     "definitions",
     "diagnostics",
@@ -588,6 +593,7 @@ function parseObservation(
   ];
   const allowedKeys = new Set([
     ...requiredKeys,
+    "cursorSurfaceIdentity",
     "renameSafety",
     "symbolLocation",
     "surfaceAuthorizations",
@@ -596,6 +602,9 @@ function parseObservation(
   const unknown = Object.keys(item).filter((key) => !allowedKeys.has(key));
   if (formulaDecisionRequired && !("formulaDecision" in item)) {
     throw new Error(`${label}.formulaDecision is required`);
+  }
+  if (cursorSurfaceIdentityRequired && !("cursorSurfaceIdentity" in item)) {
+    throw new Error(`${label}.cursorSurfaceIdentity is required`);
   }
   if (surfaceAuthorizationsRequired && !("surfaceAuthorizations" in item)) {
     throw new Error(`${label}.surfaceAuthorizations is required`);
@@ -800,11 +809,38 @@ function parseObservation(
     item.symbol === null
       ? null
       : nonemptyString(item.symbol, `${label}.symbol`);
+  const cursorSurfaceIdentity = item.cursorSurfaceIdentity === undefined
+    ? undefined
+    : parseCursorSurfaceIdentity(
+        item.cursorSurfaceIdentity,
+        `${label}.cursorSurfaceIdentity`,
+      );
+  if (
+    cursorSurfaceIdentity !== undefined &&
+    (symbol === null) !== (cursorSurfaceIdentity === null)
+  ) {
+    throw new Error(`${label}.cursorSurfaceIdentity must match symbol availability`);
+  }
+  if (
+    cursorSurfaceIdentityRequired && cursorSurfaceIdentity !== null &&
+    item.symbolLocation === undefined
+  ) {
+    throw new Error(`${label}.cursorSurfaceIdentity requires symbolLocation`);
+  }
+  if (
+    cursorSurfaceIdentity && item.symbolLocation !== undefined &&
+    !isDeepStrictEqual(cursorSurfaceIdentity.location, item.symbolLocation)
+  ) {
+    throw new Error(`${label}.cursorSurfaceIdentity must match symbolLocation`);
+  }
   return {
     ...(authoringContext === undefined
       ? {}
       : { authoringContext }),
     caseId,
+    ...(cursorSurfaceIdentity === undefined
+      ? {}
+      : { cursorSurfaceIdentity }),
     decision,
     definitions,
     diagnostics,
@@ -847,6 +883,30 @@ function parseObservation(
           ),
         }),
   };
+}
+
+function parseCursorSurfaceIdentity(
+  value: unknown,
+  label: string,
+): NonNullable<AuthoredScientificObservation["cursorSurfaceIdentity"]> | null {
+  if (value === null) return null;
+  const item = record(value, label);
+  exact(item, ["entityId", "location", "occurrenceId"], label);
+  const occurrenceId = parseSourceOccurrenceId(
+    item.occurrenceId,
+    `${label}.occurrenceId`,
+  );
+  const identity = {
+    entityId: item.entityId === null
+      ? null
+      : parseEntityId(item.entityId, `${label}.entityId`),
+    location: location(item.location, `${label}.location`),
+    occurrenceId,
+  };
+  if (identity.location.fileId !== occurrenceId.fileId) {
+    throw new Error(`${label}.occurrenceId must match location.fileId`);
+  }
+  return identity;
 }
 
 function parseSurfaceAuthorizations(

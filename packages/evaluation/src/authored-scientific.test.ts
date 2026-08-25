@@ -5,6 +5,7 @@ import {
   DOCUMENT_REASONING_FAMILIES,
   authoredFixtureSealPayload,
   authoredProbeIdentityFailures,
+  authoredRenameNotationFamilyMatches,
   authoredRelationRangeMatches,
   authoredScenarioReviewPayload,
   observeAuthoredScientificProbe,
@@ -21,6 +22,16 @@ import {
 } from "./authored-scientific";
 
 describe("independently authored scientific corpus", () => {
+  test("uses one notation-family rule for atomic and composite rename", () => {
+    expect(authoredRenameNotationFamilyMatches("x", "y")).toBe(true);
+    expect(authoredRenameNotationFamilyMatches("x_0", "y_0")).toBe(true);
+    expect(authoredRenameNotationFamilyMatches("\\hat{x}", "\\hat{y}"))
+      .toBe(true);
+    expect(authoredRenameNotationFamilyMatches("\\hat{x}", "\\bar{x}"))
+      .toBe(false);
+    expect(authoredRenameNotationFamilyMatches("x_0", "y_1")).toBe(false);
+  });
+
   test("retains exact public entity-surface authorizations in observations", () => {
     const probe = parseAuthoredScientificFixture(fixtureValue("holdout", 1))
       .probes[0]!;
@@ -43,6 +54,15 @@ describe("independently authored scientific corpus", () => {
       reason: { kind: "non-editable", message: "not editable" },
       status: "refused",
     } as const;
+    const cursorSurfaceIdentity = {
+      entityId: authorized.entityId,
+      location: {
+        fileId: "main",
+        path: "main.md",
+        range: { startOffset: 1, endOffset: 2 },
+      },
+      occurrenceId: focusOccurrenceId,
+    };
     const result = (value: unknown) => ({ value });
     const results = {
       definition: result({ authorization: authorized, kind: "locations", locations: [] }),
@@ -59,13 +79,17 @@ describe("independently authored scientific corpus", () => {
           },
           context: { relations: [] },
           decision: { reasons: [], status: "partial" },
-          symbol: null,
+          symbol: {
+            ...cursorSurfaceIdentity,
+            symbol: "x",
+          },
         },
       }),
     } as unknown as AuthoredScientificSurfaceResults;
 
-    expect(observeAuthoredScientificProbe(probe, results).surfaceAuthorizations)
-      .toEqual({
+    const observation = observeAuthoredScientificProbe(probe, results);
+    expect(observation.cursorSurfaceIdentity).toEqual(cursorSurfaceIdentity);
+    expect(observation.surfaceAuthorizations).toEqual({
         definition: authorized,
         prepareRename: { refusalKind: "non-editable", status: "refused" },
         references: authorized,
