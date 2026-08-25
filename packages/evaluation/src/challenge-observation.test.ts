@@ -386,4 +386,36 @@ describe("selected-formula challenge observation", () => {
       }).recognizedRelations[0]?.authority,
     ).toBe("candidate");
   });
+
+  test("rejects matched binding anchors with invalid numeric ranges", () => {
+    for (const range of [
+      { endOffset: 2, startOffset: -1 },
+      { endOffset: 12.5, startOffset: 10.5 },
+    ]) {
+      const invalidRange = hypothesis("test:law", "explicit", { formula });
+      expect(
+        observeSelectedFormulaDecision({
+          disposition: "partial",
+          formula,
+          hypotheses: [
+            {
+              ...invalidRange,
+              bindings: invalidRange.bindings.map((binding) => ({
+                ...binding,
+                evidence: { ...binding.evidence, sourceRanges: [range] },
+              })),
+              evidence: invalidRange.evidence.map((item) => ({
+                ...item,
+                evidence: { ...item.evidence, sourceRanges: [range] },
+                sourceAnchors: item.sourceAnchors.map((anchor) => ({
+                  ...anchor,
+                  location: { ...anchor.location, range },
+                })),
+              })),
+            },
+          ],
+        }).recognizedRelations[0]?.authority,
+      ).toBe("candidate");
+    }
+  });
 });

@@ -132,18 +132,23 @@ function bindingEvidenceIsGrounded(
   hypothesis: FormulaRelationHypothesis,
   bindingEvidence: MathInterpretationEvidenceInfo["evidence"],
 ): boolean {
-  return hypothesis.evidence.some(
-    (item) =>
-      item.role === "supporting" &&
-      sameEvidenceRecord(bindingEvidence, item.evidence) &&
-      interpretationEvidenceIsGrounded(item) &&
-      item.sourceAnchors.every(
-        (anchor) =>
-          anchor.documentVersion === hypothesis.formula.documentVersion &&
-          anchor.location.fileId === hypothesis.formula.location.fileId &&
-          anchor.location.path === hypothesis.formula.location.path &&
-          scopeOwns(anchor.scopePath, hypothesis.formula.scopePath),
-      ),
+  return (
+    bindingEvidence.sourceRanges.length > 0 &&
+    bindingEvidence.sourceRanges.every(validSourceRange) &&
+    hypothesis.evidence.some(
+      (item) =>
+        item.role === "supporting" &&
+        sameEvidenceRecord(bindingEvidence, item.evidence) &&
+        interpretationEvidenceIsGrounded(item) &&
+        item.sourceAnchors.every(
+          (anchor) =>
+            validSourceRange(anchor.location.range) &&
+            anchor.documentVersion === hypothesis.formula.documentVersion &&
+            anchor.location.fileId === hypothesis.formula.location.fileId &&
+            anchor.location.path === hypothesis.formula.location.path &&
+            scopeOwns(anchor.scopePath, hypothesis.formula.scopePath),
+        ),
+    )
   );
 }
 
