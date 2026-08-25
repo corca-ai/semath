@@ -2340,20 +2340,20 @@
       },
       "review": {
         "correctionSummary": [
-          "Applied the independent critic's source or cursor correction."
+          "Clarified the public regression as a direct rejection of the plus-sign formula under the adopted Faraday convention."
         ],
         "criticId": "physics-development-review",
-        "finalDigest": "cb3c0b9933f89c20ced219e415f34262098880c99883706978dd9ca98c4f4a70",
+        "finalDigest": "a2fdb815fe99533199c22ddba040e96e1b9a27894fbd4703d3fbf8d625834126",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-12",
-        "semanticReviewDigest": "cb3c0b9933f89c20ced219e415f34262098880c99883706978dd9ca98c4f4a70",
+        "reviewedAt": "2026-08-25",
+        "semanticReviewDigest": "a2fdb815fe99533199c22ddba040e96e1b9a27894fbd4703d3fbf8d625834126",
         "status": "corrected"
       },
       "snapshots": [
         {
           "documents": [
             {
-              "content": "Our laboratory convention uses a right-handed coordinate system and assigns\nthe conventional minus sign to the magnetic-field derivative in Faraday's law.\nI have not determined whether the probe channel was inverted or the export routine\ndropped the sign.  The following plus-sign rule is therefore quoted only as the\nacquisition notebook's exported output and must not be used as a corrected physical field equation:\n$\n\\nabla\\times\\mathbf E_{\\rm rec}=+\\frac{\\partial\\mathbf B_{\\rm probe}}{\\partial t}.\n$\nThe raw voltages and timestamps remain valid for a later reprocessing pass.\n",
+              "content": "Our laboratory convention assigns the conventional minus sign to the\nmagnetic-field derivative in Faraday's law. The following formula is rejected:\n$\\nabla\\times E=+\\frac{\\partial B}{\\partial t}$.\nThe probe channel may have been inverted or the export routine may have dropped\nthe sign. The raw voltages and timestamps remain valid for a later reprocessing pass.\n",
               "fileId": "lab/2026-05-18-coil.md",
               "path": "lab/2026-05-18-coil.md"
             }
@@ -2995,13 +2995,14 @@
       },
       "review": {
         "correctionSummary": [
-          "Added reviewed typed linear-algebra foundation relations and exact cursor anchors."
+          "Added reviewed typed linear-algebra foundation relations and exact cursor anchors.",
+          "Updated the retracted foundation probe to the fail-closed unsupported disposition after its adopted matrix meaning is removed."
         ],
         "criticId": "mature-cross-development-review",
-        "finalDigest": "b63027f1785e0aef15fd6b9482ee46f588563226e6fc977096eb38951a3bb609",
+        "finalDigest": "d6847ad5259f0aa5eab55761f8ab438ab69c106019f3779a3b49cbc3d66e6601",
         "mainReviewer": "codex-main-agent",
-        "reviewedAt": "2026-08-15",
-        "semanticReviewDigest": "b63027f1785e0aef15fd6b9482ee46f588563226e6fc977096eb38951a3bb609",
+        "reviewedAt": "2026-08-25",
+        "semanticReviewDigest": "d6847ad5259f0aa5eab55761f8ab438ab69c106019f3779a3b49cbc3d66e6601",
         "status": "corrected"
       },
       "snapshots": [
@@ -7806,7 +7807,7 @@
       "cursor": {
         "snapshotId": "current",
         "fileId": "lab/2026-05-18-coil.md",
-        "needle": "\\nabla\\times\\mathbf E_{\\rm rec}=+\\frac{\\partial\\mathbf B_{\\rm probe}}{\\partial t}.",
+        "needle": "\\nabla\\times E=+\\frac{\\partial B}{\\partial t}",
         "edge": "after"
       },
       "expected": {
@@ -14708,7 +14709,7 @@
         "snapshotId": "foundation-retracted"
       },
       "expected": {
-        "decision": "partial",
+        "decision": "unsupported",
         "diagnostics": {
           "excludedCodes": [],
           "maximum": 0,
