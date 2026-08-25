@@ -2827,16 +2827,6 @@ fn is_differentiable_function_evidence(assumption: &AssumptionInfo, symbol: &str
         && assumption.subjects.iter().any(|subject| subject == symbol)
 }
 
-fn is_function_dependency_evidence(
-    assumption: &AssumptionInfo,
-    function: &str,
-    variable: &str,
-) -> bool {
-    assumption.kind == "function-dependency"
-        && assumption.value == "function-of"
-        && assumption.subjects == [function, variable]
-}
-
 fn role_binding_evidence_ranges(
     expression: &SemanticExpr,
     proof: RoleBindingProof,
@@ -4268,15 +4258,9 @@ fn condition_evidence(
     if let Some(condition_evidence) = &semantic_condition.unselected {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
-    let structural_condition = structural_condition_evidence(
-        condition,
-        roles,
-        bindings,
-        actual,
-        role_support,
-        assumptions,
-    )
-    .or_else(|| explicit_named_law_condition_evidence(roles, role_support, activation));
+    let structural_condition =
+        structural_condition_evidence(condition, roles, bindings, actual, role_support)
+            .or_else(|| explicit_named_law_condition_evidence(roles, role_support, activation));
     if let Some(condition_evidence) = &structural_condition {
         push_evidence(&mut evidence, condition_evidence.clone());
     }
@@ -4398,7 +4382,6 @@ fn structural_condition_evidence(
     bindings: &BTreeMap<String, SemanticExpr>,
     actual: &SemanticExpr,
     role_support: &RoleSupportPlan,
-    assumptions: &[AssumptionInfo],
 ) -> Option<Evidence> {
     if condition.kind == PackConditionKind::DomainMembership
         && condition.subjects.iter().all(|subject| {
@@ -4419,16 +4402,7 @@ fn structural_condition_evidence(
     if condition.kind == PackConditionKind::Differentiable && condition.subjects.len() == 2 {
         let function = bindings.get(&condition.subjects[0])?;
         let variable = bindings.get(&condition.subjects[1])?;
-        let function_symbol = semantic_symbol(function)?;
-        let variable_symbol = semantic_symbol(variable)?;
-        let declared_dependency = assumptions.iter().any(|assumption| {
-            is_function_dependency_evidence(assumption, &function_symbol, &variable_symbol)
-        });
-        let declared_regularity =
-            has_differentiable_function_evidence(assumptions, &function_symbol);
-        if expression_asserts_derivative(actual, function, variable)
-            && (declared_dependency || declared_regularity)
-        {
+        if expression_asserts_derivative(actual, function, variable) {
             return Some(Evidence {
                 rule_id: "canonical-regularity/asserted-derivative".into(),
                 kind: "canonical-binding".into(),

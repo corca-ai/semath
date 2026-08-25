@@ -5232,41 +5232,6 @@ fn collect_typed_regularity_assumptions(
                 });
             }
         }
-        for pair in clause_mentions.windows(2) {
-            let [function, variable] = pair else {
-                continue;
-            };
-            let bridge_words = source[function.end..variable.start]
-                .split(|character: char| !character.is_ascii_alphabetic())
-                .filter(|word| !word.is_empty())
-                .map(str::to_ascii_lowercase)
-                .collect::<Vec<_>>();
-            if !matches!(
-                bridge_words.as_slice(),
-                [verb, article, noun, preposition]
-                    if matches!(verb.as_str(), "be" | "is")
-                        && article == "a"
-                        && noun == "function"
-                        && preposition == "of"
-            ) {
-                continue;
-            }
-            output.assumptions.push(AssumptionInfo {
-                kind: "function-dependency".into(),
-                value: "function-of".into(),
-                subjects: vec![function.symbol.clone(), variable.symbol.clone()],
-                evidence: Evidence {
-                    rule_id: "scientific-prose/function-dependency".into(),
-                    kind: "typed-math-condition".into(),
-                    strength: "strong".into(),
-                    source_ranges: vec![SourceRange {
-                        start_offset: index.utf16_for_byte(function.start),
-                        end_offset: index.utf16_for_byte(variable.end),
-                    }],
-                    source_anchors: Vec::new(),
-                },
-            });
-        }
     }
 }
 
@@ -8548,17 +8513,6 @@ Define the mean axial speed by the flow relation
             assumption.kind == "declaration-status"
                 && assumption.value == "undeclared"
                 && assumption.subjects == ["z"]
-        }));
-    }
-
-    #[test]
-    fn function_dependencies_preserve_the_exact_declared_variable() {
-        let analysis = analyze("Let $f$ be a function of $x$.");
-
-        assert!(analysis.assumptions.iter().any(|assumption| {
-            assumption.kind == "function-dependency"
-                && assumption.value == "function-of"
-                && assumption.subjects == ["f", "x"]
         }));
     }
 
