@@ -76,6 +76,8 @@ const MAX_CONVENTIONAL_CANDIDATES: usize = 8;
 const MAX_CONVENTIONAL_REQUIREMENTS: usize = 16;
 const MAX_AUTHORING_ITEMS: usize = 16;
 const MAX_VIEW_CLAIMS: usize = 32;
+const MAX_FORMULA_CLAIM_OWNER_OCCURRENCES: usize = 512;
+const MAX_FORMULA_CLAIM_OWNER_ENTITIES: usize = 128;
 
 fn formula_meaning_owns_relation_head(fact: &crate::prose::FormulaMeaningFact) -> bool {
     fact.ownership == crate::prose::FormulaMeaningOwnership::RelationHead
@@ -4403,9 +4405,10 @@ impl SemathEngine {
             } else {
                 (context.clone(), Vec::new())
             };
-        let root_claim_support = selected_root
-            .map(|root| self.formula_root_index_claims(document, root))
-            .unwrap_or_default();
+        let (root_claim_support, root_claims_truncated) = selected_root.map_or_else(
+            || (Vec::new(), false),
+            |root| self.formula_root_index_claims(document, root),
+        );
         let mut formula_claim_context = formula_context.clone();
         if let Some(root) = selected_root {
             self.append_formula_index_claims(
@@ -4441,7 +4444,8 @@ impl SemathEngine {
         });
         let formula_truncated = conventional_candidates_truncated
             || formula_domains_truncated
-            || formula_context.truncated;
+            || formula_context.truncated
+            || root_claims_truncated;
         let unsupported_formula_context = local_formulas.is_empty()
             && (queried_formula_is_rejected
                 || queried_formula_range.is_some_and(|root_range| {
@@ -4473,6 +4477,7 @@ impl SemathEngine {
         if !queried_formula_is_rejected
             && !formula_retracted
             && !formula_engine_limited
+            && !root_claims_truncated
             && conventional_candidates.is_empty()
             && matches!(formula_decision, MeaningDecision::Unsupported { .. })
             && !root_claim_support.is_empty()
@@ -4659,12 +4664,19 @@ impl SemathEngine {
         let approximation = queried_relation
             .and_then(|relation| self.math_approximation(relation, local_formulas, context));
         let mut claim_evidence = self.math_claim_evidence(claim_context);
-        truncated |= claim_evidence.len() > MAX_AUTHORING_ITEMS;
+        let claim_evidence_truncated = claim_evidence.len() > MAX_AUTHORING_ITEMS;
         claim_evidence.truncate(MAX_AUTHORING_ITEMS);
 
         let (mut notation_occurrences, notation_truncated) = self.math_notation_occurrences(focus);
-        truncated |= notation_truncated || notation_occurrences.len() > MAX_AUTHORING_ITEMS;
+        let notation_projection_truncated =
+            notation_truncated || notation_occurrences.len() > MAX_AUTHORING_ITEMS;
         notation_occurrences.truncate(MAX_AUTHORING_ITEMS);
+        // Formula decisions and lifecycle describe the complete selected syntax root. Cursor-owned
+        // claim and notation projections have independent public caps and cannot change that root
+        // status merely because a sibling happens to have more occurrences.
+        if formula.is_none() {
+            truncated |= claim_evidence_truncated || notation_projection_truncated;
+        }
 
         let generated = formula
             .as_ref()
@@ -5461,16 +5473,25 @@ impl SemathEngine {
         &self,
         document: &AnalyzedDocument,
         root: &SemanticExpr,
-    ) -> Vec<crate::SemanticClaimInfo> {
+    ) -> (Vec<crate::SemanticClaimInfo>, bool) {
         let owner_range = match &root.kind {
-            SemanticExprKind::System(_) => return Vec::new(),
+            SemanticExprKind::System(_) => return (Vec::new(), false),
             SemanticExprKind::Relation { left, .. } => left.range.clone(),
             _ => root.range.clone(),
         };
-        let mut sources = document
-            .semantic_occurrences
+        let start = document.semantic_occurrences.partition_point(|occurrence| {
+            occurrence.selection_range.start_offset < owner_range.start_offset
+        });
+        let end = document.semantic_occurrences.partition_point(|occurrence| {
+            occurrence.selection_range.start_offset < owner_range.end_offset
+        });
+        let owner_occurrences = &document.semantic_occurrences[start..end];
+        if owner_occurrences.len() > MAX_FORMULA_CLAIM_OWNER_OCCURRENCES {
+            return (Vec::new(), true);
+        }
+        let mut sources = owner_occurrences
             .iter()
-            .filter(|seed| ranges_overlap(&seed.selection_range, &owner_range))
+            .filter(|seed| seed.selection_range.end_offset <= owner_range.end_offset)
             .filter_map(|seed| {
                 let focus = self.index.cursor_focus(&document.document.file_id, seed)?;
                 let entity = self.resolved_entity(&focus.occurrence_id)?;
@@ -5487,16 +5508,24 @@ impl SemathEngine {
             .collect::<Vec<_>>();
         sources.sort_by_key(|(_, _, order)| *order);
         let mut seen_entities = BTreeSet::new();
-        let mut claims = sources
+        let sources = sources
             .into_iter()
             .filter(|(entity, _, _)| seen_entities.insert(entity.clone()))
-            .take(MAX_VIEW_CLAIMS)
+            .collect::<Vec<_>>();
+        if sources.len() > MAX_FORMULA_CLAIM_OWNER_ENTITIES {
+            // An incomplete owner search must not promote formula certainty based on whichever
+            // entities happened to sort before the traversal boundary.
+            return (Vec::new(), true);
+        }
+        let mut claims = sources
+            .into_iter()
             .flat_map(|(_, focus, _)| self.formula_index_claims_for_focus(document, &focus, false))
             .collect::<Vec<_>>();
         claims.sort_by(|left, right| left.claim_id.cmp(&right.claim_id));
         claims.dedup_by(|left, right| left.claim_id == right.claim_id);
+        let truncated = claims.len() > MAX_VIEW_CLAIMS;
         claims.truncate(MAX_VIEW_CLAIMS);
-        claims
+        (claims, truncated)
     }
 
     fn append_formula_index_claims(

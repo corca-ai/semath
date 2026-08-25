@@ -3213,6 +3213,177 @@ fn formula_disposition_is_invariant_across_sibling_cursor_claims() {
 }
 
 #[test]
+fn cursor_projection_caps_do_not_change_formula_lifecycle() {
+    let uses = std::iter::repeat_n("Inspect $x$.", 20)
+        .collect::<Vec<_>>()
+        .join(" ");
+    let content = format!("The source calls $x$ the unique sample. {uses} Compare $g=x$.");
+    let formula = content.rfind("g=x").unwrap() as u32;
+    let at_g = semantic_view_at(&content, formula);
+    let at_x = semantic_view_at(&content, formula + 2);
+
+    assert_ne!(
+        at_g.authoring_context.notation_occurrences,
+        at_x.authoring_context.notation_occurrences
+    );
+    assert_eq!(at_x.authoring_context.notation_occurrences.len(), 16);
+    assert!(!at_x.authoring_context.truncated, "{at_x:#?}");
+    assert_eq!(
+        at_g.authoring_context.lifecycle, at_x.authoring_context.lifecycle,
+        "g={at_g:#?}\nx={at_x:#?}"
+    );
+    assert_eq!(
+        at_g.authoring_context.truncated, at_x.authoring_context.truncated,
+        "g={at_g:#?}\nx={at_x:#?}"
+    );
+    assert_eq!(
+        at_g.authoring_context.interpretations.analysis_limits,
+        at_x.authoring_context.interpretations.analysis_limits,
+        "g={at_g:#?}\nx={at_x:#?}"
+    );
+}
+
+#[test]
+fn root_claim_search_finds_late_substantive_entities_before_output_capping() {
+    let weak = [
+        r"\alpha",
+        r"\beta",
+        r"\gamma",
+        r"\delta",
+        r"\epsilon",
+        r"\varepsilon",
+        r"\zeta",
+        r"\eta",
+        r"\theta",
+        r"\vartheta",
+        r"\iota",
+        r"\kappa",
+        r"\lambda",
+        r"\mu",
+        r"\nu",
+        r"\xi",
+        r"\omicron",
+        r"\pi",
+        r"\varpi",
+        r"\rho",
+        r"\varrho",
+        r"\sigma",
+        r"\varsigma",
+        r"\tau",
+        r"\upsilon",
+        r"\phi",
+        r"\varphi",
+        r"\chi",
+        r"\psi",
+        r"\omega",
+        r"\Gamma",
+        r"\Delta",
+        r"\Theta",
+        r"\Lambda",
+        r"\Xi",
+        r"\Pi",
+        r"\Sigma",
+        r"\Upsilon",
+        r"\Phi",
+        r"\Psi",
+        r"\Omega",
+    ];
+    let formula_view = |defined_first: bool| {
+        let assumptions = weak
+            .iter()
+            .map(|symbol| format!("Assume ${symbol}>0$."))
+            .collect::<Vec<_>>()
+            .join(" ");
+        let operands = if defined_first {
+            std::iter::once("Q".to_string())
+                .chain(weak.iter().map(ToString::to_string))
+                .collect::<Vec<_>>()
+                .join("+")
+        } else {
+            weak.iter()
+                .map(ToString::to_string)
+                .chain(std::iter::once("Q".to_string()))
+                .collect::<Vec<_>>()
+                .join("+")
+        };
+        let content = format!(
+            "{assumptions} The source calls $Q$ the unique aggregate. Inspect ${operands}=R$."
+        );
+        let offset = content.rfind("=R").unwrap() as u32 + 1;
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(&content)).unwrap();
+        let (owner_entities, root_claims, root_claims_truncated) = {
+            let document = engine.index.documents.get("main").unwrap();
+            let root = document.canonical_expressions.last().unwrap();
+            let owner_range = match &root.kind {
+                SemanticExprKind::Relation { left, .. } => &left.range,
+                _ => &root.range,
+            };
+            let entities = document
+                .semantic_occurrences
+                .iter()
+                .filter(|occurrence| {
+                    owner_range.start_offset <= occurrence.selection_range.start_offset
+                        && occurrence.selection_range.end_offset <= owner_range.end_offset
+                })
+                .filter_map(|occurrence| {
+                    engine
+                        .index
+                        .cursor_focus(&document.document.file_id, occurrence)
+                })
+                .filter_map(|focus| engine.resolved_entity(&focus.occurrence_id))
+                .collect::<BTreeSet<_>>()
+                .len();
+            let (claims, truncated) = engine.formula_root_index_claims(document, root);
+            (entities, claims, truncated)
+        };
+        let QueryValue::SemanticView { view } = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset,
+                },
+                1,
+                1,
+            ))
+            .unwrap()
+            .value
+        else {
+            panic!("expected semantic view")
+        };
+        (*view, owner_entities, root_claims, root_claims_truncated)
+    };
+    let first = formula_view(true);
+    let last = formula_view(false);
+
+    assert!(
+        first.1 > 32 && last.1 > 32,
+        "first={first:#?}\nlast={last:#?}"
+    );
+    assert!(!first.3 && !last.3, "first={first:#?}\nlast={last:#?}");
+    assert_eq!(first.2, last.2, "first={first:#?}\nlast={last:#?}");
+    assert!(!first.2.is_empty(), "first={first:#?}");
+    assert_eq!(
+        first.0.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial,
+        "{first:#?}"
+    );
+    assert_eq!(
+        first.0.authoring_context.disposition, last.0.authoring_context.disposition,
+        "first={first:#?}\nlast={last:#?}"
+    );
+    assert_eq!(
+        first.0.authoring_context.lifecycle, last.0.authoring_context.lifecycle,
+        "first={first:#?}\nlast={last:#?}"
+    );
+    assert_eq!(
+        first.0.authoring_context.interpretations.analysis_limits,
+        last.0.authoring_context.interpretations.analysis_limits,
+        "first={first:#?}\nlast={last:#?}"
+    );
+}
+
+#[test]
 fn authoring_claim_anchor_uses_the_claims_own_included_document() {
     let main = "\\input{definitions}\nInspect $A$.";
     let definitions = "Let $A$ denote an event.";
