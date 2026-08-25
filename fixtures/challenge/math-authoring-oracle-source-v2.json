@@ -1909,10 +1909,10 @@
           "needle": "\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}."
         },
         {
-          "id": "rejection",
+          "id": "refutation-current",
           "snapshotId": "current",
           "fileId": "faraday-sign-conflict.tex",
-          "needle": "Review rejects that proposal under the stated orientation."
+          "needle": "]\nReview rejects that proposal under the stated orientation."
         },
         {
           "id": "adopted-formula",
@@ -2033,7 +2033,7 @@
           "needle": "\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}."
         },
         {
-          "id": "rejection",
+          "id": "refutation-current",
           "snapshotId": "current",
           "fileId": "faraday-sign-conflict.md",
           "needle": "Review rejects that proposal under the stated orientation."
@@ -2289,6 +2289,12 @@
         },
         {
           "fileId": "open-world-cap-plus-one.tex",
+          "id": "adopted-formula-meaning",
+          "needle": "The selected relation is\n\\[\nr=uv.\n\\]",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "open-world-cap-plus-one.tex",
           "id": "notation-01",
           "needle": "r",
           "occurrence": 7,
@@ -2476,6 +2482,12 @@
           "fileId": "open-world-cap-plus-one.md",
           "id": "formula.root",
           "needle": "\nr=uv.\n",
+          "snapshotId": "current"
+        },
+        {
+          "fileId": "open-world-cap-plus-one.md",
+          "id": "adopted-formula-meaning",
+          "needle": "The selected relation is\n\n$$\nr=uv.\n$$",
           "snapshotId": "current"
         },
         {

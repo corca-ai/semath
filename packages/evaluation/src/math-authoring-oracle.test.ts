@@ -20,6 +20,49 @@ import {
 } from "./math-authoring-oracle";
 
 describe("source-authored MathAuthoring oracle v2", () => {
+  test("compiles the checked-in mixed-lifecycle reviewed oracle", async () => {
+    const source = await Bun.file("fixtures/challenge/math-authoring-oracle-source-v2.json").json();
+    const oracle = await Bun.file("fixtures/challenge/math-authoring-oracle-v2.json").json();
+    const review = await Bun.file("fixtures/challenge/math-authoring-oracle-review-v2.json").json();
+    const compiled = compileMathAuthoringOracle(source, oracle, review);
+    expect(compiled.oracle.review).toEqual({
+      attestationDigest: "3098aafd1b20618514c0011cc315c96b2d26f4121d4d574e51c28c6da3559607",
+      author: "agent:/root",
+      digest: "bf9d361ed7cd66f75b3fe9dc40a62d89d6add93ef3f06cccac5c56bff7c8adb2",
+      reviewFixture: "fixtures/challenge/math-authoring-oracle-review-v2.json",
+      reviewedAt: "2026-08-25",
+      reviewer: "agent:/root/v042-main-reviewer",
+    });
+    expect(compiled.oracle.cases.find((item) => item.id === "open-world-cap-plus-one-tex")?.safety.disposition)
+      .toBe("established");
+    expect(compiled.oracle.cases.find((item) => item.id === "faraday-sign-conflict-tex")?.safety.lifecycle)
+      .toEqual({
+        capped: false,
+        documentVersion: 1,
+        editable: false,
+        engineLimited: false,
+        freshness: "current",
+        generation: "authored",
+        retracted: true,
+      });
+    expect(compiled.oracle.evidence["faraday-sign-conflict-tex-source-meaning-rejected-e1"])
+      .toMatchObject({
+        anchorStates: [
+          {
+            anchor: "faraday-sign-conflict-tex:rejected-formula.root",
+            generation: "authored",
+            lifecycle: "retracted",
+          },
+          {
+            anchor: "faraday-sign-conflict-tex:refutation-current",
+            generation: "authored",
+            lifecycle: "current",
+          },
+        ],
+        role: "contradicting",
+      });
+  });
+
   test("compiles unique UTF-16 named anchors and passes exact safety plus true pair parity", () => {
     const fixture = finalizedFixture();
     const compiled = compileFixture(fixture);
@@ -492,6 +535,127 @@ describe("source-authored MathAuthoring oracle v2", () => {
     const missingAnchor = structuredClone(values);
     missingAnchor[0]!.authoringContext!.interpretations.hypotheses[0]!.evidence[0]!.sourceAnchors = [];
     expect(evaluateMathAuthoringOracle(compiled, missingAnchor).safetyFailures).not.toEqual([]);
+  });
+
+  test("supports exact mixed-lifecycle evidence while preserving the legacy uniform form", () => {
+    const legacy = finalizedFixture();
+    expect(() => compileFixture(legacy)).not.toThrow();
+
+    const fixture = fixtureValue();
+    for (const source of fixture.source.cases.slice(0, 2)) {
+      source.namedNeedles.push({
+        fileId: source.snapshots[0]!.mainFileId,
+        id: "secondary",
+        needle: "relation",
+        snapshotId: "current",
+      });
+      const reviewed = fixture.oracle.evidence[`evidence-${source.id}`] as Record<string, unknown>;
+      reviewed.role = "contradicting";
+      delete reviewed.anchors;
+      delete reviewed.generation;
+      delete reviewed.lifecycle;
+      reviewed.anchorStates = [
+        { anchor: `${source.id}:formula`, generation: "authored", lifecycle: "current" },
+        { anchor: `${source.id}:secondary`, generation: "authored", lifecycle: "retracted" },
+      ];
+      const constraint = fixture.oracle.cases.find((item) => item.id === source.id);
+      if (!constraint) throw new Error("mixed evidence constraint missing");
+      const required = constraint.advisory.requiredHypotheses[0] as Record<string, unknown>;
+      required.supportAllowed = ["contradicted"];
+      constraint.safety.requiredAuthority = [];
+      (constraint.safety as Record<string, unknown>).requiredContradictions = ["main"];
+    }
+    finalize(fixture);
+    const compiled = compileFixture(fixture);
+    const values = observations(fixture);
+    for (const observation of values.filter((item) => item.caseId === "tex-0" || item.caseId === "md-0")) {
+      const source = fixture.source.cases.find((item) => item.id === observation.caseId);
+      if (!source || !observation.authoringContext) throw new Error("mixed evidence test case missing");
+      const secondary = selectionFor(source, "current", "relation");
+      const hypothesis = observation.authoringContext.interpretations.hypotheses[0]!;
+      hypothesis.support = "contradicted";
+      hypothesis.evidence[0]!.role = "contradicting";
+      hypothesis.evidence[0]!.sourceAnchors = [
+        ...hypothesis.evidence[0]!.sourceAnchors,
+        {
+          ...secondary,
+          generation: "authored",
+          lifecycle: "retracted",
+          scopePath: [],
+        },
+      ];
+    }
+    const report = evaluateMathAuthoringOracle(compiled, values);
+    expect(report.safetyFailures).toEqual([]);
+    expect(report.pairFailures).toEqual([]);
+
+    const wrongLifecycle = structuredClone(values);
+    wrongLifecycle.find((item) => item.caseId === "tex-0" && item.mode === "clean")!
+      .authoringContext!.interpretations.hypotheses[0]!.evidence[0]!
+      .sourceAnchors[1]!.lifecycle = "current";
+    expect(evaluateMathAuthoringOracle(compiled, wrongLifecycle).safetyFailures).not.toEqual([]);
+
+    const changedConstraint = structuredClone(fixture);
+    const changedStates = (changedConstraint.oracle.evidence["evidence-tex-0"] as {
+      anchorStates: Array<{ anchor: string; generation: string; lifecycle: string }>;
+    }).anchorStates;
+    changedStates[1]!.lifecycle = "current";
+    expect(mathAuthoringOracleConstraintDigest(parseMathAuthoringOracle(changedConstraint.oracle)))
+      .not.toBe(mathAuthoringOracleConstraintDigest(compiled.oracle));
+  });
+
+  test("rejects mixed evidence XOR, duplicate or cross-case states, and pair drift", () => {
+    const bothForms = fixtureValue();
+    const both = bothForms.oracle.evidence["evidence-tex-0"] as Record<string, unknown>;
+    both.anchorStates = [{ anchor: "tex-0:formula", generation: "authored", lifecycle: "current" }];
+    expect(() => parseMathAuthoringOracle(bothForms.oracle)).toThrow("mutually exclusive");
+
+    const incompleteLegacy = fixtureValue();
+    delete (incompleteLegacy.oracle.evidence["evidence-tex-0"] as Record<string, unknown>).lifecycle;
+    expect(() => parseMathAuthoringOracle(incompleteLegacy.oracle)).toThrow("complete anchors/generation/lifecycle");
+
+    const emptyMixed = fixtureValue();
+    const empty = emptyMixed.oracle.evidence["evidence-tex-0"] as Record<string, unknown>;
+    delete empty.anchors;
+    delete empty.generation;
+    delete empty.lifecycle;
+    empty.anchorStates = [];
+    expect(() => parseMathAuthoringOracle(emptyMixed.oracle)).toThrow("expected at least one anchor state");
+
+    const duplicateMixed = fixtureValue();
+    const duplicate = duplicateMixed.oracle.evidence["evidence-tex-0"] as Record<string, unknown>;
+    delete duplicate.anchors;
+    delete duplicate.generation;
+    delete duplicate.lifecycle;
+    duplicate.anchorStates = [
+      { anchor: "tex-0:formula", generation: "authored", lifecycle: "current" },
+      { anchor: "tex-0:formula", generation: "authored", lifecycle: "retracted" },
+    ];
+    expect(() => parseMathAuthoringOracle(duplicateMixed.oracle)).toThrow("duplicate tex-0:formula");
+
+    const crossCase = fixtureValue();
+    const cross = crossCase.oracle.evidence["evidence-tex-0"] as Record<string, unknown>;
+    delete cross.anchors;
+    delete cross.generation;
+    delete cross.lifecycle;
+    cross.anchorStates = [{ anchor: "md-0:formula", generation: "authored", lifecycle: "current" }];
+    finalize(crossCase);
+    expect(() => compileFixture(crossCase)).toThrow("unknown or cross-case anchor");
+
+    const pairDrift = fixtureValue();
+    for (const caseId of ["tex-0", "md-0"]) {
+      const evidence = pairDrift.oracle.evidence[`evidence-${caseId}`] as Record<string, unknown>;
+      delete evidence.anchors;
+      delete evidence.generation;
+      delete evidence.lifecycle;
+      evidence.anchorStates = [{
+        anchor: `${caseId}:formula`,
+        generation: "authored",
+        lifecycle: caseId === "tex-0" ? "current" : "retracted",
+      }];
+    }
+    finalize(pairDrift);
+    expect(() => compileFixture(pairDrift)).toThrow("paired required hypotheses must share source-relative exact contracts");
   });
 
   test("derives and enforces protocol-owned cap metadata at the 16/+1 boundary", () => {
