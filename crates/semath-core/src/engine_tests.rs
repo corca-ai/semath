@@ -673,6 +673,49 @@ fn a_unique_deictic_retraction_targets_the_formula_in_its_scoped_block() {
 }
 
 #[test]
+fn a_later_review_rejection_retracts_the_unique_preceding_proposal() {
+    let content = r"\section{Faraday sign review}
+The electric field $\mathbf E(x,t)$ and magnetic field $\mathbf B(x,t)$ belong to the same time-dependent model, with $t$ as the independent time variable. The orientation of the loop and surface is fixed by the right-hand rule. A draft proposed the plus-sign relation
+\[
+\nabla\times\mathbf E=+\frac{\partial\mathbf B}{\partial t}.
+\]
+Review rejects that proposal under the stated orientation. The adopted relation is instead
+\[
+\nabla\times\mathbf E=-\frac{\partial\mathbf B}{\partial t}.
+\]
+The sign conclusion depends on the recorded orientation and is not a free stylistic choice.
+";
+    let view = semantic_view_at(
+        content,
+        content
+            .find(r"\nabla\times\mathbf E=+")
+            .expect("rejected formula") as u32,
+    );
+
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Unsupported,
+        "{view:#?}"
+    );
+    assert!(view.authoring_context.lifecycle.retracted, "{view:#?}");
+    assert!(!view.authoring_context.lifecycle.editable, "{view:#?}");
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .any(|hypothesis| {
+                hypothesis.kind == crate::MathInterpretationKind::SourceMeaning
+                    && hypothesis.support == crate::MathInterpretationSupportTier::Contradicted
+                    && hypothesis.evidence.iter().any(|evidence| {
+                        evidence.role == crate::MathInterpretationEvidenceRole::Contradicting
+                            && evidence.evidence.rule_id == "scientific-prose/formula-refutation"
+                    })
+            })
+    );
+}
+
+#[test]
 fn a_deictic_retraction_does_not_guess_between_two_scoped_formulas() {
     let content = "\\[V=IR\\]\nThe review explicitly retracts this selected equation after the model changed.\n\\[P=VI\\]";
     let mut engine = SemathEngine::default();
