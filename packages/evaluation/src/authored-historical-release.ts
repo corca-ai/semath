@@ -12,7 +12,12 @@ import {
   authoredScenarioFor,
   authoredSnapshotFor,
   resolveAuthoredAnchor,
+  scoreAuthoredScientificFixture,
 } from "./authored-scientific";
+import {
+  observeSelectedFormulaDecision,
+  selectedFormulaMeaningIsEstablishmentGrade,
+} from "./challenge-observation";
 
 export interface ApprovedSourceGroundedNavigationRecovery {
   readonly caseId: string;
@@ -31,6 +36,7 @@ export interface AuthoredHistoricalReleaseBaseline {
   readonly approvedConservativeDecisionIds: readonly string[];
   readonly approvedCursorBoundaryIdentityIds: readonly string[];
   readonly approvedFalseEstablishments: readonly ApprovedFalseEstablishment[];
+  readonly approvedFormulaDecisionDomainIds: readonly string[];
   readonly approvedSourceGroundedNavigationRecoveries: readonly ApprovedSourceGroundedNavigationRecovery[];
   readonly cases: number;
   readonly maximumMissedCoverage: number;
@@ -109,6 +115,32 @@ export function authoredHistoricalReleaseRegressions(
       regressions.push(`invalid cursor-boundary identity adjudication ${caseId}`);
     }
   }
+  const approvedFormulaDecisionDomain = new Set(
+    baseline.approvedFormulaDecisionDomainIds,
+  );
+  if (
+    approvedFormulaDecisionDomain.size !==
+    baseline.approvedFormulaDecisionDomainIds.length
+  ) {
+    regressions.push("duplicate formula-decision-domain adjudication");
+  }
+  const adjudicatedFormulaDecisionDomainIds = fixture.probes
+    .filter((probe) => approvedFormulaDecisionDomain.has(probe.id))
+    .filter((probe) => {
+      const observation = observations.find((item) => item.caseId === probe.id);
+      return (
+        observation !== undefined &&
+        legacyFormulaDecisionIsEstablished(fixture, probe, observation)
+      );
+    })
+    .map((probe) => probe.id);
+  for (const caseId of approvedFormulaDecisionDomain) {
+    if (!adjudicatedFormulaDecisionDomainIds.includes(caseId)) {
+      regressions.push(
+        `invalid formula-decision-domain adjudication ${caseId}`,
+      );
+    }
+  }
   const adjudicatedSourceGroundedNavigationIds =
     baseline.approvedSourceGroundedNavigationRecoveries
       .filter(
@@ -185,9 +217,15 @@ export function authoredHistoricalReleaseRegressions(
       );
     }
   }
+  const reviewedScore = applyReviewedScoreAdjustments(
+    fixture,
+    observations,
+    score,
+    adjudicatedFormulaDecisionDomainIds,
+    adjudicatedBoundaryIdentityIds,
+  );
   const adjudicatedNavigationOrIdentity =
-    score.risk.navigationOrIdentity -
-    adjudicatedBoundaryIdentityIds.length -
+    reviewedScore.risk.navigationOrIdentity -
     adjudicatedSourceGroundedNavigationIds.length;
   const approvedConservativeDecision = new Set(
     baseline.approvedConservativeDecisionIds,
@@ -216,15 +254,15 @@ export function authoredHistoricalReleaseRegressions(
     }
   }
   const adjudicatedMissedCoverage =
-    score.risk.missedCoverage - adjudicatedConservativeDecisionIds.length;
+    reviewedScore.risk.missedCoverage -
+    adjudicatedConservativeDecisionIds.length;
   const adjudicatedRisk =
-    score.risk.total -
-    adjudicatedBoundaryIdentityIds.length * 10 -
+    reviewedScore.risk.total -
     adjudicatedSourceGroundedNavigationIds.length * 10 -
     adjudicatedConservativeDecisionIds.length * 2;
-  if (score.passed < baseline.minimumPassed) {
+  if (reviewedScore.passed < baseline.minimumPassed) {
     regressions.push(
-      `passed ${score.passed} is below ${baseline.minimumPassed}`,
+      `adjudicated passed ${reviewedScore.passed} is below ${baseline.minimumPassed}`,
     );
   }
   if (adjudicatedRisk > baseline.maximumRisk) {
@@ -246,6 +284,156 @@ export function authoredHistoricalReleaseRegressions(
     );
   }
   return regressions;
+}
+
+function applyReviewedScoreAdjustments(
+  fixture: AuthoredScientificFixture,
+  observations: readonly AuthoredScientificObservation[],
+  score: AuthoredScientificScorecard,
+  formulaDecisionIds: readonly string[],
+  boundaryIdentityIds: readonly string[],
+): AuthoredScientificScorecard {
+  let passed = score.passed;
+  let falseConflict = score.risk.falseConflict;
+  let falseEstablishment = score.risk.falseEstablishment;
+  let missedCoverage = score.risk.missedCoverage;
+  let navigationOrIdentity = score.risk.navigationOrIdentity;
+  let total = score.risk.total;
+  for (const caseId of [...formulaDecisionIds, ...boundaryIdentityIds]) {
+    const probe = fixture.probes.find((item) => item.id === caseId);
+    const observation = observations.find((item) => item.caseId === caseId);
+    if (!probe || !observation) continue;
+    const scenario = authoredScenarioFor(fixture, probe);
+    const singleFixture = {
+      ...fixture,
+      probes: [probe],
+      scenarios: [scenario],
+    };
+    const raw = scoreAuthoredScientificFixture(singleFixture, [observation]);
+    const reviewedObservation = formulaDecisionIds.includes(caseId)
+      ? {
+          ...observation,
+          decision: probe.expected.decision,
+          proofGrounded: probe.expected.proofGrounded,
+        }
+      : { ...observation, symbol: probe.expected.symbol ?? null };
+    const reviewed = scoreAuthoredScientificFixture(singleFixture, [
+      reviewedObservation,
+    ]);
+    passed += reviewed.passed - raw.passed;
+    falseConflict += reviewed.risk.falseConflict - raw.risk.falseConflict;
+    falseEstablishment +=
+      reviewed.risk.falseEstablishment - raw.risk.falseEstablishment;
+    missedCoverage += reviewed.risk.missedCoverage - raw.risk.missedCoverage;
+    navigationOrIdentity +=
+      reviewed.risk.navigationOrIdentity - raw.risk.navigationOrIdentity;
+    total += reviewed.risk.total - raw.risk.total;
+  }
+  return {
+    ...score,
+    passed,
+    risk: {
+      falseConflict,
+      falseEstablishment,
+      missedCoverage,
+      navigationOrIdentity,
+      total,
+    },
+  };
+}
+
+function legacyFormulaDecisionIsEstablished(
+  fixture: AuthoredScientificFixture,
+  probe: AuthoredScientificFixture["probes"][number],
+  observation: AuthoredScientificObservation,
+): boolean {
+  if (
+    fixture.schemaVersion !== 1 ||
+    probe.expected.decision !== "established" ||
+    !probe.expected.proofGrounded ||
+    (observation.decision === "established" && observation.proofGrounded)
+  ) {
+    return false;
+  }
+  const context = observation.authoringContext;
+  const formula = context?.formula;
+  if (
+    !context ||
+    !formula ||
+    context.disposition !== "established" ||
+    context.lifecycle.freshness !== "current" ||
+    context.lifecycle.retracted ||
+    context.lifecycle.capped ||
+    context.lifecycle.engineLimited ||
+    context.truncated
+  ) {
+    return false;
+  }
+  const snapshot = authoredSnapshotFor(
+    authoredScenarioFor(fixture, probe),
+    probe,
+  );
+  const document = snapshot.documents.find(
+    (item) => item.fileId === formula.location.fileId,
+  );
+  if (
+    !document ||
+    document.path !== formula.location.path ||
+    !Number.isInteger(formula.location.range.startOffset) ||
+    !Number.isInteger(formula.location.range.endOffset) ||
+    formula.location.range.startOffset < 0 ||
+    formula.location.range.endOffset <= formula.location.range.startOffset ||
+    formula.location.range.endOffset > document.content.length ||
+    document.content.slice(
+      formula.location.range.startOffset,
+      formula.location.range.endOffset,
+    ) !== formula.sourceNotation
+  ) {
+    return false;
+  }
+  const cursor = resolveAuthoredAnchor(snapshot, probe.cursor);
+  const cursorOffset =
+    probe.cursor.offset === undefined
+      ? probe.cursor.edge === "after"
+        ? cursor.range.endOffset
+        : cursor.range.startOffset
+      : cursor.range.startOffset + probe.cursor.offset;
+  if (
+    cursor.fileId !== formula.location.fileId ||
+    cursor.path !== formula.location.path ||
+    cursorOffset < formula.location.range.startOffset ||
+    cursorOffset > formula.location.range.endOffset
+  ) {
+    return false;
+  }
+  const selectedFormula = observeSelectedFormulaDecision({
+    disposition: context.disposition,
+    formula,
+    hypotheses: context.interpretations.hypotheses,
+  });
+  const expectedRelationIds = new Set(
+    probe.expected.relations
+      .filter((relation) => relation.sourceGrounded)
+      .map((relation) => relation.relationId),
+  );
+  const authoritative = selectedFormula.recognizedRelations.filter(
+    (relation) => relation.authority === "authoritative",
+  );
+  return (
+    selectedFormula.decision.status === "established" &&
+    selectedFormula.decision.sourceGrounded &&
+    selectedFormula.decision.problemCount === 0 &&
+    selectedFormulaMeaningIsEstablishmentGrade({
+      disposition: context.disposition,
+      formula,
+      hypotheses: context.interpretations.hypotheses,
+    }) &&
+    typeof selectedFormula.decision.meaningRelationId === "string" &&
+    expectedRelationIds.has(selectedFormula.decision.meaningRelationId) &&
+    authoritative.length === 1 &&
+    authoritative[0]?.relationId ===
+      selectedFormula.decision.meaningRelationId
+  );
 }
 
 function sameCauseSet(
