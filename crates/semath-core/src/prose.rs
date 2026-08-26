@@ -3741,9 +3741,6 @@ fn collect_semantic_evidence(
                         if preceding_target {
                             candidates
                                 .retain(|(_, formula)| formula.end_offset <= range.start_offset);
-                            if candidates.len() != 1 {
-                                return None;
-                            }
                         }
                         let local = candidates
                             .iter()
@@ -6658,7 +6655,7 @@ mod tests {
     use crate::{
         CompleteSyntaxState, DocumentLanguage, MathRoot, MathRootState, ProjectDocument,
         ProjectMacro, ProjectMacroExpansion, ProjectMacroExpansionStatus, ProjectMacroKind,
-        ProjectSourceRef, SourceRange, VisibleProseSpan,
+        ProjectSourceRef, SourceIndex, SourceRange, VisibleProseSpan,
     };
 
     fn analyze(source: &str) -> super::ProseObservations {
@@ -8211,6 +8208,26 @@ gain.";
             !analysis
                 .semantic_evidence
                 .formula_is_rejected(&formulas[1].content_range)
+        );
+
+        let source = "The electric field $\\mathbf E(x,t)$ and magnetic field $\\mathbf B(x,t)$ belong to one model, with $t$ as time. A draft proposed the plus-sign relation\n\\[\\nabla\\times\\mathbf E=+\\frac{\\partial\\mathbf B}{\\partial t}.\\]\nReview rejects that proposal under the stated orientation. The adopted relation is instead\n\\[\\nabla\\times\\mathbf E=-\\frac{\\partial\\mathbf B}{\\partial t}.\\]";
+        let analysis = analyze(source);
+        let formulas = test_math_regions(source, DocumentLanguage::Latex);
+        let source_index = SourceIndex::new(source);
+        let rejected = formulas
+            .iter()
+            .find(|formula| {
+                let start = source_index.byte_for_utf16(formula.content_range.start_offset);
+                let end = source_index.byte_for_utf16(formula.content_range.end_offset);
+                source[start..end].contains("=+")
+            })
+            .expect("the plus-sign proposal");
+        assert!(
+            analysis
+                .semantic_evidence
+                .formula_is_explicitly_retracted(&rejected.content_range),
+            "{:#?}",
+            analysis.semantic_evidence.clauses
         );
 
         let source = "The earlier draft used\n\\[\\sum_v d(v)=2|E|.\\]\nThat statement is incorrect. The corrected relation is\n\\[\\sum_v d(v)=|E|.\\]";
