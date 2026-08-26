@@ -17,6 +17,10 @@ export type SemanticContinuityDecision =
   | "established"
   | "partial"
   | "unsupported";
+export type SemanticContinuityFormulaDecision =
+  | SemanticContinuityDecision
+  | "conventional"
+  | "engine-limited";
 
 export interface SemanticContinuityExpectation {
   readonly decision: SemanticContinuityDecision;
@@ -61,6 +65,7 @@ export interface SemanticContinuityObservation {
   readonly caseId: string;
   readonly decision: SemanticContinuityDecision;
   readonly definitions: readonly string[];
+  readonly formulaDecision: SemanticContinuityFormulaDecision | null;
   readonly problems: number;
   readonly relationIds: readonly string[];
   readonly shapeKinds: readonly string[];

@@ -6,6 +6,7 @@ import {
   adjudicateSemanticContinuityDecisions,
   parseSemanticContinuityFixture,
   scoreSemanticContinuity,
+  selectSemanticContinuityFormulaDecisions,
   semanticContinuityReleaseRegressions,
   type SemanticContinuityObservation,
 } from "../packages/evaluation/src/index";
@@ -63,6 +64,8 @@ const DECISION_ADJUDICATIONS = [
   },
 ];
 
+const SELECTED_FORMULA_DECISIONS = ["propagation-minimal-conflict"];
+
 const temporary = await mkdtemp(join(tmpdir(), "semath-continuity-release-"));
 const reportPath = join(temporary, "report.json");
 try {
@@ -86,7 +89,10 @@ try {
   };
   const score = scoreSemanticContinuity(
     adjudicateSemanticContinuityDecisions(fixture, DECISION_ADJUDICATIONS),
-    report.observations,
+    selectSemanticContinuityFormulaDecisions(
+      report.observations,
+      SELECTED_FORMULA_DECISIONS,
+    ),
   );
   const regressions = semanticContinuityReleaseRegressions(score, {
     cases: 48,

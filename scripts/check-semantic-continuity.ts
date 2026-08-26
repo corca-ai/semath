@@ -38,6 +38,7 @@ const observations: SemanticContinuityObservation[] = fixture.cases.map(
       definitions: (view.symbol?.definitions ?? []).map(
         (definition) => definition.description,
       ),
+      formulaDecision: view.authoringContext?.disposition ?? null,
       problems: view.diagnostics.length,
       relationIds: [...relationIds].sort(),
       shapeKinds: [...new Set((view.symbol?.shapes ?? []).map((shape) => shape.kind))].sort(),

@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
   adjudicateSemanticContinuityDecisions,
+  selectSemanticContinuityFormulaDecisions,
   semanticContinuityReleaseRegressions,
 } from "./semantic-continuity-release";
+import type { SemanticContinuityObservation } from "./semantic-continuity";
 import type { SemanticContinuityFixture } from "./semantic-continuity";
 
 describe("semantic continuity release policy", () => {
@@ -28,6 +30,39 @@ describe("semantic continuity release policy", () => {
         { caseId: "case-1", from: "unsupported", to: "established" },
       ]),
     ).toThrow("fixture has partial");
+  });
+
+  test("keeps cursor-entity and selected-formula decisions separate", () => {
+    const observation = oneObservation({
+      decision: "established",
+      formulaDecision: "conflicting",
+    });
+    expect(
+      selectSemanticContinuityFormulaDecisions([observation], ["case-1"])[0]
+        ?.decision,
+    ).toBe("conflicting");
+    expect(observation.decision).toBe("established");
+  });
+
+  test("fails closed on invalid selected-formula decisions", () => {
+    expect(() =>
+      selectSemanticContinuityFormulaDecisions(
+        [oneObservation({ formulaDecision: null })],
+        ["case-1"],
+      ),
+    ).toThrow("no legacy continuity decision");
+    expect(() =>
+      selectSemanticContinuityFormulaDecisions(
+        [oneObservation()],
+        ["missing"],
+      ),
+    ).toThrow("unknown");
+    expect(() =>
+      selectSemanticContinuityFormulaDecisions(
+        [oneObservation()],
+        ["case-1", "case-1"],
+      ),
+    ).toThrow("duplicate");
   });
 
   test("allows reviewed misses but rejects every unsafe class", () => {
@@ -91,6 +126,22 @@ function oneCaseFixture(): SemanticContinuityFixture {
       },
     ],
     schemaVersion: 1,
+  };
+}
+
+function oneObservation(
+  overrides: Partial<SemanticContinuityObservation> = {},
+): SemanticContinuityObservation {
+  return {
+    caseId: "case-1",
+    decision: "partial",
+    definitions: [],
+    formulaDecision: "partial",
+    problems: 0,
+    relationIds: [],
+    shapeKinds: [],
+    symbol: "x",
+    ...overrides,
   };
 }
 
