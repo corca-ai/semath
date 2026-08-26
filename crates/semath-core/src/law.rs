@@ -4887,16 +4887,21 @@ fn assumption_condition_evidence(
         })
         .chain(external_assumptions.iter().filter(subjects_match))
     {
-        if condition.kind == PackConditionKind::SignConvention
-            && assumption.kind == "alternative-selection"
-            && assumption_value_and_target(&assumption.value).0 == condition.id
-        {
+        let assumption_value = assumption_value_and_target(&assumption.value).0;
+        let condition_is_unselected = matches!(
+            assumption.kind.as_str(),
+            "alternative-selection" | "condition-selection"
+        ) && assumption_value == condition.id;
+        if condition_is_unselected {
             resolution.supporting = None;
             resolution.refuting = None;
             resolution.unselected = Some(assumption_public_evidence(assumption));
-            break;
+            continue;
         }
-        if resolution.supporting.is_none() && assumption_supports_condition(condition, assumption) {
+        if resolution.unselected.is_none()
+            && resolution.supporting.is_none()
+            && assumption_supports_condition(condition, assumption)
+        {
             resolution.supporting = Some(assumption_public_evidence(assumption));
         }
         if resolution.refuting.is_none()
@@ -7974,6 +7979,59 @@ m=\rho A u
             .expect("uniform-section condition");
 
         assert_ne!(condition.status, ConstraintStatus::Verified, "{flow:#?}");
+    }
+
+    #[test]
+    fn unselected_context_and_unverified_guard_do_not_authorize_a_law() {
+        let recognized = recognized_law_observations(
+            r"Two candidate sampling frames remain unresolved for events $E$ and $G$.
+Condition common-probability-space: Both events belong to the same probability space.
+Condition positive-conditioning-probability: The conditioning event has positive probability.
+One reading places both events in the household frame, while another places them in the respondent frame; neither common frame is selected and positivity is unverified.
+The reviewed expression is
+\[
+P(E\mid G)=\frac{P(E\cap G)}{P(G)}.
+\]",
+        );
+        let conditional = recognized
+            .iter()
+            .find(|law| law.law_id == "conditional-probability")
+            .expect("conditional-probability shape remains visible");
+
+        assert!(
+            conditional
+                .conditions
+                .iter()
+                .all(|condition| condition.status != ConstraintStatus::Verified),
+            "{conditional:#?}"
+        );
+        assert_ne!(
+            conditional.status,
+            LawRecognitionStatus::Verified,
+            "{conditional:#?}"
+        );
+    }
+
+    #[test]
+    fn unrelated_unverified_metric_does_not_withhold_a_formula_condition() {
+        let recognized = recognized_law_observations(
+            r"The dashboard positivity score is unverified.
+Let $E$ and $G$ be events in one probability space, with $P(G)=0.2>0$.
+Then
+\[
+P(E\mid G)=\frac{P(E\cap G)}{P(G)}.
+\]",
+        );
+        let conditional = recognized
+            .iter()
+            .find(|law| law.law_id == "conditional-probability")
+            .expect("conditional probability");
+
+        assert_eq!(
+            conditional.status,
+            LawRecognitionStatus::Verified,
+            "{conditional:#?}"
+        );
     }
 
     fn recognized_law_observations(source: &str) -> Vec<LawRecognition> {

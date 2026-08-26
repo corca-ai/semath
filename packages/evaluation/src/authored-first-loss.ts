@@ -119,14 +119,6 @@ export function classifyAuthoredFirstLoss(
       stage: null,
     };
   }
-  if (evidence.hostProjectionMismatch) {
-    return {
-      basis: "native semantic surfaces match but a host projection differs",
-      decisionDomain: "cursor-entity",
-      reason: "host-projection-mismatch",
-      stage: "host-projection",
-    };
-  }
   const observedDecision = evidence.cursorSignals.decision;
   if (
     (observedDecision === "established" || observedDecision === "conflicting") &&
@@ -139,41 +131,49 @@ export function classifyAuthoredFirstLoss(
       stage: "decision",
     };
   }
+  const candidates: LossCandidate[] = [];
+  if (evidence.hostProjectionMismatch) {
+    candidates.push({
+      basis: "native semantic surfaces match but a host projection differs",
+      decisionDomain: "cursor-entity",
+      reason: "host-projection-mismatch",
+      stage: "host-projection",
+    });
+  }
   if (evidence.formulaLocationMatched === false) {
-    return {
+    candidates.push({
       basis: "selected formula location differs from reviewed evidence",
       decisionDomain: "selected-formula",
       reason: "formula-selection-mismatch",
       stage: "identity",
-    };
+    });
   }
   if (
     evidence.expectedFormulaDecision !== undefined &&
     evidence.formulaDecision !== undefined &&
-    (evidence.formulaDecision === "established" ||
-      evidence.formulaDecision === "conflicting") &&
     evidence.formulaDecision !== evidence.expectedFormulaDecision
   ) {
-    return {
+    candidates.push({
       basis:
-        `unsafe ${evidence.formulaDecision} selected-formula decision differs from reviewed evidence`,
+        (evidence.formulaDecision === "established" ||
+            evidence.formulaDecision === "conflicting")
+          ? `unsafe ${evidence.formulaDecision} selected-formula decision differs from reviewed evidence`
+          : "selected formula evidence does not produce the reviewed decision",
       decisionDomain: "selected-formula",
-      reason: "unsafe-decision",
+      reason:
+        evidence.formulaDecision === "established" ||
+          evidence.formulaDecision === "conflicting"
+          ? "unsafe-decision"
+          : "evidence-sufficiency-mismatch",
       stage: "decision",
-    };
+    });
   }
   if (!evidence.expectedRelationsMatched && evidence.relationSources.length) {
-    const candidates: Array<{
-      readonly basis: string;
-      readonly decisionDomain: "cursor-entity" | "selected-formula";
-      readonly reason: AuthoredFirstLossReason;
-      readonly relationId: string;
-      readonly stage: FirstLossStage;
-    }> = evidence.relationSources
+    const relationCandidates = evidence.relationSources
       .filter((source) => !source.localRelationMatched)
       .map(relationSourceLoss);
-    if (!candidates.length) {
-      candidates.push({
+    if (!relationCandidates.length) {
+      relationCandidates.push({
         basis:
           "reviewed relations exist at their source equations but not at the observation boundary",
         decisionDomain: "selected-formula",
@@ -182,55 +182,28 @@ export function classifyAuthoredFirstLoss(
         stage: "propagation",
       });
     }
-    if (evidence.identityFailures.length) {
-      const identity = identityLoss(evidence.identityFailures);
-      candidates.push({
-        basis: identity.basis,
-        decisionDomain: identity.decisionDomain,
-        relationId: "",
-        reason: identity.reason,
-        stage: "identity",
-      });
-    }
-    const first = candidates.reduce((left, right) =>
-      STAGE_ORDER[left.stage] <= STAGE_ORDER[right.stage] ? left : right,
-    );
-    return {
-      basis: first.basis,
-      decisionDomain: first.decisionDomain,
-      reason: first.reason,
-      stage: first.stage,
-    };
+    candidates.push(...relationCandidates);
   }
   if (evidence.identityFailures.length) {
     const identity = identityLoss(evidence.identityFailures);
-    return { ...identity, stage: "identity" };
+    candidates.push({ ...identity, stage: stageForIdentityLoss(identity.reason) });
   }
-  if (
-    evidence.expectedFormulaDecision !== undefined &&
-    evidence.formulaDecision !== evidence.expectedFormulaDecision
-  ) {
-    return {
-      basis: "selected formula evidence does not produce the reviewed decision",
-      decisionDomain: "selected-formula",
-      reason: "evidence-sufficiency-mismatch",
-      stage: "decision",
-    };
-  }
-  const cursorStage = authoredStage(
-    classifyRecognitionFrontier(evidence.cursorSignals),
-  );
-  if (
-    cursorStage !== "decision" &&
-    cursorStage !== "pack-unification" &&
-    observedDecision !== "established"
-  ) {
-    return {
+  if (observedDecision !== evidence.expectedDecision) {
+    const cursorStage = authoredStage(
+      classifyRecognitionFrontier(evidence.cursorSignals),
+    );
+    candidates.push({
       basis: `cursor evidence is first unavailable at ${cursorStage}`,
       decisionDomain: "cursor-entity",
       reason: reasonForFrontier(evidence.cursorSignals),
       stage: cursorStage,
-    };
+    });
+  }
+  if (candidates.length) {
+    const first = candidates.reduce((left, right) =>
+      STAGE_ORDER[left.stage] <= STAGE_ORDER[right.stage] ? left : right,
+    );
+    return first;
   }
   return {
     basis: "available semantic evidence does not produce the reviewed public decision",
@@ -239,6 +212,11 @@ export function classifyAuthoredFirstLoss(
     stage: "decision",
   };
 }
+
+type LossCandidate = AuthoredFirstLossObservation & {
+  readonly decisionDomain: "cursor-entity" | "selected-formula";
+  readonly stage: FirstLossStage;
+};
 
 function relationSourceLoss(source: AuthoredRelationSourceEvidence): {
   readonly basis: string;
@@ -397,6 +375,13 @@ function identityLoss(
     decisionDomain: "cursor-entity",
     reason: "edit-projection-mismatch",
   };
+}
+
+function stageForIdentityLoss(reason: AuthoredFirstLossReason): FirstLossStage {
+  return reason === "navigation-projection-mismatch" ||
+      reason === "edit-projection-mismatch"
+    ? "host-projection"
+    : "identity";
 }
 
 function reasonForFrontier(

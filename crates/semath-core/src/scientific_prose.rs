@@ -1853,9 +1853,9 @@ fn active_demonstrative_formula_refusal_marker(value: &str) -> Option<(usize, us
     if let Some(start) = start {
         words.push((start, value.len(), &value[start..]));
     }
-    words.windows(3).find_map(|window| {
+    words.iter().enumerate().find_map(|(action, (_, _, word))| {
         matches!(
-            window[0].2,
+            *word,
             "reject"
                 | "rejects"
                 | "rejected"
@@ -1865,11 +1865,26 @@ fn active_demonstrative_formula_refusal_marker(value: &str) -> Option<(usize, us
                 | "discard"
                 | "discards"
                 | "discarded"
+                | "retract"
+                | "retracts"
+                | "retracted"
         )
         .then_some(())?;
-        matches!(window[1].2, "this" | "that").then_some(())?;
+        let tail = &words[action + 1..];
+        matches!(tail.first()?.2, "this" | "that" | "the").then_some(())?;
+        let target = tail
+            .iter()
+            .skip(1)
+            .take_while(|(_, _, word)| {
+                matches!(
+                    *word,
+                    "current" | "displayed" | "exact" | "reviewed" | "selected"
+                )
+            })
+            .count()
+            + 1;
         matches!(
-            window[2].2,
+            tail.get(target)?.2,
             "formula"
                 | "equation"
                 | "identity"
@@ -1880,8 +1895,9 @@ fn active_demonstrative_formula_refusal_marker(value: &str) -> Option<(usize, us
                 | "estimate"
                 | "calculation"
                 | "proposal"
+                | "root"
         )
-        .then_some((window[0].0, window[0].1))
+        .then_some((words[action].0, words[action].1))
     })
 }
 
@@ -2014,6 +2030,10 @@ fn assumption_phrases() -> &'static [(&'static str, &'static str, &'static str)]
             "context",
             "common-probability-space",
         ),
+        ("common space", "condition-selection", "same-context"),
+        ("common context", "condition-selection", "same-context"),
+        ("common frame", "condition-selection", "same-context"),
+        ("positivity", "condition-selection", "positive"),
         ("different experiments", "context", "different-context"),
         ("different experiment", "context", "different-context"),
         (
@@ -2123,6 +2143,12 @@ fn assumption_phrase_polarity(
         words.push((start, prefix.len(), &prefix[start..]));
     }
 
+    // A condition catalog label describes a condition; it does not assert
+    // that the condition holds in the surrounding source.
+    if prefix.trim_start().starts_with("condition ") && prefix.contains(':') {
+        return AssumptionPhrasePolarity::Ignored;
+    }
+
     let negative_cue = |word: &str| {
         [
             "reject",
@@ -2161,6 +2187,22 @@ fn assumption_phrase_polarity(
         .filter(|word| !word.is_empty())
         .take(8)
         .collect::<Vec<_>>();
+    if kind == "condition-selection" {
+        let prefix_leaves_unselected = words
+            .iter()
+            .any(|(_, _, word)| matches!(*word, "neither" | "none" | "no"));
+        let leaves_unselected = suffix_words.iter().take(5).any(|word| {
+            word.starts_with("unverif")
+                || word.starts_with("unresolv")
+                || word.starts_with("unselect")
+                || (prefix_leaves_unselected && word.starts_with("select"))
+        });
+        return if leaves_unselected {
+            AssumptionPhrasePolarity::Supported
+        } else {
+            AssumptionPhrasePolarity::Ignored
+        };
+    }
     let direct_modifier = |word: &str| {
         word.ends_with("ly")
             || matches!(

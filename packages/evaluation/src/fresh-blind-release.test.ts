@@ -727,9 +727,26 @@ describe("fresh blind release evidence", () => {
       renameEdits: [],
     }]))
       .toMatchObject({
-        unsafeNavigationOrEditCaseIds: [probe.id],
-        unsafeNavigationOrEditLocations: 4,
+        unsafeNavigationOrEditCaseIds: [],
+        unsafeNavigationOrEditLocations: 0,
       });
+
+    expect(freshBlindSafetySummary(release.fixture, [{
+      ...consistent,
+      definitions: [],
+      prepareRename: {},
+      references: [],
+      renameEdits: [],
+      surfaceAuthorizations: {
+        definition: refused,
+        prepareRename: refused,
+        references: refused,
+        rename: refused,
+      },
+    }])).toMatchObject({
+      unsafeNavigationOrEditCaseIds: [],
+      unsafeNavigationOrEditLocations: 0,
+    });
   });
 
   test("gates only reviewed authoring authority, contradiction, and lifecycle boundaries", () => {
@@ -769,7 +786,33 @@ describe("fresh blind release evidence", () => {
             bindings: [],
             conditions: [],
             documentVersion: 1,
-            evidence: [],
+            evidence: [{
+              evidence: {
+                kind: "explicit-source-meaning",
+                ruleId: "test/explicit-source-meaning",
+                sourceRanges: [{
+                  startOffset,
+                  endOffset: startOffset + needle.length,
+                }],
+                strength: "strong",
+              },
+              provenance: "explicit-declaration" as const,
+              role: "supporting" as const,
+              sourceAnchors: [{
+                documentVersion: 1,
+                generation: "authored" as const,
+                lifecycle: "current" as const,
+                location: {
+                  fileId: document.fileId,
+                  path: document.path,
+                  range: {
+                    startOffset,
+                    endOffset: startOffset + needle.length,
+                  },
+                },
+                scopePath: [],
+              }],
+            }],
             formula: {
               documentVersion: 1,
               location: {

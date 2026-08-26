@@ -21,7 +21,7 @@ describe("authored first-loss localization", () => {
     expect(
       classifyAuthoredFirstLoss({
         cursorSignals: { ...signals, decision: "established" },
-        expectedDecision: "established",
+        expectedDecision: "partial",
         expectedRelationsMatched: true,
         identityFailures: [],
         probePassed: true,
@@ -38,7 +38,7 @@ describe("authored first-loss localization", () => {
     expect(
       classifyAuthoredFirstLoss({
         cursorSignals: signals,
-        expectedDecision: "established",
+        expectedDecision: "partial",
         expectedRelationsMatched: false,
         identityFailures: [],
         probePassed: false,
@@ -64,7 +64,7 @@ describe("authored first-loss localization", () => {
     expect(
       classifyAuthoredFirstLoss({
         cursorSignals: signals,
-        expectedDecision: "established",
+        expectedDecision: "partial",
         expectedRelationsMatched: false,
         identityFailures: [],
         probePassed: false,
@@ -86,7 +86,7 @@ describe("authored first-loss localization", () => {
     });
   });
 
-  test("reports navigation identity before downstream propagation", () => {
+  test("reports an earlier cursor frontier before downstream navigation", () => {
     expect(
       classifyAuthoredFirstLoss({
         cursorSignals: signals,
@@ -108,8 +108,8 @@ describe("authored first-loss localization", () => {
         ],
       }),
     ).toMatchObject({
-      reason: "navigation-projection-mismatch",
-      stage: "identity",
+      reason: "typed-fact-condition-missing",
+      stage: "typed-fact",
     });
   });
 
@@ -231,7 +231,7 @@ describe("authored first-loss localization", () => {
 
   test("separates cursor, navigation, and edit projection reasons", () => {
     const base = {
-      cursorSignals: signals,
+      cursorSignals: { ...signals, decision: "established" as const },
       expectedDecision: "established" as const,
       expectedRelationsMatched: true,
       probePassed: false,

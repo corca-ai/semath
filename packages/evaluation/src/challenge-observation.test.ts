@@ -5,6 +5,7 @@ import type {
   MathInterpretationHypothesisInfo,
 } from "../../protocol/src/index";
 import {
+  hypothesisIsMathematicalAuthority,
   observeSelectedFormulaDecision,
   selectedFormulaMeaningIsEstablishmentGrade,
 } from "./challenge-observation";
@@ -95,6 +96,28 @@ function hypothesis(
 }
 
 describe("selected-formula challenge observation", () => {
+  test("limits mathematical authority to grounded typed laws or source meanings", () => {
+    const reviewed = hypothesis("test:convention", "supported", { formula });
+    expect(hypothesisIsMathematicalAuthority({
+      ...reviewed,
+      kind: "reviewed-convention",
+    })).toBe(false);
+
+    const { relation: _reviewedRelation, ...reviewedWithoutRelation } = reviewed;
+    const sourceMeaning: MathInterpretationHypothesisInfo = {
+      ...reviewedWithoutRelation,
+      bindings: [],
+      evidence: [evidence("supporting")],
+      kind: "source-meaning",
+      support: "explicit",
+    };
+    expect(hypothesisIsMathematicalAuthority(sourceMeaning)).toBe(true);
+    expect(hypothesisIsMathematicalAuthority({
+      ...sourceMeaning,
+      evidence: [],
+    })).toBe(false);
+  });
+
   test("binds relation support and authority to the exact selected formula", () => {
     const candidate = observeSelectedFormulaDecision({
       disposition: "partial",

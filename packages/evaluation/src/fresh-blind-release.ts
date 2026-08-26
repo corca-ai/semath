@@ -1366,9 +1366,10 @@ function unsafeSurfaceAuthorizations(
     ["prepareRename", observed.prepareRename, expected.prepareRename.status],
     ["rename", observed.rename, expected.rename.status],
   ] as const;
+  // Refusing an expected surface is a coverage loss, not an unsafe host
+  // mutation. Only authority that the reviewed envelope forbids is unsafe.
   let failures = surfaces.filter(([, authorization, expectedStatus]) =>
-    authorization.status !==
-      (expectedStatus === "available" ? "authorized" : "refused")
+    expectedStatus === "unavailable" && authorization.status === "authorized"
   ).length;
   const authorized = surfaces.flatMap(([, authorization]) =>
     authorization.status === "authorized"
@@ -1458,10 +1459,7 @@ function unsafeLocations<
           sameRange(location.range, anchor.range),
       ),
   ).length;
-  const requiredCount = expected.status === "available"
-    ? Math.max(1, expected.minimum)
-    : expected.minimum;
-  return unsafe + Math.max(0, requiredCount - observed.length);
+  return unsafe;
 }
 
 function unsafePrepareRenameLocation(
@@ -1470,9 +1468,7 @@ function unsafePrepareRenameLocation(
   snapshot: ReturnType<typeof authoredSnapshotFor>,
 ): number {
   if (!observed.range) {
-    return expected.status === "available" || observed.placeholder !== undefined
-      ? 1
-      : 0;
+    return observed.placeholder !== undefined ? 1 : 0;
   }
   if (expected.status === "unavailable") return 1;
   if (

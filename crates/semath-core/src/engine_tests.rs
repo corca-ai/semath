@@ -660,6 +660,43 @@ fn passively_unused_formula_is_retracted_and_noneditable() {
 }
 
 #[test]
+fn a_unique_deictic_retraction_targets_the_formula_in_its_scoped_block() {
+    for content in [
+        "The current review explicitly retracts this selected equation because its roles no longer share one model. The independent symbol declaration remains valid for navigation. The selected root retained for audit is\n\\[V=IR\\]",
+        "The document first asserts the selected equation, then explicitly rejects that exact equation as false in the same scope. The current revision also retracts the root; it is no longer editable.\n\\[V=IR\\]",
+    ] {
+        let mut engine = SemathEngine::default();
+        engine.reset(snapshot(content)).unwrap();
+
+        assert_retracted_formula_surfaces(&engine, content, 1, 1);
+    }
+}
+
+#[test]
+fn a_deictic_retraction_does_not_guess_between_two_scoped_formulas() {
+    let content = "\\[V=IR\\]\nThe review explicitly retracts this selected equation after the model changed.\n\\[P=VI\\]";
+    let mut engine = SemathEngine::default();
+    engine.reset(snapshot(content)).unwrap();
+
+    for needle in ["V=IR", "P=VI"] {
+        let result = engine
+            .query(query(
+                Query::SemanticView {
+                    file_id: "main".into(),
+                    offset: content.find(needle).unwrap() as u32,
+                },
+                1,
+                1,
+            ))
+            .unwrap();
+        let QueryValue::SemanticView { view } = result.value else {
+            panic!("expected semantic view")
+        };
+        assert!(!view.authoring_context.lifecycle.retracted, "{view:#?}");
+    }
+}
+
+#[test]
 fn incremental_withdrawal_retracts_prior_formula_authority() {
     let before = "Let $V$ be voltage, $I$ current, and $R$ resistance. The circuit adopts Ohm's law.\n\\[V=IR\\]";
     let after = "The relation displayed next is withdrawn and retained only as an archival quotation.\n\\[V=IR\\]";
@@ -5225,6 +5262,64 @@ fn competing_unselected_conventions_cannot_authorize_a_relation() {
             .all(|hypothesis| {
                 hypothesis.relation.as_ref().is_none_or(|relation| {
                     relation.relation_id != "thermodynamics-heat-transfer:closed-system-first-law"
+                        || !matches!(
+                            hypothesis.support,
+                            crate::MathInterpretationSupportTier::Explicit
+                                | crate::MathInterpretationSupportTier::Derived
+                                | crate::MathInterpretationSupportTier::Supported
+                        )
+                })
+            }),
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn unselected_formula_conditions_cannot_authorize_a_relation() {
+    let content = r"Two candidate mappings cite conditional probability.
+Condition common-probability-space: Both events belong to the same probability space.
+Condition positive-conditioning-probability: The conditioning event has positive probability.
+One mapping places $E$ and $G$ in a household frame, while another places them in a respondent frame; neither common frame is selected and positivity is unverified.
+The reviewed expression is
+\[
+P(E\mid G)=\frac{P(E\cap G)}{P(G)}.
+\]";
+    let view = semantic_view_at(content, content.rfind(r"P(E\mid G)").unwrap() as u32);
+
+    assert_ne!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established,
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .conditions
+            .iter()
+            .filter(|condition| {
+                matches!(
+                    condition.kind,
+                    crate::ScientificConstraintKind::SameContext
+                        | crate::ScientificConstraintKind::Positive
+                )
+            })
+            .all(|condition| condition.status == crate::ConstraintStatus::Required),
+        "{view:#?}"
+    );
+    assert!(
+        view.context
+            .relations
+            .iter()
+            .all(|relation| { relation.relation_id != "probability:conditional-probability" }),
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .all(|hypothesis| {
+                hypothesis.relation.as_ref().is_none_or(|relation| {
+                    relation.relation_id != "probability:conditional-probability"
                         || !matches!(
                             hypothesis.support,
                             crate::MathInterpretationSupportTier::Explicit
