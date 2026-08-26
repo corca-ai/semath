@@ -1,4 +1,8 @@
 import { describe, expect, test } from "bun:test";
+import type {
+  MathAuthoringContext,
+  MathInterpretationHypothesisInfo,
+} from "../../protocol/src/index";
 import { authoredHistoricalReleaseRegressions } from "./authored-historical-release";
 import type { AuthoredHistoricalReleaseBaseline } from "./authored-historical-release";
 import {
@@ -17,6 +21,7 @@ const baseline: AuthoredHistoricalReleaseBaseline = {
   approvedFalseEstablishments: [
     { caseId: "reviewed-transition", causes: ["decision"] },
   ],
+  approvedFormulaDecisionDomainIds: [],
   approvedSourceGroundedNavigationRecoveries: [],
   cases: 2,
   maximumMissedCoverage: 1,
@@ -373,6 +378,81 @@ describe("authored historical release policy", () => {
     );
   });
 
+  test("adjudicates a legacy cursor decision only from exact establishment-grade formula evidence", () => {
+    const reviewed = probe("reviewed-formula-domain");
+    const reviewedProbe = {
+      ...reviewed,
+      expected: {
+        ...reviewed.expected,
+        decision: "established" as const,
+        proofGrounded: true,
+        relations: [
+          {
+            anchor: { fileId: "main", needle: "x" },
+            relationId: "test:law",
+            roles: [{ role: "value", symbol: "x" }],
+            sourceGrounded: true,
+          },
+        ],
+      },
+    };
+    const reviewedFixture: AuthoredScientificFixture = {
+      ...fixture(),
+      probes: [reviewedProbe],
+      scenarios: [scenario()],
+    };
+    const reviewedObservation = formulaDomainObservation();
+    const reviewedBaseline: AuthoredHistoricalReleaseBaseline = {
+      ...baseline,
+      approvedFalseEstablishments: [],
+      approvedFormulaDecisionDomainIds: ["reviewed-formula-domain"],
+      cases: 1,
+      maximumMissedCoverage: 0,
+      maximumNavigationOrIdentity: 0,
+      maximumRisk: 0,
+      minimumPassed: 1,
+    };
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [reviewedObservation],
+        scoreAuthoredScientificFixture(reviewedFixture, [reviewedObservation]),
+        reviewedBaseline,
+      ),
+    ).toEqual([]);
+
+    const context = reviewedObservation.authoringContext!;
+    const hypothesis = context.interpretations.hypotheses[0]!;
+    const assertedObservation: AuthoredScientificObservation = {
+      ...reviewedObservation,
+      authoringContext: {
+        ...context,
+        interpretations: {
+          ...context.interpretations,
+          hypotheses: [
+            {
+              ...hypothesis,
+              bindings: hypothesis.bindings.map((binding) => ({
+                ...binding,
+                proof: "asserted" as const,
+              })),
+            },
+          ],
+        },
+      },
+    };
+    expect(
+      authoredHistoricalReleaseRegressions(
+        reviewedFixture,
+        [assertedObservation],
+        scoreAuthoredScientificFixture(reviewedFixture, [assertedObservation]),
+        reviewedBaseline,
+      ),
+    ).toContain(
+      "invalid formula-decision-domain adjudication reviewed-formula-domain",
+    );
+  });
+
   test("adjudicates only an exact source-grounded navigation recovery", () => {
     const reviewed = probe("reviewed-navigation");
     const content = "Define $x$ here; use $x$ there.";
@@ -576,6 +656,110 @@ function observation(
     relations: [],
     renameEdits: [],
     symbol: "x",
+  };
+}
+
+function formulaDomainObservation(): AuthoredScientificObservation {
+  const formula = {
+    documentVersion: 1,
+    location: location(0, 1),
+    scopePath: [] as readonly number[],
+    sourceNotation: "x",
+  };
+  const evidence = {
+    kind: "canonical-math" as const,
+    ruleId: "test/evidence",
+    sourceRanges: [{ startOffset: 0, endOffset: 1 }],
+    strength: "hard" as const,
+  };
+  const hypothesis: MathInterpretationHypothesisInfo = {
+    bindings: [
+      {
+        constraint: { kind: "scalar" },
+        evidence,
+        parameter: "value",
+        proof: "typed",
+        symbol: "x",
+      },
+    ],
+    conditions: [],
+    documentVersion: 1,
+    evidence: [
+      {
+        evidence,
+        provenance: "typed-structure",
+        role: "supporting",
+        sourceAnchors: [
+          {
+            documentVersion: 1,
+            generation: "authored",
+            lifecycle: "current",
+            location: location(0, 1),
+            scopePath: [],
+          },
+        ],
+      },
+    ],
+    formula,
+    hypothesisId: "test:law",
+    kind: "typed-law",
+    label: "Test law",
+    location: formula.location,
+    missingDiscriminatorIds: [],
+    orderingReasons: [],
+    range: formula.location.range,
+    rank: 0,
+    relation: {
+      conditions: [],
+      description: "Test law",
+      evidence: [],
+      range: formula.location.range,
+      relationId: "test:law",
+      roles: [{ label: "Value", role: "value", symbol: "x" }],
+      title: "Test law",
+    },
+    scopePath: [],
+    support: "explicit",
+  };
+  const authoringContext: MathAuthoringContext = {
+    claimEvidence: [],
+    conditions: [],
+    disposition: "established",
+    equationLinks: [],
+    formula,
+    interpretations: {
+      analysisLimits: [],
+      exhaustiveness: "bounded-open-world",
+      hypotheses: [hypothesis],
+      missingDiscriminators: [],
+      truncated: false,
+    },
+    lifecycle: {
+      capped: false,
+      documentVersion: 1,
+      editable: true,
+      engineLimited: false,
+      freshness: "current",
+      generation: "authored",
+      retracted: false,
+    },
+    notationOccurrences: [],
+    requirements: [],
+    truncated: false,
+  };
+  return {
+    ...observation("reviewed-formula-domain", "partial", false),
+    authoringContext,
+    relations: [
+      {
+        fileId: "main",
+        formulaRange: formula.location.range,
+        range: formula.location.range,
+        relationId: "test:law",
+        roles: [{ role: "value", symbol: "x" }],
+        sourceGrounded: true,
+      },
+    ],
   };
 }
 

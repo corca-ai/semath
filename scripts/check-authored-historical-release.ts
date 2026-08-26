@@ -51,6 +51,11 @@ try {
           causes: ["decision", "excluded-relation", "proof-grounding"],
         },
       ],
+      approvedFormulaDecisionDomainIds: [
+        "CA-HO-06-probe-revised-prime-notation",
+        "FMH-027-01-probe-water-volume-flow",
+        "probability-holdout-structural-conditional-expectation-001-probe-event-set-operations",
+      ],
       approvedSourceGroundedNavigationRecoveries: [
         {
           caseId: "OPTML-HO-03-probe",
@@ -97,7 +102,7 @@ try {
     );
   }
   console.log(
-    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; raw risk ${resultReport.score.risk.total}; reviewed formula-boundary identity adjudications 1; source-grounded navigation recoveries 1; conservative proof adjudications 1`,
+    `historical release gate OK: ${resultReport.score.passed}/${resultReport.score.cases}; raw risk ${resultReport.score.risk.total}; reviewed legacy formula-domain adjudications 3; formula-boundary identity adjudications 1; source-grounded navigation recoveries 1; conservative proof adjudications 1`,
   );
 } finally {
   await rm(temporary, { force: true, recursive: true });
