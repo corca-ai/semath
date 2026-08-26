@@ -133,6 +133,34 @@ export function hypothesisIsEstablishmentGrade(
   );
 }
 
+export function hypothesisIsMathematicalAuthority(
+  hypothesis: MathInterpretationHypothesisInfo,
+): boolean {
+  if (
+    hypothesis.kind === "typed-law" && hypothesis.formula !== undefined &&
+    hypothesis.relation !== undefined
+  ) {
+    return hypothesisIsEstablishmentGrade(
+      hypothesis as FormulaRelationHypothesis,
+    );
+  }
+  if (
+    hypothesis.kind !== "source-meaning" || hypothesis.formula === undefined ||
+    (hypothesis.support !== "explicit" && hypothesis.support !== "derived") ||
+    hypothesis.missingDiscriminatorIds.length > 0 ||
+    hypothesis.bindings.length > 0 ||
+    hypothesis.conditions.some((condition) => condition.status !== "verified")
+  ) {
+    return false;
+  }
+  return hypothesis.evidence.some(
+    (evidence) =>
+      evidence.role === "supporting" &&
+      interpretationEvidenceIsGrounded(evidence) &&
+      evidenceOwnsFormula(evidence, hypothesis.formula!),
+  );
+}
+
 export function selectedFormulaMeaningIsEstablishmentGrade(
   input: SelectedFormulaObservationInput,
 ): boolean {

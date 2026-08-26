@@ -15,6 +15,7 @@ import {
   parseMathAuthoringContextExpectation,
   type StableMathAuthoringContext,
 } from "./math-authoring-development";
+import { hypothesisIsMathematicalAuthority } from "./challenge-observation";
 import type { CorpusDocument } from "./model";
 import { roleInstancesMatch, type ObservedRole } from "./observation";
 
@@ -755,7 +756,7 @@ export function authoredFalseEstablishmentCases(
       causes.add("formula-decision");
       const authority = (observed.authoringContext?.interpretations ??
         observed.interpretations)?.hypotheses.filter(
-          authoredHypothesisIsMathematicalAuthority,
+          hypothesisIsMathematicalAuthority,
         ) ?? [];
       grounding.push(
         authority.length > 0 && authority.every((hypothesis) =>
@@ -810,7 +811,7 @@ export function authoredFalseEstablishmentCases(
       : leakedRelations.filter((relation) =>
         interpretations.hypotheses.some((hypothesis) =>
           hypothesis.relation?.relationId === relation.relationId &&
-          authoredHypothesisIsMathematicalAuthority(hypothesis)
+          hypothesisIsMathematicalAuthority(hypothesis)
         )
       );
     if (falselyEstablishedRelations.length > 0) {
@@ -828,18 +829,6 @@ export function authoredFalseEstablishmentCases(
     }
   }
   return cases;
-}
-
-function authoredHypothesisIsMathematicalAuthority(
-  hypothesis: MathInterpretationHypothesisInfo,
-): boolean {
-  if (hypothesis.support === "explicit" || hypothesis.support === "derived") {
-    return true;
-  }
-  return hypothesis.support === "supported" &&
-    (hypothesis.kind === "typed-law" ||
-      hypothesis.kind === "source-meaning" ||
-      hypothesis.kind === "reviewed-convention");
 }
 
 export function observeAuthoredScientificProbe(

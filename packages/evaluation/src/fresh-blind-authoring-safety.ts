@@ -15,6 +15,7 @@ import {
   mathAuthoringContextSafetyFailures,
   type MathAuthoringContextFailure,
 } from "./math-authoring-development";
+import { hypothesisIsMathematicalAuthority } from "./challenge-observation";
 
 export interface FreshBlindAuthoringHypothesisSelector {
   readonly anchor: AuthoredSourceAnchor;
@@ -217,7 +218,7 @@ export function freshBlindAuthoringSafetySummary(
       probe,
     );
     compareHypotheses(
-      context.interpretations.hypotheses.filter(isMathematicalAuthority),
+      context.interpretations.hypotheses.filter(hypothesisIsMathematicalAuthority),
       expectation.allowedAuthority,
       expectation.requiredAuthority,
       snapshot,
@@ -304,15 +305,6 @@ function matches(
     (hypothesis.relation?.relationId ?? null) === selector.relationId &&
     location.fileId === anchor.fileId && location.path === anchor.path &&
     sameRange(location.range, anchor.range);
-}
-
-function isMathematicalAuthority(
-  hypothesis: MathInterpretationHypothesisInfo,
-): boolean {
-  if (hypothesis.support === "explicit" || hypothesis.support === "derived") return true;
-  return hypothesis.support === "supported" &&
-    (hypothesis.kind === "typed-law" || hypothesis.kind === "source-meaning" ||
-      hypothesis.kind === "reviewed-convention");
 }
 
 function selectorSets(expectation: FreshBlindAuthoringSafetyExpectation) {

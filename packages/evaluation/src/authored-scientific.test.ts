@@ -451,10 +451,8 @@ describe("independently authored scientific corpus", () => {
     );
     expect(candidateOnly.risk.falseEstablishment).toBe(0);
 
-    observation.interpretations = interpretationSet(
+    observation.interpretations = authoritativeSourceMeaningSet(
       "candidate-law",
-      "typed-law",
-      "supported",
     );
     expect(scoreAuthoredScientificFixture(fixture, [observation]).risk)
       .toMatchObject({ falseEstablishment: 1 });
@@ -903,6 +901,55 @@ function interpretationSet(
 ): MathInterpretationSetInfo {
   return {
     hypotheses: [{ kind, relation: { relationId }, support }],
+  } as unknown as MathInterpretationSetInfo;
+}
+
+function authoritativeSourceMeaningSet(
+  relationId: string,
+): MathInterpretationSetInfo {
+  const range = { startOffset: 35, endOffset: 44 };
+  const formula = {
+    documentVersion: 1,
+    location: { fileId: "main", path: "main.tex", range },
+    scopePath: [],
+    sourceNotation: "$x_0=y_0$",
+  };
+  const evidence = {
+    kind: "canonical-math" as const,
+    ruleId: "test/source-meaning",
+    sourceRanges: [range],
+    strength: "hard" as const,
+  };
+  return {
+    hypotheses: [{
+      bindings: [],
+      conditions: [],
+      documentVersion: 1,
+      evidence: [{
+        evidence,
+        provenance: "explicit-declaration",
+        role: "supporting",
+        sourceAnchors: [{
+          documentVersion: 1,
+          generation: "authored",
+          lifecycle: "current",
+          location: formula.location,
+          scopePath: [],
+        }],
+      }],
+      formula,
+      hypothesisId: relationId,
+      kind: "source-meaning",
+      label: relationId,
+      location: formula.location,
+      missingDiscriminatorIds: [],
+      orderingReasons: [],
+      range,
+      rank: 0,
+      relation: { relationId },
+      scopePath: [],
+      support: "explicit",
+    }],
   } as unknown as MathInterpretationSetInfo;
 }
 

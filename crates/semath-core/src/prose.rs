@@ -3211,6 +3211,7 @@ fn collect_semantic_evidence(
                     | "calculation"
                     | "proposal"
                     | "statement"
+                    | "root"
             )
         };
         let is_target_tail = |word: &str| {
@@ -3266,6 +3267,7 @@ fn collect_semantic_evidence(
                         | "reviewed"
                         | "selected"
                         | "shown"
+                        | "exact"
                 )
             };
             match prefix.as_slice() {
@@ -3305,6 +3307,10 @@ fn collect_semantic_evidence(
                     | "withdrew"
                     | "withdrawn"
                     | "withdrawing"
+                    | "retract"
+                    | "retracts"
+                    | "retracted"
+                    | "retracting"
                     | "reject"
                     | "rejects"
                     | "rejected"
@@ -3574,10 +3580,45 @@ fn collect_semantic_evidence(
             .filter(|word| !word.is_empty())
             .map(str::to_owned)
             .collect::<Vec<_>>();
-        words.windows(2).any(|pair| {
-            matches!(pair[0].as_str(), "this" | "that")
-                && matches!(
-                    pair[1].as_str(),
+        words.iter().enumerate().any(|(action, word)| {
+            if !matches!(
+                word.as_str(),
+                "reject"
+                    | "rejects"
+                    | "rejected"
+                    | "withdraw"
+                    | "withdraws"
+                    | "withdrew"
+                    | "discard"
+                    | "discards"
+                    | "discarded"
+                    | "retract"
+                    | "retracts"
+                    | "retracted"
+            ) {
+                return false;
+            }
+            let tail = &words[action + 1..];
+            if !tail
+                .first()
+                .is_some_and(|word| matches!(word.as_str(), "this" | "that" | "the"))
+            {
+                return false;
+            }
+            let target = tail
+                .iter()
+                .skip(1)
+                .take_while(|word| {
+                    matches!(
+                        word.as_str(),
+                        "current" | "displayed" | "exact" | "reviewed" | "selected"
+                    )
+                })
+                .count()
+                + 1;
+            tail.get(target).is_some_and(|word| {
+                matches!(
+                    word.as_str(),
                     "formula"
                         | "equation"
                         | "identity"
@@ -3589,8 +3630,29 @@ fn collect_semantic_evidence(
                         | "calculation"
                         | "proposal"
                         | "statement"
+                        | "root"
                 )
+            })
         })
+    };
+    let demonstrative_preceding_target = |value: &str| {
+        let words = value
+            .to_ascii_lowercase()
+            .split(|character: char| !character.is_ascii_alphabetic())
+            .filter(|word| !word.is_empty())
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        words
+            .windows(2)
+            .any(|pair| matches!(pair[0].as_str(), "this" | "that") && pair[1] == "proposal")
+            || words.windows(3).any(|window| {
+                matches!(window[0].as_str(), "this" | "that" | "the")
+                    && matches!(window[1].as_str(), "earlier" | "preceding" | "previous")
+                    && matches!(
+                        window[2].as_str(),
+                        "formula" | "equation" | "identity" | "relation" | "root"
+                    )
+            })
     };
     let attachment = AttachmentGraph::new(document);
     let scopes = ScopeGraph::new(document);
@@ -3638,6 +3700,8 @@ fn collect_semantic_evidence(
             let rejected_formula_range = if clause.frame.polarity == EvidencePolarity::Negative {
                 let demonstrative_target =
                     demonstrative_formula_target(&source[clause.start..clause.end]);
+                let preceding_target =
+                    demonstrative_preceding_target(&source[clause.start..clause.end]);
                 polarity_range.clone().and_then(|marker| {
                     let clause_scope = scopes.path_at(range.start_offset);
                     let mut candidates = parsed
@@ -3645,10 +3709,7 @@ fn collect_semantic_evidence(
                         .map(|math| math.region.content_range.clone())
                         .filter(|formula| {
                             scope_visible(&clause_scope, &scopes.path_at(formula.start_offset))
-                                && (attachment.permits(&range, formula)
-                                    || demonstrative_target
-                                        && formula.end_offset <= range.start_offset
-                                        && range.start_offset - formula.end_offset <= 32)
+                                && (attachment.permits(&range, formula) || demonstrative_target)
                         })
                         .filter_map(|formula| {
                             let marker_distance = if formula.end_offset <= marker.start_offset {
@@ -3665,7 +3726,9 @@ fn collect_semantic_evidence(
                             } else {
                                 0
                             };
-                            (clause_distance <= 32).then_some((marker_distance, formula))
+                            let maximum_distance = if demonstrative_target { 960 } else { 32 };
+                            (clause_distance <= maximum_distance)
+                                .then_some((marker_distance, formula))
                         })
                         .collect::<Vec<_>>();
                     let clause_words = source[clause.start..clause.end]
@@ -3674,6 +3737,33 @@ fn collect_semantic_evidence(
                         .filter(|word| !word.is_empty())
                         .map(str::to_owned)
                         .collect::<Vec<_>>();
+                    if demonstrative_target {
+                        if preceding_target {
+                            candidates
+                                .retain(|(_, formula)| formula.end_offset <= range.start_offset);
+                            if candidates.len() != 1 {
+                                return None;
+                            }
+                        }
+                        let local = candidates
+                            .iter()
+                            .filter(|(_, formula)| {
+                                if formula.end_offset <= range.start_offset {
+                                    range.start_offset - formula.end_offset <= 32
+                                } else if range.end_offset <= formula.start_offset {
+                                    formula.start_offset - range.end_offset <= 32
+                                } else {
+                                    true
+                                }
+                            })
+                            .cloned()
+                            .collect::<Vec<_>>();
+                        if local.len() == 1 {
+                            candidates = local;
+                        } else if !local.is_empty() || candidates.len() != 1 {
+                            return None;
+                        }
+                    }
                     if candidates.len() > 1
                         && clause_words.iter().any(|word| {
                             matches!(
@@ -3733,7 +3823,8 @@ fn collect_semantic_evidence(
                             true,
                             ranges_overlap(&range, &formula),
                         );
-                    (refusal_before_formula || refusal_after_formula).then_some(formula)
+                    (demonstrative_target || refusal_before_formula || refusal_after_formula)
+                        .then_some(formula)
                 })
             } else {
                 None
@@ -5021,6 +5112,18 @@ fn collect_assumptions(
             &condition_phrases,
             &condition_formula_descriptors,
         ) {
+            let value = if assumption.kind == "condition-selection" {
+                let Some(condition_id) = reviewed_condition_selection_target(
+                    source,
+                    assumption.phrase_start,
+                    &assumption.value,
+                ) else {
+                    continue;
+                };
+                condition_id
+            } else {
+                assumption.value.clone()
+            };
             let phrase_range = SourceRange {
                 start_offset: index.utf16_for_byte(assumption.phrase_start),
                 end_offset: index.utf16_for_byte(assumption.phrase_end),
@@ -5066,10 +5169,7 @@ fn collect_assumptions(
             source_ranges.push(phrase_range);
             output.assumptions.push(AssumptionInfo {
                 kind: assumption.kind,
-                value: target_assumption_value(
-                    assumption.value,
-                    assumption.target_relation_id.as_deref(),
-                ),
+                value: target_assumption_value(value, assumption.target_relation_id.as_deref()),
                 subjects: assumption
                     .subjects
                     .into_iter()
@@ -5164,6 +5264,36 @@ fn collect_assumptions(
             .then(left.value.cmp(&right.value))
     });
     output.assumptions.dedup();
+}
+
+fn reviewed_condition_selection_target(
+    source: &str,
+    phrase_start: usize,
+    selection_kind: &str,
+) -> Option<String> {
+    const MAX_CONDITION_SELECTION_ANTECEDENT_BYTES: usize = 640;
+
+    let window_start = phrase_start.saturating_sub(MAX_CONDITION_SELECTION_ANTECEDENT_BYTES);
+    let antecedent = source.get(window_start..phrase_start)?.to_ascii_lowercase();
+    built_in_packs()
+        .iter()
+        .flat_map(|pack| &pack.laws)
+        .flat_map(|law| &law.conditions)
+        .filter(|condition| {
+            matches!(
+                (selection_kind, condition.kind),
+                ("same-context", PackConditionKind::SameContext)
+                    | ("positive", PackConditionKind::Positive)
+            )
+        })
+        .filter_map(|condition| {
+            let marker = format!("condition {}:", condition.id.to_ascii_lowercase());
+            antecedent
+                .rfind(&marker)
+                .map(|offset| (offset, condition.id.clone()))
+        })
+        .max_by_key(|(offset, _)| *offset)
+        .map(|(_, condition_id)| condition_id)
 }
 
 fn collect_typed_regularity_assumptions(
