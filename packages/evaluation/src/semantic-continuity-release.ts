@@ -1,6 +1,7 @@
 import type {
   SemanticContinuityDecision,
   SemanticContinuityFixture,
+  SemanticContinuityObservation,
   SemanticContinuityScorecard,
 } from "./semantic-continuity";
 
@@ -14,6 +15,37 @@ export interface SemanticContinuityReleaseBaseline {
   readonly cases: number;
   readonly maximumRisk: number;
   readonly minimumPassed: number;
+}
+
+export function selectSemanticContinuityFormulaDecisions(
+  observations: readonly SemanticContinuityObservation[],
+  selectedFormulaCaseIds: readonly string[],
+): readonly SemanticContinuityObservation[] {
+  const selected = new Set(selectedFormulaCaseIds);
+  if (selected.size !== selectedFormulaCaseIds.length) {
+    throw new Error(
+      "semantic continuity formula selections contain duplicate case IDs",
+    );
+  }
+  const known = new Set(observations.map((item) => item.caseId));
+  for (const caseId of selected) {
+    if (!known.has(caseId)) {
+      throw new Error(`unknown semantic continuity formula selection ${caseId}`);
+    }
+  }
+  return observations.map((item) => {
+    if (!selected.has(item.caseId)) return item;
+    if (
+      item.formulaDecision === null ||
+      item.formulaDecision === "conventional" ||
+      item.formulaDecision === "engine-limited"
+    ) {
+      throw new Error(
+        `${item.caseId}: selected formula has no legacy continuity decision`,
+      );
+    }
+    return { ...item, decision: item.formulaDecision };
+  });
 }
 
 export function adjudicateSemanticContinuityDecisions(

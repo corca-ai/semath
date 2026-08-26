@@ -23,6 +23,7 @@ describe("semantic continuity holdout", () => {
         caseId: item.id,
         decision: item.id === "lifetime-shadowing-0" ? "conflicting" : "partial",
         definitions: [],
+        formulaDecision: null,
         problems: item.id === "lifetime-shadowing-0" ? 1 : 0,
         relationIds: [],
         shapeKinds: [],
