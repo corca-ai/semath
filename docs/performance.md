@@ -1,6 +1,6 @@
 # Performance gates
 
-Semath measures the complete authoring path: wasmtex syntax construction,
+Semath measures the complete analysis path: wasmtex syntax construction,
 adapter encoding, Worker-host scheduling, JS/WASM transfer, semantic update, and
 cursor queries. CorTeX DOM rendering is intentionally outside this core gate.
 
@@ -13,6 +13,18 @@ bun run budget:scale
 bun run budget:stable
 mkdir -p .artifacts && bun run budget:report
 ```
+
+Absolute time and process-RSS limits are calibrated for x86_64 Linux. On other
+hosts `budget` still verifies semantic work, invalidation, transfer, fanout,
+artifact, and parity bounds, but reports time and RSS as diagnostics. Reports
+include the host, Bun version, enforced limits, and live WASM linear-memory
+size. `budget:stable` refuses other hosts so their samples cannot qualify a
+release. Explicit `SEMATH_BUDGET_TIMING_GATE=1` and `SEMATH_BUDGET_RSS_GATE=1`
+remain available for investigating a local reference-limit violation.
+
+Process RSS includes host allocator and runtime memory; it is not interchangeable
+with live engine allocations or macOS physical footprint. Linux retained-memory
+limits are 112/192 MiB. Compare revisions on the same host.
 
 The fixture set deterministically rotates through the reported ECE expression,
 nested modifiers and styles, dense matrices, Unicode and combining characters,
@@ -70,9 +82,7 @@ This is a structural dispatch budget, independent of installed pack count.
 Pure 100-pack and 500-pack fixtures include collision-heavy structural families,
 not only unique operators. Domain ordering must place supported candidates in
 the bounded frontier without losing any result accepted by the exhaustive test
-oracle; genuine identical alternatives remain ambiguous. Full challenge and
-corpus execution stays manual, while deterministic counters and caps remain in
-ordinary gates.
+oracle; genuine identical alternatives remain ambiguous. Deterministic counters and caps remain in ordinary gates.
 
 Ordinary CI runs both document counts to catch deterministic scope, transfer,
 memory, and artifact regressions. It enforces latency on the smaller fixture,

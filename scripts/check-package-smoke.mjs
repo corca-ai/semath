@@ -14,11 +14,15 @@ try {
     "examples/lsp.mjs",
     "packages/authoring/cli.mjs",
     "packages/authoring/src/index.ts",
-    "packages/evaluation/src/index.ts",
   ];
   const names = new Set(metadata.files.map((file) => file.path));
   for (const path of required) {
     if (!names.has(path)) throw new Error(`packed release is missing ${path}`);
+  }
+  for (const path of names) {
+    if (path.startsWith("scripts/") || path.startsWith("fixtures/") || /\.test\.ts$/u.test(path)) {
+      throw new Error(`packed release includes development-only file ${path}`);
+    }
   }
   const tarball = join(temporary, metadata.filename);
   await writeFile(
@@ -39,14 +43,6 @@ try {
       "node_modules/semath/packages/authoring/cli.mjs",
       "validate",
       "authoring/pack.json",
-    ],
-    temporary,
-  );
-  run(
-    "bun",
-    [
-      "-e",
-      'import { parseQualityManifest } from "semath/evaluation"; if (typeof parseQualityManifest !== "function") throw new Error("missing evaluation export")',
     ],
     temporary,
   );

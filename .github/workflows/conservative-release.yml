@@ -1,0 +1,41 @@
+name: conservative-release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          components: clippy, rustfmt
+          targets: wasm32-unknown-unknown
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - name: Install documentation linter
+        run: |
+          curl -fsSL https://github.com/corca-ai/awiki/releases/download/v0.5.0/awiki-x86_64-unknown-linux-gnu.tar.xz -o /tmp/awiki.tar.xz
+          echo 'c0b7ee22c089130c5ace0cd7201cf8c39a48afbfbc220463b03f5ba41fe8200e  /tmp/awiki.tar.xz' | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          tar -xJf /tmp/awiki.tar.xz -C /tmp
+          install -m 0755 /tmp/awiki-x86_64-unknown-linux-gnu/awiki "$HOME/.local/bin/awiki"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: bun run release:check
+      - name: Retain qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conservative-release-${{ github.sha }}
+          path: |
+            .artifacts/conservative-release.json
+            .artifacts/conservative-package/
+            lib/wasm/
+          if-no-files-found: error

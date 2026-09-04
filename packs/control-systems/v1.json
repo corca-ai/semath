@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "control-systems",
-  "packVersion": "1.1.0",
+  "packVersion": "1.1.1",
   "packKind": "field",
   "namespace": "control-systems",
   "title": "Control systems",
@@ -155,90 +155,25 @@
           "id": "state",
           "concept": "control-systems:state",
           "description": "State vector and its derivative.",
-          "shape": "vector",
-          "notation": [
-            "x",
-            "z",
-            "q",
-            "s",
-            "y",
-            "xi",
-            "chi",
-            "rho",
-            "omega",
-            "p",
-            "a",
-            "h",
-            "theta",
-            "zeta",
-            "X"
-          ]
+          "shape": "vector"
         },
         {
           "id": "state-matrix",
           "concept": "control-systems:state-matrix",
           "description": "State matrix.",
-          "shape": "matrix",
-          "notation": [
-            "A",
-            "F",
-            "M",
-            "K",
-            "C",
-            "H",
-            "R",
-            "U",
-            "E",
-            "B",
-            "D",
-            "G",
-            "L"
-          ]
+          "shape": "matrix"
         },
         {
           "id": "input-matrix",
           "concept": "control-systems:input-matrix",
           "description": "Input matrix.",
-          "shape": "matrix",
-          "notation": [
-            "B",
-            "G",
-            "N",
-            "L",
-            "D",
-            "J",
-            "S",
-            "V",
-            "F",
-            "A",
-            "C",
-            "H",
-            "K",
-            "R"
-          ]
+          "shape": "matrix"
         },
         {
           "id": "control-input",
           "concept": "control-systems:control-input",
           "description": "Control input.",
-          "shape": "vector",
-          "notation": [
-            "u",
-            "v",
-            "w",
-            "r",
-            "e",
-            "eta",
-            "nu",
-            "sigma",
-            "tau",
-            "c",
-            "b",
-            "j",
-            "mu",
-            "upsilon",
-            "U"
-          ]
+          "shape": "vector"
         }
       ],
       "conditions": [
@@ -268,49 +203,19 @@
           "id": "state-matrix",
           "concept": "control-systems:state-matrix",
           "description": "State matrix.",
-          "shape": "matrix",
-          "notation": [
-            "A",
-            "F",
-            "M",
-            "K",
-            "C",
-            "B",
-            "D",
-            "E",
-            "G",
-            "L"
-          ]
+          "shape": "matrix"
         },
         {
           "id": "certificate",
           "concept": "control-systems:lyapunov-certificate",
           "description": "Lyapunov matrix.",
-          "shape": "matrix",
-          "notation": [
-            "P",
-            "X",
-            "H",
-            "Y",
-            "Z",
-            "J",
-            "L"
-          ]
+          "shape": "matrix"
         },
         {
           "id": "forcing",
           "concept": "control-systems:forcing-matrix",
           "description": "Forcing matrix.",
-          "shape": "matrix",
-          "notation": [
-            "Q",
-            "W",
-            "R",
-            "S",
-            "N",
-            "T",
-            "Omega"
-          ]
+          "shape": "matrix"
         }
       ],
       "conditions": [
@@ -344,51 +249,31 @@
           "id": "output",
           "concept": "control-systems:output",
           "description": "System output.",
-          "shape": "vector",
-          "notation": [
-            "y",
-            "z"
-          ]
+          "shape": "vector"
         },
         {
           "id": "output-matrix",
           "concept": "control-systems:output-matrix",
           "description": "Output matrix.",
-          "shape": "matrix",
-          "notation": [
-            "C",
-            "H"
-          ]
+          "shape": "matrix"
         },
         {
           "id": "state",
           "concept": "control-systems:state",
           "description": "State vector.",
-          "shape": "vector",
-          "notation": [
-            "x",
-            "z"
-          ]
+          "shape": "vector"
         },
         {
           "id": "feedthrough-matrix",
           "concept": "control-systems:feedthrough-matrix",
           "description": "Feedthrough matrix.",
-          "shape": "matrix",
-          "notation": [
-            "D",
-            "J"
-          ]
+          "shape": "matrix"
         },
         {
           "id": "control-input",
           "concept": "control-systems:control-input",
           "description": "Control input.",
-          "shape": "vector",
-          "notation": [
-            "u",
-            "v"
-          ]
+          "shape": "vector"
         }
       ],
       "conditions": [

@@ -1,6 +1,21 @@
+export interface PerformanceHost {
+  readonly platform: string;
+  readonly architecture: string;
+}
+
+const currentHost: PerformanceHost = {
+  platform: process.platform,
+  architecture: process.arch,
+};
+
+export function isReleasePerformanceHost(host: PerformanceHost = currentHost): boolean {
+  return host.platform === "linux" && host.architecture === "x64";
+}
+
 export function shouldEnforceTiming(
   environment: Readonly<Record<string, string | undefined>>,
   documentCount: number,
+  host: PerformanceHost = currentHost,
 ): boolean {
   const override = environment.SEMATH_BUDGET_TIMING_GATE;
   if (override !== undefined) {
@@ -8,7 +23,8 @@ export function shouldEnforceTiming(
     if (override === "0") return false;
     throw new Error("SEMATH_BUDGET_TIMING_GATE must be 0 or 1");
   }
-  return environment.SEMATH_BUDGET_STABLE === "1" || documentCount < 500;
+  return isReleasePerformanceHost(host)
+    && (environment.SEMATH_BUDGET_STABLE === "1" || documentCount < 500);
 }
 
 export function retainedRssBudgetBytes(documentCount: number): number {
@@ -33,9 +49,11 @@ export function timingBudget(documentCount: number, stableHost: boolean): Timing
 
 export function shouldEnforceRetainedRss(
   environment: Readonly<Record<string, string | undefined>>,
+  host: PerformanceHost = currentHost,
 ): boolean {
   const override = environment.SEMATH_BUDGET_RSS_GATE;
-  if (override === undefined || override === "1") return true;
+  if (override === undefined) return isReleasePerformanceHost(host);
+  if (override === "1") return true;
   if (override === "0") return false;
   throw new Error("SEMATH_BUDGET_RSS_GATE must be 0 or 1");
 }

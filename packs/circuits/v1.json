@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "circuits",
-  "packVersion": "1.0.0",
+  "packVersion": "1.0.1",
   "packKind": "field",
   "namespace": "circuits",
   "title": "Electric circuits",
@@ -70,38 +70,19 @@
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Voltage across the component.",
-          "shape": "scalar",
-          "notation": [
-            "V",
-            "v",
-            "U",
-            "E",
-            "e",
-            "DeltaV"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Current through the component.",
-          "shape": "scalar",
-          "notation": [
-            "I",
-            "i",
-            "J",
-            "j"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "resistance",
           "concept": "quantities-units:resistance",
           "description": "Electrical resistance of the component.",
-          "shape": "scalar",
-          "notation": [
-            "R",
-            "r",
-            "rho"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
@@ -140,20 +121,6 @@
           "id": "branch-current",
           "concept": "quantities-units:electric-current",
           "description": "A signed current incident on the node.",
-          "notation": [
-            "I",
-            "i",
-            "J",
-            "j",
-            "a",
-            "b",
-            "c",
-            "k",
-            "p",
-            "q",
-            "r",
-            "s"
-          ],
           "variadic": true
         }
       ],
@@ -164,13 +131,13 @@
           "subjects": [
             "branch-current"
           ],
-        "evidencePhrases": [
-          "node convention",
-          "junction convention",
-          "currents entering the node",
-          "currents leaving the node",
-          "currents directed into the junction",
-          "currents directed away"
+          "evidencePhrases": [
+            "node convention",
+            "junction convention",
+            "currents entering the node",
+            "currents leaving the node",
+            "currents directed into the junction",
+            "currents directed away"
           ],
           "label": "All branch-current signs use one node convention."
         }
@@ -203,44 +170,26 @@
           "concept": "quantities-units:electric-current",
           "description": "Capacitor current.",
           "shape": "scalar",
-          "notation": [
-            "I",
-            "i",
-            "j"
-          ]
+          "sourceProjection": "head"
         },
         {
           "id": "capacitance",
           "concept": "quantities-units:capacitance",
           "description": "Capacitance.",
-          "shape": "scalar",
-          "notation": [
-            "C",
-            "K",
-            "B"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Capacitor voltage.",
           "shape": "scalar",
-          "notation": [
-            "V",
-            "v",
-            "u",
-            "e"
-          ]
+          "sourceProjection": "head"
         },
         {
           "id": "time",
           "concept": "quantities-units:duration",
           "description": "Time variable.",
-          "shape": "scalar",
-          "notation": [
-            "t",
-            "tau"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
@@ -275,41 +224,26 @@
           "concept": "quantities-units:voltage",
           "description": "Inductor terminal voltage.",
           "shape": "scalar",
-          "notation": [
-            "V",
-            "v",
-            "u"
-          ]
+          "sourceProjection": "head"
         },
         {
           "id": "inductance",
           "concept": "quantities-units:inductance",
           "description": "Inductance.",
-          "shape": "scalar",
-          "notation": [
-            "L"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Inductor current.",
           "shape": "scalar",
-          "notation": [
-            "I",
-            "i",
-            "j"
-          ]
+          "sourceProjection": "head"
         },
         {
           "id": "time",
           "concept": "quantities-units:duration",
           "description": "Time variable.",
-          "shape": "scalar",
-          "notation": [
-            "t",
-            "tau"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [

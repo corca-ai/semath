@@ -25,11 +25,10 @@ use crate::scope::{ScopeGraph, scope_visible};
 use crate::shape::ShapeObservations;
 use crate::source_index::SourceIndex;
 use crate::{
-    AssumptionInfo, ConstraintStatus, DomainSupportTier, Evidence, LawBinding, LawBindingProof,
-    LawConditionInfo, LawRecognition, LawRecognitionStatus,
-    MathInterpretationEvidenceSourceAnchorInfo, MeaningConflict, OperatorProperty, QuantityInfo,
-    RelationInfo, RelationRoleInfo, RoleInfo, ScientificConstraintKind, SemanticConstraint,
-    SemanticConstraintKind, ShapeInfo, SourceRange,
+    AssumptionInfo, ConstraintStatus, Evidence, LawBinding, LawBindingProof, LawConditionInfo,
+    LawRecognition, LawRecognitionStatus, MathInterpretationEvidenceSourceAnchorInfo,
+    MeaningConflict, OperatorProperty, QuantityInfo, RelationInfo, RelationRoleInfo, RoleInfo,
+    ScientificConstraintKind, SemanticConstraint, SemanticConstraintKind, ShapeInfo, SourceRange,
 };
 
 const MAX_LAW_MATCHES_PER_EXPRESSION: usize = 16;
@@ -735,7 +734,6 @@ impl LawObservations {
         let established = self
             .recognitions
             .iter()
-            .filter(|recognition| !recognition.non_authoritative)
             .filter(|recognition| {
                 matches!(
                     recognition.status,
@@ -777,7 +775,6 @@ impl ExternalTypeEnvironment {
             let mut derived = observations
                 .all()
                 .iter()
-                .filter(|recognition| !recognition.non_authoritative)
                 .filter(|recognition| {
                     recognition.range.end_offset <= formula.start_offset
                         && matches!(
@@ -943,8 +940,6 @@ pub(crate) fn observe_laws(
         }
         let alternatives = structural_alternatives(actual);
         let mut frontier = LAW_DISPATCH.candidates_for(&alternatives);
-        let dominant_context_pack =
-            dominant_frontier_context_pack(&frontier, context.domains, actual.range.start_offset);
         let recognition_start = recognitions.len();
         let mut traversed_latent = false;
         pack_frontier_candidates += frontier.len() as u32;
@@ -982,12 +977,6 @@ pub(crate) fn observe_laws(
                         &compiled.law.id,
                     )
                 });
-            let role_context_activated = relevance.as_ref().is_some_and(|relevance| {
-                matches!(
-                    relevance.support,
-                    DomainSupportTier::Explicit | DomainSupportTier::Supported
-                )
-            }) || dominant_context_pack == Some(compiled.pack_id);
             let exact_match = plan_matches_exact(&compiled.plan, actual);
             if !exact_match && recognitions.len() > recognition_start {
                 continue;
@@ -1035,10 +1024,6 @@ pub(crate) fn observe_laws(
             });
             let attached_role_support =
                 attached_declared_role_support || attached_formula_role_support;
-            let context_only_admission = !compiled.law.activation_phrases.is_empty()
-                && activation.is_none()
-                && !attached_role_support
-                && role_context_activated;
             if !compiled.law.activation_phrases.is_empty()
                 && pack_requires_explicit_law_activation(compiled.pack_id)
                 && activation.is_none()
@@ -1048,7 +1033,7 @@ pub(crate) fn observe_laws(
             }
             if !compiled.law.activation_phrases.is_empty()
                 && activation.is_none()
-                && ((!attached_role_support && !role_context_activated)
+                && (!attached_role_support
                     || recognitions[recognition_start..].iter().any(|recognized| {
                         laws_share_collision(
                             &recognized.pack_id,
@@ -1093,7 +1078,6 @@ pub(crate) fn observe_laws(
                         actual,
                         inferred_role.as_deref(),
                         actual.range.start_offset,
-                        role_context_activated || activation.is_some(),
                         activation.is_some(),
                         activation.is_some_and(|activation| activation.identifies_attached_formula),
                         context.shapes,
@@ -1131,24 +1115,6 @@ pub(crate) fn observe_laws(
                 &recognition_context,
                 activation,
             );
-            recognized.conventional_candidate = context_only_admission
-                || (activation.is_none()
-                    && role_context_activated
-                    && (!attached_role_support
-                        || relevance.as_ref().is_some_and(|relevance| {
-                            relevance.support == DomainSupportTier::Tentative
-                        }))
-                    && recognized.bindings.iter().any(|binding| {
-                        binding.proof == LawBindingProof::Asserted
-                            && compiled.law.roles.iter().any(|role| {
-                                let PackLawRole { id, notation, .. } = role;
-                                id == &binding.parameter
-                                    && notation.iter().any(|candidate| {
-                                        notation_matches_symbol(candidate, &binding.symbol)
-                                    })
-                            })
-                    }));
-            recognized.non_authoritative = context_only_admission;
             recognized.rank = relevance.as_ref().map_or(
                 if is_capability_pack(compiled.pack_id) {
                     25
@@ -1178,34 +1144,6 @@ pub(crate) fn observe_laws(
         pack_latent_candidates,
         pack_latent_fallbacks,
     }
-}
-
-fn dominant_frontier_context_pack<'a>(
-    frontier: &[&'a CompiledLaw],
-    domains: &DomainObservations,
-    offset: u32,
-) -> Option<&'a str> {
-    let mut ranked = frontier
-        .iter()
-        .filter(|compiled| {
-            compiled.law.activation_phrases.is_empty()
-                || !pack_requires_explicit_law_activation(compiled.pack_id)
-        })
-        .filter_map(|compiled| {
-            domains
-                .relevance(compiled.pack_id, offset)
-                .map(|relevance| (support_rank(relevance.support), compiled.pack_id))
-        })
-        .collect::<Vec<_>>();
-    ranked.sort_unstable();
-    ranked.dedup();
-    let best_rank = ranked.first()?.0;
-    let mut best = ranked
-        .iter()
-        .filter(|(rank, _)| *rank == best_rank)
-        .map(|(_, pack_id)| *pack_id);
-    let pack_id = best.next()?;
-    best.next().is_none().then_some(pack_id)
 }
 
 fn strip_formula_presentation(
@@ -2583,7 +2521,6 @@ fn plan_role_support(
     actual: &SemanticExpr,
     inferred_role: Option<&str>,
     offset: u32,
-    notation_context_activated: bool,
     law_explicitly_activated: bool,
     formula_identified: bool,
     shapes: &ShapeObservations,
@@ -2599,19 +2536,6 @@ fn plan_role_support(
         let bound_expression = bindings.get(&role.id)?;
         let projected_expression = match (&bound_expression.kind, role.source_projection) {
             (SemanticExprKind::Apply { operator, .. }, RoleSourceProjection::Head) => {
-                Some(SemanticExpr {
-                    kind: SemanticExprKind::Symbol(operator.value.clone()),
-                    range: operator.range.clone(),
-                    provenance: operator.provenance.clone(),
-                })
-            }
-            (SemanticExprKind::Apply { operator, .. }, RoleSourceProjection::Expression)
-                if notation_context_activated
-                    && role
-                        .notation
-                        .iter()
-                        .any(|notation| notation_matches_symbol(notation, operator.as_str())) =>
-            {
                 Some(SemanticExpr {
                     kind: SemanticExprKind::Symbol(operator.value.clone()),
                     range: operator.range.clone(),
@@ -2653,11 +2577,6 @@ fn plan_role_support(
                 supported_roles.insert(role.id.as_str(), RoleBindingProof::DerivedFromTypes);
                 continue;
             }
-            RoleSupport::Asserted => {
-                supported += 1;
-                supported_roles.insert(role.id.as_str(), RoleBindingProof::Asserted);
-                continue;
-            }
             RoleSupport::Refuted => return None,
             RoleSupport::Unresolved => {}
         }
@@ -2677,8 +2596,6 @@ fn plan_role_support(
                 symbol,
                 &expression.range,
                 offset,
-                notation_context_activated,
-                law_explicitly_activated,
                 shapes,
                 quantities,
                 consistency,
@@ -2705,17 +2622,6 @@ fn plan_role_support(
                 };
                 supported_roles.insert(role.id.as_str(), proof);
             }
-            RoleSupport::Asserted => {
-                supported += 1;
-                supported_roles.insert(
-                    role.id.as_str(),
-                    if formula_operator_role_support(role, expression, actual).is_proven() {
-                        RoleBindingProof::Derived
-                    } else {
-                        RoleBindingProof::Asserted
-                    },
-                );
-            }
             RoleSupport::Unresolved => {
                 if formula_operator_role_support(role, expression, actual).is_proven() {
                     supported += 1;
@@ -2731,18 +2637,7 @@ fn plan_role_support(
     let unresolved_role = (unresolved == 1)
         .then(|| unresolved_roles.first().copied())
         .flatten();
-    let asserted_roles = supported_roles
-        .iter()
-        .filter_map(|(role, proof)| (*proof == RoleBindingProof::Asserted).then_some(*role))
-        .collect::<Vec<_>>();
-    let asserted_role = (asserted_roles.len() == 1).then(|| asserted_roles[0].to_owned());
-    let inferable_role = if unresolved == 1 && asserted_roles.is_empty() {
-        unresolved_role
-    } else if unresolved == 0 && asserted_roles.len() == 1 {
-        asserted_role.as_deref()
-    } else {
-        None
-    };
+    let inferable_role = unresolved_role;
     let proved = supported_roles
         .values()
         .filter(|proof| {
@@ -2775,9 +2670,6 @@ fn plan_role_support(
         .into_iter()
         .map(|(role, proof)| (role.to_owned(), proof))
         .collect::<BTreeMap<_, _>>();
-    if inferred && let Some(role) = asserted_role {
-        proofs.insert(role, RoleBindingProof::Derived);
-    }
     for role in unresolved_roles {
         let proof = if inferred && Some(role) == unresolved_role {
             RoleBindingProof::Derived
@@ -3441,7 +3333,6 @@ fn role_expression_is_atomic(expression: &SemanticExpr) -> bool {
 enum RoleSupport {
     Typed,
     Derived,
-    Asserted,
     Unresolved,
     Refuted,
 }
@@ -3455,7 +3346,6 @@ impl RoleSupport {
         match (self, other) {
             (Self::Refuted, _) | (_, Self::Refuted) => Self::Refuted,
             (Self::Unresolved, _) | (_, Self::Unresolved) => Self::Unresolved,
-            (Self::Asserted, _) | (_, Self::Asserted) => Self::Asserted,
             (Self::Derived, _) | (_, Self::Derived) => Self::Derived,
             (Self::Typed, Self::Typed) => Self::Typed,
         }
@@ -3468,8 +3358,6 @@ fn role_symbol_support(
     symbol: &str,
     symbol_range: &SourceRange,
     offset: u32,
-    notation_context_activated: bool,
-    law_explicitly_activated: bool,
     shapes: &ShapeObservations,
     quantities: &QuantityObservations,
     consistency: &RoleObservations,
@@ -3503,11 +3391,6 @@ fn role_symbol_support(
     {
         return RoleSupport::Derived;
     }
-    let activated_notation_support = notation_context_activated
-        && role
-            .notation
-            .iter()
-            .any(|notation| notation_matches_symbol(notation, symbol));
     let required_quantity = role
         .quantity
         .as_deref()
@@ -3524,19 +3407,6 @@ fn role_symbol_support(
     if required_quantity == RoleSupport::Refuted {
         return RoleSupport::Refuted;
     }
-    let notation_support = || {
-        if law_explicitly_activated {
-            RoleSupport::Derived
-        } else {
-            RoleSupport::Asserted
-        }
-    };
-    let required_quantity =
-        if required_quantity == RoleSupport::Unresolved && activated_notation_support {
-            notation_support()
-        } else {
-            required_quantity
-        };
     let declared_roles = consistency.roles_at(symbol, offset).0;
     let has_exact_role = declared_roles
         .iter()
@@ -3597,32 +3467,18 @@ fn role_symbol_support(
         let shape_proves_concept = role.concept.split(':').next_back() == Some(expected_shape)
             || (role.concept == "linear-algebra:linear-operator" && expected_shape == "matrix");
         if shape_proves_concept {
-            return required_quantity.and(
-                if shape_support == RoleSupport::Unresolved && activated_notation_support {
-                    notation_support()
-                } else {
-                    shape_support
-                },
-            );
-        }
-        if activated_notation_support && shape_support.is_proven() {
-            return required_quantity.and(notation_support());
+            return required_quantity.and(shape_support);
         }
     }
     let concept_support = if role.concept.starts_with("quantities-units:") {
-        let support = quantity_support(
+        quantity_support(
             &role.concept,
             symbol,
             notation_symbol,
             offset,
             quantities,
             external,
-        );
-        if support == RoleSupport::Unresolved && activated_notation_support {
-            notation_support()
-        } else {
-            support
-        }
+        )
     } else if role.concept == "linear-algebra:linear-operator" {
         let local_matrix = shapes
             .shape_at(symbol, offset)
@@ -3631,8 +3487,6 @@ fn role_symbol_support(
             RoleSupport::Typed
         } else if shape_support.is_proven() {
             shape_support
-        } else if activated_notation_support {
-            notation_support()
         } else {
             RoleSupport::Unresolved
         }
@@ -3651,8 +3505,6 @@ fn role_symbol_support(
         } else {
             RoleSupport::Typed
         }
-    } else if activated_notation_support {
-        notation_support()
     } else {
         RoleSupport::Unresolved
     };
@@ -3967,7 +3819,6 @@ fn recognition(
         title: compiled.law.title.clone(),
         description: compiled.law.description.clone(),
         description_key: compiled.law.id.clone(),
-        maturity: "recognition".into(),
         status,
         pack_id: compiled.pack_id.into(),
         pack_version: compiled.pack_version.into(),
@@ -3997,8 +3848,6 @@ fn recognition(
         evidence,
         relevance: None,
         rank: 100,
-        conventional_candidate: false,
-        non_authoritative: false,
     }
 }
 
@@ -4399,19 +4248,10 @@ fn structural_condition_evidence(
             source_anchors: Vec::new(),
         });
     }
-    if condition.kind == PackConditionKind::Differentiable && condition.subjects.len() == 2 {
-        let function = bindings.get(&condition.subjects[0])?;
-        let variable = bindings.get(&condition.subjects[1])?;
-        if expression_asserts_derivative(actual, function, variable) {
-            return Some(Evidence {
-                rule_id: "canonical-regularity/asserted-derivative".into(),
-                kind: "canonical-binding".into(),
-                strength: "hard".into(),
-                source_ranges: vec![actual.range.clone()],
-                source_anchors: Vec::new(),
-            });
-        }
-    }
+    // A derivative expression identifies the function and variable roles, but
+    // it cannot prove its own differentiability precondition.  That would make
+    // every asserted derivative circularly self-justifying and would override
+    // explicit prose that withholds or contradicts regularity.
     if condition.kind == PackConditionKind::SameContext
         && application_roles_share_arguments(&condition.subjects, bindings, actual)
     {
@@ -4706,26 +4546,6 @@ fn collect_application_arguments<'a>(
     }
 }
 
-fn expression_asserts_derivative(
-    expression: &SemanticExpr,
-    function: &SemanticExpr,
-    variable: &SemanticExpr,
-) -> bool {
-    if let SemanticExprKind::Derivative {
-        expression,
-        variable: derivative_variable,
-        ..
-    } = &expression.kind
-        && equivalent(expression, function)
-        && semantic_symbol(variable).is_some_and(|name| name == derivative_variable.value)
-    {
-        return true;
-    }
-    crate::canonical::expression_children(expression)
-        .into_iter()
-        .any(|child| expression_asserts_derivative(child, function, variable))
-}
-
 const MAX_ASSUMPTION_DISTANCE: u32 = 640;
 const MAX_ATTACHED_ASSUMPTION_GAP: u32 = 16;
 
@@ -4821,6 +4641,21 @@ fn assumption_condition_evidence(
                 .iter()
                 .all(|subject| condition_symbols_contain(&symbols, subject));
         }
+        if condition.kind == PackConditionKind::Differentiable
+            && assumption.kind == "regularity"
+            && matches!(assumption_value, "differentiable" | "not-differentiable")
+        {
+            let function_symbols = condition
+                .subjects
+                .first()
+                .and_then(|role| bindings.get(role))
+                .map(semantic_symbols)
+                .unwrap_or_default();
+            return !function_symbols.is_empty()
+                && function_symbols
+                    .iter()
+                    .all(|symbol| condition_symbols_contain(&assumption.subjects, symbol));
+        }
         symbols
             .iter()
             .all(|symbol| condition_symbols_contain(&assumption.subjects, symbol))
@@ -4904,10 +4739,7 @@ fn assumption_condition_evidence(
         {
             resolution.supporting = Some(assumption_public_evidence(assumption));
         }
-        if resolution.refuting.is_none()
-            && condition.kind == PackConditionKind::SignConvention
-            && typed_assumption(assumption) == TypedAssumption::OpposedSignConvention
-        {
+        if resolution.refuting.is_none() && assumption_refutes_condition(condition, assumption) {
             resolution.refuting = Some(assumption_public_evidence(assumption));
         }
         if resolution.supporting.is_some() && resolution.refuting.is_some() {
@@ -4915,6 +4747,22 @@ fn assumption_condition_evidence(
         }
     }
     resolution
+}
+
+fn assumption_refutes_condition(condition: &PackLawCondition, assumption: &AssumptionInfo) -> bool {
+    let value = assumption_value_and_target(&assumption.value).0;
+    if value.strip_prefix("not-") == Some(condition.id.as_str()) {
+        return true;
+    }
+    match (condition.kind, assumption.kind.as_str(), value) {
+        (PackConditionKind::Differentiable, "regularity", "not-differentiable") => true,
+        (PackConditionKind::Positive, "sign", "not-positive" | "nonpositive") => true,
+        (PackConditionKind::Uniform, "uniformity", "not-uniform") => true,
+        (PackConditionKind::SignConvention, _, _) => {
+            typed_assumption(assumption) == TypedAssumption::OpposedSignConvention
+        }
+        _ => false,
+    }
 }
 
 fn assumption_supports_condition(
@@ -5935,7 +5783,7 @@ mod tests {
     }
 
     #[test]
-    fn recognizes_v025_vertical_relations() {
+    fn recognizes_explicit_typed_relations() {
         let wave_template = lower_template(
             "\\nabla^2 field = \\frac{1}{speed^2} \\frac{\\partial^2 field}{\\partial time^2}",
         );
@@ -6259,35 +6107,14 @@ mod tests {
     }
 
     #[test]
-    fn a_unique_frontier_domain_prior_can_activate_existing_notation_support() {
-        assert_eq!(
-            recognized_laws(
-                "For the inductor, the passive sign convention is used. $v_L=L\\frac{di_L}{dt}$."
-            ),
-            ["inductor-voltage-law"]
-        );
-        assert!(
-            recognized_laws("An electric circuit model is compared with electromagnetism. $P=VI$.")
-                .is_empty()
-        );
-
-        let period =
-            recognized_law_observations("For a periodic signal, the asserted relation is $f=1/T$.")
-                .into_iter()
-                .find(|law| law.law_id == "period-frequency-reciprocity")
-                .expect("reviewed notation supplies the frequency quantity roles");
-        assert_eq!(period.status, LawRecognitionStatus::ConditionMissing);
-        assert!(
-            period
-                .bindings
-                .iter()
-                .all(|binding| binding.proof == LawBindingProof::Asserted),
-            "domain routing and formula-level assertion may expose a candidate but cannot type its roles: {period:?}"
-        );
-        assert!(period.conditions.iter().any(|condition| {
-            condition.kind == ScientificConstraintKind::Positive
-                && condition.status == ConstraintStatus::Required
-        }));
+    fn field_context_and_familiar_notation_do_not_supply_role_types() {
+        for source in [
+            r"For the inductor, the passive sign convention is used. $v_L=L\frac{di_L}{dt}$.",
+            r"An electric circuit model is compared with electromagnetism. $P=VI$.",
+            r"For a periodic signal, the asserted relation is $f=1/T$.",
+        ] {
+            assert!(recognized_laws(source).is_empty(), "{source}");
+        }
     }
 
     #[test]
@@ -6349,7 +6176,7 @@ mod tests {
 
     #[test]
     fn explicit_measurement_context_verifies_frequency_conversions() {
-        let source = r"The measured-period stage estimates the oscillator period from successive rising edges.
+        let source = r"Let $T$ be oscillator period and $f$ cyclic frequency. The oscillator period $T$ is positive. The measured-period stage estimates the oscillator period from successive rising edges.
 The computed ordinary-frequency stage uses
 \[f=1/T.\]
 The same oscillator's converted angular-frequency stage then supplies the phase accumulator with
@@ -6838,7 +6665,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
-    fn blind_extension_adds_matrix_vector_product_with_pack_data_only() {
+    fn matrix_vector_product_uses_pack_data_only() {
         let source = "Let $A$ be an m by n matrix. Let $x$ be an n-dimensional vector. Let $y$ be an m-dimensional vector. $y=Ax$";
         assert_eq!(recognized_laws(source), ["matrix-vector-product"]);
     }
@@ -6857,7 +6684,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
-    fn blind_extension_adds_event_intersection_with_pack_data_only() {
+    fn event_intersection_uses_pack_data_only() {
         let source = "Let $A$ be an event. Let $B$ be an event. $A \\cap B$";
         assert_eq!(recognized_laws(source), ["event-intersection"]);
     }
@@ -7071,7 +6898,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
             ["capacitor-current-law"]
         );
         let public_capacitor = recognized_law_observations(
-            "Let $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, and let $i_C(t)$ enter the positive terminal. Under this passive sign convention, the capacitor law is\n\\[\ni_C(t)=C\\frac{dv_C}{dt}(t).\n\\]",
+            "Let $C>0$ be a constant capacitance, let $v_C(t)$ be the voltage from the marked positive terminal to the marked negative terminal, let $i_C(t)$ be electric current entering the positive terminal, and let $t$ be time. Under this passive sign convention, the capacitor law is\n\\[\ni_C(t)=C\\frac{dv_C}{dt}(t).\n\\]",
         );
         let public_capacitor = public_capacitor
             .iter()
@@ -7111,12 +6938,6 @@ This conversion is performed once per accepted timing sample so the accumulator 
         assert_eq!(
             recognized_laws(
                 "Current $i_{\\rm out}$ is referenced leaving the positive-voltage terminal. We write $i_{\\rm out}$ for electric current scalar. We write $C$ for capacitance scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar. \\[i_{\\rm out}=-C\\,dv/dt\\]."
-            ),
-            ["capacitor-current-law"]
-        );
-        assert_eq!(
-            recognized_laws(
-                "The next formula is presented without an assumed named law. \\begin{equation}q_{1323}\\end{equation} Current $i_{\\rm out}$ is referenced leaving the positive-voltage terminal, so We write $i_{\\rm out}$ for electric current scalar. We write $C$ for capacitance scalar. We write $v$ for voltage scalar. We write $t$ for duration scalar. \\[i_{\\rm out}=-C\\,dv/dt\\]."
             ),
             ["capacitor-current-law"]
         );
@@ -7237,7 +7058,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
     }
 
     #[test]
-    fn promotion_laws_use_only_the_generic_compiled_runtime() {
+    fn typed_laws_use_only_the_generic_compiled_runtime() {
         for (source, expected) in [
             (
                 "For this matrix product, let $A$ be an m by n matrix. Let $B$ be an n by p matrix. Let $C$ be an m by p matrix. $C=AB$",
@@ -7504,7 +7325,7 @@ This conversion is performed once per accepted timing sample so the accumulator 
     #[test]
     fn recognizes_source_grounded_closed_system_balance_without_a_law_specific_path() {
         let observations = recognized_law_observations(
-            "The vessel is a closed system. Heat into the system and work done by the system are positive. The balance is $\\Delta U=Q-W$.",
+            "Let $\\Delta U$ be change in internal energy, $Q$ heat added to the system, and $W$ work done by the system. The vessel is a closed system. Heat into the system and work done by the system are positive. The balance is $\\Delta U=Q-W$.",
         );
         let recognition = observations
             .iter()
@@ -7723,13 +7544,13 @@ P_s=V_sI_s.
         let condition = &derivative[0].conditions[0];
         assert_eq!(condition.condition_id, "function-differentiable");
         assert_eq!(condition.kind, ScientificConstraintKind::Differentiable);
-        assert_eq!(condition.status, ConstraintStatus::Verified);
         assert_eq!(condition.subjects, ["f", "x"]);
+        assert_eq!(condition.status, ConstraintStatus::Required);
         assert!(
             condition
                 .evidence
                 .iter()
-                .any(|evidence| { evidence.rule_id == "canonical-regularity/asserted-derivative" })
+                .all(|evidence| evidence.rule_id != "canonical-regularity/asserted-derivative")
         );
         assert!(
             condition

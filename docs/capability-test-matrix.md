@@ -1,20 +1,30 @@
 # Capability and test-layer matrix
 
-The lowest layer that can state a behavior owns its permutations. E2E tests are
-reserved for real editor, Worker, and deployment wiring.
+Tests specify the [supported scope](conservative-analysis.md). The lowest layer
+that can state a behavior owns its permutations. Boundary checks use the real
+syntax adapter and shipped engine; passing native helpers alone is insufficient.
 
-| Capability | Authoritative test | Boundary evidence | E2E responsibility |
-| --- | --- | --- | --- |
-| Notation CST, UTF-16, cursor paths, malformed input | wasmtex contract plus `bun run notation:conformance` matrix/generative tests | adapter and clean/incremental parity | editor selection wiring |
-| Semantic selection and binders | Rust cursor/parser/binder properties plus the neutral eight-family cursor plan | 102 native/WASM view/navigation queries | one semantic selection journey |
-| Definitions, references, rename | pure shared-authorization, scope/capture, fanout-cap, and include-order properties | LSP mapping without fallback and both cursor edges | one navigation journey |
-| Canonical meaning and typed laws | Rust canonical/unifier tests plus manifest-owned corpus | protocol and native/WASM equality | one meaning-first view |
-| Shapes, quantities, roles, diagnostics | pure extractors and contradiction tests | Worker/LSP result mapping | reveal one source-linked conflict |
-| Domain packs | Rust schema-12 compiler tests, conformance, pack-derived property planning, and evaluated or probe corpus | clean package and compiled catalog | none |
-| Document-level scientific reasoning | pure authored-fixture schema, source-anchor, review-seal, wasmtex CST fingerprint, prose-shingle, and risk-scorer tests | manual six-surface native evaluation; one-shot sealed fresh-blind evaluation with clean/incremental lifecycle parity and an immutable receipt | unchanged meaning, navigation, and real-conflict journeys |
-| Incremental analysis | pure six-family lifecycle planning, first-divergence comparison, shrinking, reverse-include closure, and clean-rebuild equivalence | fixed-sample and manual full-lifecycle parity plus 61/501-document budgets | one rapid-edit wiring case |
-| Worker lifecycle | pure queue and generation policy tests | real engine recreation | one project-switch or crash case |
-| CorTeX formula meaning | pure calm-presentation and bounded view-model tests | component integration tests | one meaning and one real-conflict journey |
+| Capability | Authoritative check | Boundary check |
+| --- | --- | --- |
+| Syntax, UTF-16 ranges, malformed input | wasmtex contract and notation conformance | adapter tests and native/WASM parity |
+| Definition, reference, and cursor identity | Rust scope, binder, source-order, and hygiene tests | Markdown/TeX acceptance and LSP mapping |
+| Rename | Rust complete-set, capture, generated-source, and fanout refusal tests | real rename acceptance and Worker/LSP mapping |
+| Shape, dimension, and unit consistency | Rust typed-operation and evidence tests | foundation fixtures and positive/negative acceptance |
+| Formula evidence and uncertainty | Rust source-grounding and unsupported-input tests | formula-root acceptance and cursor parity |
+| Pack compilation | Rust compiler, unifier, and dependency tests | `bun run pack:authoring` and package smoke |
+| Incremental analysis | Rust retraction and dependency tests | full lifecycle parity and clean rebuild comparison |
+| Worker lifecycle | queue, generation, and transaction tests | engine reset/recreation and package examples |
+| Performance bounds | pure policy and bounded-work tests | 61/501-document measurements on x86_64 Linux |
 
-New E2E permutations must identify a browser-only risk not covered below that
-boundary. Pack and notation combinations belong in corpus tests.
+`bun run check` runs local code and supported-behavior checks. `bun run quality`
+adds the foundation regressions, complete lifecycle traces, and stable repeated
+performance measurements. [Release qualification](compatibility.md) records the
+exact tested source and artifacts.
+
+Keep examples small and independently understandable. Every diagnostic needs a
+corresponding grounded case and a missing-evidence case. Changes to evidence
+handling must preserve retraction and native/WASM parity. Do not replace useful
+positive cases with silence merely to make a check pass.
+
+Editor E2E tests belong to the host and should cover wiring risks that cannot be
+expressed below the UI. Semantic permutations belong here.

@@ -5,7 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub const PACK_SCHEMA_VERSION: u32 = 12;
+pub const PACK_SCHEMA_VERSION: u32 = 13;
 const MAX_PACK_BYTES: usize = 256 * 1024;
 
 include!(concat!(env!("OUT_DIR"), "/pack_catalog.rs"));
@@ -295,8 +295,6 @@ pub struct PackLawRole {
     pub description: String,
     #[serde(default)]
     pub shape: Option<String>,
-    #[serde(default)]
-    pub notation: Vec<String>,
     #[serde(default, skip_serializing_if = "RoleSourceProjection::is_expression")]
     pub source_projection: RoleSourceProjection,
     #[serde(default)]
@@ -1263,7 +1261,7 @@ mod tests {
 
     #[test]
     fn compiles_the_single_current_schema_and_catalog() {
-        assert_eq!(PACK_SCHEMA_VERSION, 12);
+        assert_eq!(PACK_SCHEMA_VERSION, 13);
         assert_eq!(built_in_packs().len(), 14);
         validate_catalog(built_in_packs()).unwrap();
     }

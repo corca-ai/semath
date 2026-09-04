@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "linear-algebra",
-  "packVersion": "1.4.0",
+  "packVersion": "1.4.1",
   "packKind": "field",
   "namespace": "linear-algebra",
   "title": "Linear algebra",
@@ -369,29 +369,19 @@
           "id": "result",
           "concept": "linear-algebra:vector",
           "description": "Output vector.",
-          "shape": "vector",
-          "notation": [
-            "b",
-            "y"
-          ]
+          "shape": "vector"
         },
         {
           "id": "operator",
           "concept": "linear-algebra:linear-operator",
           "description": "Linear operator represented by a matrix.",
-          "shape": "matrix",
-          "notation": [
-            "A"
-          ]
+          "shape": "matrix"
         },
         {
           "id": "vector",
           "concept": "linear-algebra:vector",
           "description": "Input vector.",
-          "shape": "vector",
-          "notation": [
-            "x"
-          ]
+          "shape": "vector"
         }
       ],
       "conditions": [

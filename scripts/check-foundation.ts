@@ -1,26 +1,25 @@
+import { readFile, readdir } from "node:fs/promises";
 import {
   type FoundationObservation,
-  observedQualityRelations,
+  parseFoundationCorpus,
   scoreFoundation,
-} from "../packages/evaluation/src/index";
-import {
-  loadFoundationFixtures,
-  loadQualityFixtures,
-} from "./evaluation-fixtures";
+} from "./testing/foundation";
 import { runSemanticEvaluation } from "./semantic-evaluation-runner";
 
-const { manifest } = await loadQualityFixtures();
-const corpora = await loadFoundationFixtures(manifest);
-const planned = manifest.foundationSuites.flatMap((suite) => {
-  const corpus = corpora.get(suite.id);
-  if (!corpus) throw new Error(`${suite.id}: foundation corpus was not loaded`);
-  return corpus.cases.map((item) => ({ case: item, suite }));
-});
+const directory = new URL("../fixtures/foundation/", import.meta.url);
+const paths = (await readdir(directory)).filter((path) => path.endsWith(".json")).sort();
+if (!paths.length) throw new Error("foundation fixtures are missing");
+const corpora = await Promise.all(paths.map(async (path) =>
+  parseFoundationCorpus(JSON.parse(await readFile(new URL(path, directory), "utf8"))),
+));
+const planned = corpora.flatMap((corpus) =>
+  corpus.cases.map((item) => ({ case: item, suiteId: corpus.domain })),
+);
 const results = runSemanticEvaluation(
   planned.map((item) => ({
     cursor: item.case.cursor,
     documents: item.case.documents,
-    id: `${item.suite.id}/${item.case.id}`,
+    id: `${item.suiteId}/${item.case.id}`,
   })),
   "foundation-corpus",
 );
@@ -52,13 +51,21 @@ const observations = planned.map((item, index): FoundationObservation => {
     ))],
     relationIds: [
       ...new Set(
-        observedQualityRelations(view?.authoringContext).map(
-          (entry) => entry.relationId,
-        ),
+        (view?.formulaAnalysis.interpretations.hypotheses ?? []).flatMap((hypothesis) => {
+          const formula = view?.formulaAnalysis.formula;
+          const anchor = hypothesis.formula;
+          return hypothesis.kind === "typed-law" && hypothesis.support !== "contradicted" &&
+            hypothesis.relation && formula && anchor &&
+            anchor.location.fileId === formula.location.fileId &&
+            anchor.documentVersion === formula.documentVersion &&
+            anchor.location.range.startOffset === formula.location.range.startOffset &&
+            anchor.location.range.endOffset === formula.location.range.endOffset
+            ? [hypothesis.relation.relationId] : [];
+        }),
       ),
     ],
-    ...(view ? { status: view.authoringContext.disposition } : {}),
-    suiteId: item.suite.id,
+    ...(view ? { status: view.formulaAnalysis.disposition } : {}),
+    suiteId: item.suiteId,
     symbols: [...new Set([
       ...quantities.map((entry) => entry.symbol),
       ...(view?.symbol ? [view.symbol.symbol] : []),
@@ -72,18 +79,8 @@ const observations = planned.map((item, index): FoundationObservation => {
   return observation;
 });
 
-for (const suite of manifest.foundationSuites) {
-  const corpus = corpora.get(suite.id)!;
-  const scorecard = scoreFoundation(
-    suite,
-    corpus,
-    observations.filter((item) => item.suiteId === suite.id),
-    new Map(manifest.dimensions.map((dimension) => [dimension.id, dimension.tags])),
-  );
-  console.log(
-    `${suite.id}: passed=${scorecard.passed}/${scorecard.cases} dimensions=${Object.entries(scorecard.dimensions).map(([id, count]) => `${id}:${count}`).join(",")} metrics=${Object.entries(scorecard.metrics).map(([id, value]) => `${id}:${value.passed}/${value.cases}`).join(",")}`,
-  );
-  if (scorecard.failures.length) {
-    throw new Error(`foundation quality gate failed:\n${scorecard.failures.join("\n")}`);
-  }
+for (const corpus of corpora) {
+  const result = scoreFoundation(corpus.domain, corpus, observations.filter((item) => item.suiteId === corpus.domain));
+  console.log(`${corpus.domain}: passed=${result.passed}/${result.cases}`);
+  if (result.failures.length) throw new Error(`foundation regression failed:\n${result.failures.join("\n")}`);
 }

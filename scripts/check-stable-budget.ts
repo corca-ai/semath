@@ -3,9 +3,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   medianSample,
+  isReleasePerformanceHost,
   retainedRssBudgetBytes,
   timingBudget,
 } from "./performance-budget-policy";
+
+if (!isReleasePerformanceHost()) {
+  throw new Error("stable release performance requires x86_64 Linux; use bun run budget for host diagnostics");
+}
 
 const SAMPLE_COUNT = 5;
 const configurations = [

@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "numerical-analysis",
-  "packVersion": "1.0.0",
+  "packVersion": "1.0.1",
   "packKind": "field",
   "namespace": "numerical-analysis",
   "title": "Numerical analysis",
@@ -31,243 +31,370 @@
       "conceptKind": "quantity",
       "title": "Exact value",
       "description": "A declared reference value against which an approximation is compared.",
-      "aliases": ["reference value", "exact solution"],
+      "aliases": [
+        "reference value",
+        "exact solution"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "approximate-value",
       "conceptKind": "quantity",
       "title": "Approximate value",
       "description": "A declared numerical approximation that does not inherit exact-equality authority.",
-      "aliases": ["numerical approximation", "approximate solution", "computed value"],
+      "aliases": [
+        "numerical approximation",
+        "approximate solution",
+        "computed value"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "absolute-error",
       "conceptKind": "quantity",
       "title": "Absolute error",
       "description": "The norm of the difference between an exact and approximate value.",
-      "aliases": ["absolute approximation error"],
+      "aliases": [
+        "absolute approximation error"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "relative-error",
       "conceptKind": "quantity",
       "title": "Relative error",
       "description": "An absolute error normalized by a nonzero reference magnitude.",
-      "aliases": ["relative approximation error"],
+      "aliases": [
+        "relative approximation error"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "truncation-error",
       "conceptKind": "quantity",
       "title": "Truncation error",
       "description": "Error introduced by truncating an analytic or discrete representation.",
-      "aliases": ["local truncation error"],
+      "aliases": [
+        "local truncation error"
+      ],
       "parents": [],
-      "references": ["leveque"]
+      "references": [
+        "leveque"
+      ]
     },
     {
       "id": "discretization-error",
       "conceptKind": "quantity",
       "title": "Discretization error",
       "description": "Error between a continuous model and its declared discretization.",
-      "aliases": ["mesh error", "grid error"],
+      "aliases": [
+        "mesh error",
+        "grid error"
+      ],
       "parents": [],
-      "references": ["leveque"]
+      "references": [
+        "leveque"
+      ]
     },
     {
       "id": "error-bound",
       "conceptKind": "quantity",
       "title": "Error bound",
       "description": "A declared nonnegative upper bound for a numerical error.",
-      "aliases": ["a priori error bound", "a posteriori error bound"],
+      "aliases": [
+        "a priori error bound",
+        "a posteriori error bound"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "tolerance",
       "conceptKind": "quantity",
       "title": "Numerical tolerance",
       "description": "A declared positive stopping threshold.",
-      "aliases": ["solver tolerance", "stopping tolerance"],
+      "aliases": [
+        "solver tolerance",
+        "stopping tolerance"
+      ],
       "parents": [],
-      "references": ["golub-van-loan"]
+      "references": [
+        "golub-van-loan"
+      ]
     },
     {
       "id": "discretization-step",
       "conceptKind": "quantity",
       "title": "Discretization step",
       "description": "A positive spatial, temporal, or iterative step parameter.",
-      "aliases": ["mesh spacing", "grid spacing", "time step", "positive step size"],
+      "aliases": [
+        "mesh spacing",
+        "grid spacing",
+        "time step",
+        "positive step size"
+      ],
       "parents": [],
-      "references": ["leveque"]
+      "references": [
+        "leveque"
+      ]
     },
     {
       "id": "asymptotic-order",
       "conceptKind": "quantity",
       "title": "Asymptotic order",
       "description": "An explicit exponent in a stated asymptotic error class.",
-      "aliases": ["convergence order", "method order"],
+      "aliases": [
+        "convergence order",
+        "method order"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "order-coefficient",
       "conceptKind": "quantity",
       "title": "Error coefficient",
       "description": "A declared scalar coefficient in an error bound.",
-      "aliases": ["error constant"],
+      "aliases": [
+        "error constant"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "numerical-residual",
       "conceptKind": "quantity",
       "title": "Numerical residual",
       "description": "The source mismatch remaining for a declared numerical approximation.",
-      "aliases": ["linear residual", "solver residual"],
+      "aliases": [
+        "linear residual",
+        "solver residual"
+      ],
       "parents": [],
-      "references": ["golub-van-loan"]
+      "references": [
+        "golub-van-loan"
+      ]
     },
     {
       "id": "numerical-iterate",
       "conceptKind": "entity",
       "title": "Numerical iterate",
       "description": "A current or next member of an explicitly declared iterative sequence.",
-      "aliases": ["solver iterate", "iteration vector"],
+      "aliases": [
+        "solver iterate",
+        "iteration vector"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "convergence-limit",
       "conceptKind": "entity",
       "title": "Convergence limit",
       "description": "The explicitly stated limit of a numerical sequence.",
-      "aliases": ["iteration limit"],
+      "aliases": [
+        "iteration limit"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "convergence-rate",
       "conceptKind": "quantity",
       "title": "Convergence rate",
       "description": "A declared contraction or error-reduction factor.",
-      "aliases": ["contraction factor", "linear convergence factor"],
+      "aliases": [
+        "contraction factor",
+        "linear convergence factor"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "function-value",
       "conceptKind": "quantity",
       "title": "Root-function value",
       "description": "The value of the declared root-finding function at an iterate.",
-      "aliases": ["root residual value"],
+      "aliases": [
+        "root residual value"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "derivative-value",
       "conceptKind": "quantity",
       "title": "Root-function derivative",
       "description": "The declared derivative value used by a root-finding update.",
-      "aliases": ["root derivative value"],
+      "aliases": [
+        "root derivative value"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "integral-approximation",
       "conceptKind": "quantity",
       "title": "Quadrature approximation",
       "description": "A numerical approximation to a declared integral.",
-      "aliases": ["quadrature value", "numerical integral"],
+      "aliases": [
+        "quadrature value",
+        "numerical integral"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "sample-value",
       "conceptKind": "quantity",
       "title": "Sampled function value",
       "description": "A function value at a declared quadrature or finite-difference node.",
-      "aliases": ["grid value", "nodal value", "sample value"],
+      "aliases": [
+        "grid value",
+        "nodal value",
+        "sample value"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "derivative-approximation",
       "conceptKind": "quantity",
       "title": "Derivative approximation",
       "description": "A finite-difference approximation to a declared derivative.",
-      "aliases": ["finite-difference derivative"],
+      "aliases": [
+        "finite-difference derivative"
+      ],
       "parents": [],
-      "references": ["leveque"]
+      "references": [
+        "leveque"
+      ]
     },
     {
       "id": "interpolant-value",
       "conceptKind": "quantity",
       "title": "Interpolant value",
       "description": "The value produced by a declared interpolation rule.",
-      "aliases": ["interpolated value"],
+      "aliases": [
+        "interpolated value"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "interpolation-weight",
       "conceptKind": "quantity",
       "title": "Interpolation weight",
       "description": "A declared scalar weight in an interpolation rule.",
-      "aliases": ["basis weight"],
+      "aliases": [
+        "basis weight"
+      ],
       "parents": [],
-      "references": ["burden-faires"]
+      "references": [
+        "burden-faires"
+      ]
     },
     {
       "id": "relaxation-parameter",
       "conceptKind": "quantity",
       "title": "Relaxation parameter",
       "description": "A declared scalar coefficient in an iterative linear update.",
-      "aliases": ["relaxation factor"],
+      "aliases": [
+        "relaxation factor"
+      ],
       "parents": [],
-      "references": ["golub-van-loan"]
+      "references": [
+        "golub-van-loan"
+      ]
     },
     {
       "id": "condition-number",
       "conceptKind": "quantity",
       "title": "Condition number",
       "description": "A norm-dependent sensitivity measure for an invertible operator.",
-      "aliases": ["matrix condition number"],
+      "aliases": [
+        "matrix condition number"
+      ],
       "parents": [],
-      "references": ["golub-van-loan"]
+      "references": [
+        "golub-van-loan"
+      ]
     },
     {
       "id": "relative-input-error",
       "conceptKind": "quantity",
       "title": "Relative input perturbation",
       "description": "A declared relative perturbation of problem data.",
-      "aliases": ["relative data error", "relative input error"],
+      "aliases": [
+        "relative data error",
+        "relative input error"
+      ],
       "parents": [],
-      "references": ["golub-van-loan"]
+      "references": [
+        "golub-van-loan"
+      ]
     },
     {
       "id": "relative-output-error",
       "conceptKind": "quantity",
       "title": "Relative output perturbation",
       "description": "A declared relative response to perturbed problem data.",
-      "aliases": ["relative solution error", "relative output error"],
+      "aliases": [
+        "relative solution error",
+        "relative output error"
+      ],
       "parents": [],
-      "references": ["golub-van-loan"]
+      "references": [
+        "golub-van-loan"
+      ]
     },
     {
       "id": "discrete-operator",
       "conceptKind": "operator",
       "title": "Discrete operator",
       "description": "An explicitly declared discretization of a continuous operator.",
-      "aliases": ["discretized operator", "difference operator"],
+      "aliases": [
+        "discretized operator",
+        "difference operator"
+      ],
       "parents": [],
-      "references": ["leveque"]
+      "references": [
+        "leveque"
+      ]
     }
   ],
   "conceptBridges": [
@@ -285,12 +412,38 @@
       "title": "Approximate value relation",
       "description": "A declared approximate value is related directionally to its exact reference without becoming equal to it.",
       "roles": [
-        {"id": "approximate-value", "concept": "numerical-analysis:approximate-value", "description": "Approximate value."},
-        {"id": "exact-value", "concept": "numerical-analysis:exact-value", "description": "Exact reference value."}
+        {
+          "id": "approximate-value",
+          "concept": "numerical-analysis:approximate-value",
+          "description": "Approximate value."
+        },
+        {
+          "id": "exact-value",
+          "concept": "numerical-analysis:exact-value",
+          "description": "Exact reference value."
+        }
       ],
-      "conditions": [{"id": "declared-comparison", "kind": "same-context", "subjects": ["approximate-value", "exact-value"], "label": "Both values belong to the same declared approximation context.", "evidencePhrases": ["same numerical comparison"]}],
-      "activationPhrases": ["approximates the exact value", "numerical approximation"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "declared-comparison",
+          "kind": "same-context",
+          "subjects": [
+            "approximate-value",
+            "exact-value"
+          ],
+          "label": "Both values belong to the same declared approximation context.",
+          "evidencePhrases": [
+            "same numerical comparison"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "approximates the exact value",
+        "numerical approximation"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "approximate-value \\approx exact-value"
     },
     {
@@ -298,13 +451,43 @@
       "title": "Absolute error definition",
       "description": "Absolute error is the norm of the exact-minus-approximate difference.",
       "roles": [
-        {"id": "absolute-error", "concept": "numerical-analysis:absolute-error", "description": "Absolute error.", "shape": "scalar"},
-        {"id": "exact-value", "concept": "numerical-analysis:exact-value", "description": "Exact reference value."},
-        {"id": "approximate-value", "concept": "numerical-analysis:approximate-value", "description": "Approximate value."}
+        {
+          "id": "absolute-error",
+          "concept": "numerical-analysis:absolute-error",
+          "description": "Absolute error.",
+          "shape": "scalar"
+        },
+        {
+          "id": "exact-value",
+          "concept": "numerical-analysis:exact-value",
+          "description": "Exact reference value."
+        },
+        {
+          "id": "approximate-value",
+          "concept": "numerical-analysis:approximate-value",
+          "description": "Approximate value."
+        }
       ],
-      "conditions": [{"id": "compatible-values", "kind": "shape-compatible", "subjects": ["exact-value", "approximate-value"], "label": "The exact and approximate values share a normed space.", "evidencePhrases": ["same numerical comparison"]}],
-      "activationPhrases": ["absolute error"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "compatible-values",
+          "kind": "shape-compatible",
+          "subjects": [
+            "exact-value",
+            "approximate-value"
+          ],
+          "label": "The exact and approximate values share a normed space.",
+          "evidencePhrases": [
+            "same numerical comparison"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "absolute error"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "absolute-error = \\operatorname{norm}(exact-value - approximate-value)"
     },
     {
@@ -312,13 +495,44 @@
       "title": "Relative error definition",
       "description": "Relative error normalizes absolute error by the nonzero exact-value norm.",
       "roles": [
-        {"id": "relative-error", "concept": "numerical-analysis:relative-error", "description": "Relative error.", "shape": "scalar"},
-        {"id": "absolute-error", "concept": "numerical-analysis:absolute-error", "description": "Absolute error.", "shape": "scalar"},
-        {"id": "exact-value", "concept": "numerical-analysis:exact-value", "description": "Nonzero exact reference value."}
+        {
+          "id": "relative-error",
+          "concept": "numerical-analysis:relative-error",
+          "description": "Relative error.",
+          "shape": "scalar"
+        },
+        {
+          "id": "absolute-error",
+          "concept": "numerical-analysis:absolute-error",
+          "description": "Absolute error.",
+          "shape": "scalar"
+        },
+        {
+          "id": "exact-value",
+          "concept": "numerical-analysis:exact-value",
+          "description": "Nonzero exact reference value."
+        }
       ],
-      "conditions": [{"id": "nonzero-reference", "kind": "assumption", "subjects": ["exact-value"], "label": "The exact reference norm is nonzero.", "evidencePhrases": ["the exact reference is nonzero", "the reference norm is nonzero"]}],
-      "activationPhrases": ["relative error"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "nonzero-reference",
+          "kind": "assumption",
+          "subjects": [
+            "exact-value"
+          ],
+          "label": "The exact reference norm is nonzero.",
+          "evidencePhrases": [
+            "the exact reference is nonzero",
+            "the reference norm is nonzero"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "relative error"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "relative-error = absolute-error / \\lVert exact-value \\rVert"
     },
     {
@@ -326,14 +540,49 @@
       "title": "Truncation error bound",
       "description": "A truncation error is bounded by an explicit coefficient, step, and order.",
       "roles": [
-        {"id": "truncation-error", "concept": "numerical-analysis:truncation-error", "description": "Truncation error.", "shape": "scalar"},
-        {"id": "coefficient", "concept": "numerical-analysis:order-coefficient", "description": "Error coefficient.", "shape": "scalar"},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Discretization step.", "shape": "scalar"},
-        {"id": "order", "concept": "numerical-analysis:asymptotic-order", "description": "Explicit order exponent.", "shape": "scalar"}
+        {
+          "id": "truncation-error",
+          "concept": "numerical-analysis:truncation-error",
+          "description": "Truncation error.",
+          "shape": "scalar"
+        },
+        {
+          "id": "coefficient",
+          "concept": "numerical-analysis:order-coefficient",
+          "description": "Error coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Discretization step.",
+          "shape": "scalar"
+        },
+        {
+          "id": "order",
+          "concept": "numerical-analysis:asymptotic-order",
+          "description": "Explicit order exponent.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "positive-bound-data", "kind": "positive", "subjects": ["coefficient", "step", "order"], "label": "The coefficient, step, and order are positive."}],
-      "activationPhrases": ["truncation error bound"],
-      "references": ["leveque"],
+      "conditions": [
+        {
+          "id": "positive-bound-data",
+          "kind": "positive",
+          "subjects": [
+            "coefficient",
+            "step",
+            "order"
+          ],
+          "label": "The coefficient, step, and order are positive."
+        }
+      ],
+      "activationPhrases": [
+        "truncation error bound"
+      ],
+      "references": [
+        "leveque"
+      ],
       "canonicalRelation": "truncation-error \\le coefficient step^order"
     },
     {
@@ -341,14 +590,49 @@
       "title": "Discretization error bound",
       "description": "A discretization error is bounded by an explicit coefficient, mesh step, and order.",
       "roles": [
-        {"id": "discretization-error", "concept": "numerical-analysis:discretization-error", "description": "Discretization error.", "shape": "scalar"},
-        {"id": "coefficient", "concept": "numerical-analysis:order-coefficient", "description": "Error coefficient.", "shape": "scalar"},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Mesh step.", "shape": "scalar"},
-        {"id": "order", "concept": "numerical-analysis:asymptotic-order", "description": "Explicit order exponent.", "shape": "scalar"}
+        {
+          "id": "discretization-error",
+          "concept": "numerical-analysis:discretization-error",
+          "description": "Discretization error.",
+          "shape": "scalar"
+        },
+        {
+          "id": "coefficient",
+          "concept": "numerical-analysis:order-coefficient",
+          "description": "Error coefficient.",
+          "shape": "scalar"
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Mesh step.",
+          "shape": "scalar"
+        },
+        {
+          "id": "order",
+          "concept": "numerical-analysis:asymptotic-order",
+          "description": "Explicit order exponent.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "positive-bound-data", "kind": "positive", "subjects": ["coefficient", "step", "order"], "label": "The coefficient, step, and order are positive."}],
-      "activationPhrases": ["discretization error bound"],
-      "references": ["leveque"],
+      "conditions": [
+        {
+          "id": "positive-bound-data",
+          "kind": "positive",
+          "subjects": [
+            "coefficient",
+            "step",
+            "order"
+          ],
+          "label": "The coefficient, step, and order are positive."
+        }
+      ],
+      "activationPhrases": [
+        "discretization error bound"
+      ],
+      "references": [
+        "leveque"
+      ],
       "canonicalRelation": "discretization-error \\le coefficient step^order"
     },
     {
@@ -356,13 +640,42 @@
       "title": "Asymptotic order membership",
       "description": "A truncation error belongs to an explicit big-O class; the notation is not lowered to equality.",
       "roles": [
-        {"id": "truncation-error", "concept": "numerical-analysis:truncation-error", "description": "Truncation error."},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Asymptotic parameter.", "shape": "scalar"},
-        {"id": "order", "concept": "numerical-analysis:asymptotic-order", "description": "Asymptotic order.", "shape": "scalar"}
+        {
+          "id": "truncation-error",
+          "concept": "numerical-analysis:truncation-error",
+          "description": "Truncation error."
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Asymptotic parameter.",
+          "shape": "scalar"
+        },
+        {
+          "id": "order",
+          "concept": "numerical-analysis:asymptotic-order",
+          "description": "Asymptotic order.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "positive-step", "kind": "positive", "subjects": ["step", "order"], "label": "The asymptotic step and order are positive."}],
-      "activationPhrases": ["big O error estimate", "asymptotic error order"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "positive-step",
+          "kind": "positive",
+          "subjects": [
+            "step",
+            "order"
+          ],
+          "label": "The asymptotic step and order are positive."
+        }
+      ],
+      "activationPhrases": [
+        "big O error estimate",
+        "asymptotic error order"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "truncation-error \\in O(step^order)"
     },
     {
@@ -370,14 +683,50 @@
       "title": "Linear-system residual",
       "description": "The residual is the right-hand side minus the operator applied to the approximate solution.",
       "roles": [
-        {"id": "residual", "concept": "numerical-analysis:numerical-residual", "description": "Linear residual.", "shape": "vector"},
-        {"id": "right-hand-side", "concept": "linear-algebra:vector", "description": "Right-hand-side vector.", "shape": "vector"},
-        {"id": "operator", "concept": "linear-algebra:linear-operator", "description": "System matrix.", "shape": "matrix"},
-        {"id": "approximate-solution", "concept": "numerical-analysis:approximate-value", "description": "Approximate solution vector.", "shape": "vector"}
+        {
+          "id": "residual",
+          "concept": "numerical-analysis:numerical-residual",
+          "description": "Linear residual.",
+          "shape": "vector"
+        },
+        {
+          "id": "right-hand-side",
+          "concept": "linear-algebra:vector",
+          "description": "Right-hand-side vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:linear-operator",
+          "description": "System matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "approximate-solution",
+          "concept": "numerical-analysis:approximate-value",
+          "description": "Approximate solution vector.",
+          "shape": "vector"
+        }
       ],
-      "conditions": [{"id": "compatible-system", "kind": "shape-compatible", "subjects": ["residual", "right-hand-side", "operator", "approximate-solution"], "label": "The matrix and vectors have compatible dimensions."}],
-      "activationPhrases": ["linear system residual"],
-      "references": ["golub-van-loan"],
+      "conditions": [
+        {
+          "id": "compatible-system",
+          "kind": "shape-compatible",
+          "subjects": [
+            "residual",
+            "right-hand-side",
+            "operator",
+            "approximate-solution"
+          ],
+          "label": "The matrix and vectors have compatible dimensions."
+        }
+      ],
+      "activationPhrases": [
+        "linear system residual"
+      ],
+      "references": [
+        "golub-van-loan"
+      ],
       "canonicalRelation": "residual = right-hand-side - operator approximate-solution"
     },
     {
@@ -385,12 +734,36 @@
       "title": "Residual stopping condition",
       "description": "An iteration may stop only when the declared residual norm is within its tolerance.",
       "roles": [
-        {"id": "residual", "concept": "numerical-analysis:numerical-residual", "description": "Residual vector.", "shape": "vector"},
-        {"id": "tolerance", "concept": "numerical-analysis:tolerance", "description": "Stopping tolerance.", "shape": "scalar"}
+        {
+          "id": "residual",
+          "concept": "numerical-analysis:numerical-residual",
+          "description": "Residual vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "tolerance",
+          "concept": "numerical-analysis:tolerance",
+          "description": "Stopping tolerance.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "positive-tolerance", "kind": "positive", "subjects": ["tolerance"], "label": "The stopping tolerance is positive."}],
-      "activationPhrases": ["residual stopping criterion", "stop when the residual"],
-      "references": ["golub-van-loan"],
+      "conditions": [
+        {
+          "id": "positive-tolerance",
+          "kind": "positive",
+          "subjects": [
+            "tolerance"
+          ],
+          "label": "The stopping tolerance is positive."
+        }
+      ],
+      "activationPhrases": [
+        "residual stopping criterion",
+        "stop when the residual"
+      ],
+      "references": [
+        "golub-van-loan"
+      ],
       "canonicalRelation": "\\lVert residual \\rVert \\le tolerance"
     },
     {
@@ -398,13 +771,43 @@
       "title": "Convergence envelope",
       "description": "An iterate is within an explicit normed error bound of its stated limit.",
       "roles": [
-        {"id": "iterate", "concept": "numerical-analysis:numerical-iterate", "description": "Member of the iterative sequence.", "shape": "vector"},
-        {"id": "limit", "concept": "numerical-analysis:convergence-limit", "description": "Stated convergence limit.", "shape": "vector"},
-        {"id": "error-bound", "concept": "numerical-analysis:error-bound", "description": "Normed error bound.", "shape": "scalar"}
+        {
+          "id": "iterate",
+          "concept": "numerical-analysis:numerical-iterate",
+          "description": "Member of the iterative sequence.",
+          "shape": "vector"
+        },
+        {
+          "id": "limit",
+          "concept": "numerical-analysis:convergence-limit",
+          "description": "Stated convergence limit.",
+          "shape": "vector"
+        },
+        {
+          "id": "error-bound",
+          "concept": "numerical-analysis:error-bound",
+          "description": "Normed error bound.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "declared-limit", "kind": "domain-membership", "subjects": ["iterate", "limit", "error-bound"], "label": "The sequence member, limit, and normed bound are explicitly declared."}],
-      "activationPhrases": ["convergence error bound"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "declared-limit",
+          "kind": "domain-membership",
+          "subjects": [
+            "iterate",
+            "limit",
+            "error-bound"
+          ],
+          "label": "The sequence member, limit, and normed bound are explicitly declared."
+        }
+      ],
+      "activationPhrases": [
+        "convergence error bound"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "\\operatorname{norm}(iterate - limit) \\le error-bound"
     },
     {
@@ -412,13 +815,45 @@
       "title": "Linear convergence step",
       "description": "The next error is bounded by a declared contraction factor times the current error.",
       "roles": [
-        {"id": "next-error", "concept": "numerical-analysis:absolute-error", "description": "Next-iteration error.", "shape": "scalar"},
-        {"id": "rate", "concept": "numerical-analysis:convergence-rate", "description": "Contraction factor below one.", "shape": "scalar"},
-        {"id": "current-error", "concept": "numerical-analysis:absolute-error", "description": "Current-iteration error.", "shape": "scalar"}
+        {
+          "id": "next-error",
+          "concept": "numerical-analysis:absolute-error",
+          "description": "Next-iteration error.",
+          "shape": "scalar"
+        },
+        {
+          "id": "rate",
+          "concept": "numerical-analysis:convergence-rate",
+          "description": "Contraction factor below one.",
+          "shape": "scalar"
+        },
+        {
+          "id": "current-error",
+          "concept": "numerical-analysis:absolute-error",
+          "description": "Current-iteration error.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "contractive-rate", "kind": "assumption", "subjects": ["rate"], "label": "The declared convergence rate lies strictly between zero and one.", "evidencePhrases": ["the convergence rate is strictly between zero and one", "the contraction factor is below one"]}],
-      "activationPhrases": ["linear convergence"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "contractive-rate",
+          "kind": "assumption",
+          "subjects": [
+            "rate"
+          ],
+          "label": "The declared convergence rate lies strictly between zero and one.",
+          "evidencePhrases": [
+            "the convergence rate is strictly between zero and one",
+            "the contraction factor is below one"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "linear convergence"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "next-error \\le rate current-error"
     },
     {
@@ -426,14 +861,51 @@
       "title": "Newton root update",
       "description": "The next scalar iterate subtracts a function-value to derivative-value ratio.",
       "roles": [
-        {"id": "next-iterate", "concept": "numerical-analysis:numerical-iterate", "description": "Next root iterate.", "shape": "scalar"},
-        {"id": "current-iterate", "concept": "numerical-analysis:numerical-iterate", "description": "Current root iterate.", "shape": "scalar"},
-        {"id": "function-value", "concept": "numerical-analysis:function-value", "description": "Function value at the current iterate.", "shape": "scalar"},
-        {"id": "derivative-value", "concept": "numerical-analysis:derivative-value", "description": "Nonzero derivative value at the current iterate.", "shape": "scalar"}
+        {
+          "id": "next-iterate",
+          "concept": "numerical-analysis:numerical-iterate",
+          "description": "Next root iterate.",
+          "shape": "scalar"
+        },
+        {
+          "id": "current-iterate",
+          "concept": "numerical-analysis:numerical-iterate",
+          "description": "Current root iterate.",
+          "shape": "scalar"
+        },
+        {
+          "id": "function-value",
+          "concept": "numerical-analysis:function-value",
+          "description": "Function value at the current iterate.",
+          "shape": "scalar"
+        },
+        {
+          "id": "derivative-value",
+          "concept": "numerical-analysis:derivative-value",
+          "description": "Nonzero derivative value at the current iterate.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "nonzero-derivative", "kind": "assumption", "subjects": ["derivative-value"], "label": "The derivative value is nonzero.", "evidencePhrases": ["the derivative value is nonzero"]}],
-      "activationPhrases": ["Newton iteration", "Newton root update"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "nonzero-derivative",
+          "kind": "assumption",
+          "subjects": [
+            "derivative-value"
+          ],
+          "label": "The derivative value is nonzero.",
+          "evidencePhrases": [
+            "the derivative value is nonzero"
+          ]
+        }
+      ],
+      "activationPhrases": [
+        "Newton iteration",
+        "Newton root update"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "next-iterate = current-iterate - function-value / derivative-value"
     },
     {
@@ -441,14 +913,48 @@
       "title": "Trapezoidal quadrature",
       "description": "A one-panel trapezoidal rule averages the two endpoint samples over a declared step.",
       "roles": [
-        {"id": "integral-approximation", "concept": "numerical-analysis:integral-approximation", "description": "Quadrature approximation.", "shape": "scalar"},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Panel width.", "shape": "scalar"},
-        {"id": "left-value", "concept": "numerical-analysis:sample-value", "description": "Left endpoint sample.", "shape": "scalar"},
-        {"id": "right-value", "concept": "numerical-analysis:sample-value", "description": "Right endpoint sample.", "shape": "scalar"}
+        {
+          "id": "integral-approximation",
+          "concept": "numerical-analysis:integral-approximation",
+          "description": "Quadrature approximation.",
+          "shape": "scalar"
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Panel width.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Left endpoint sample.",
+          "shape": "scalar"
+        },
+        {
+          "id": "right-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Right endpoint sample.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "positive-panel", "kind": "positive", "subjects": ["step"], "label": "The quadrature panel width is positive."}],
-      "activationPhrases": ["trapezoidal rule", "trapezoidal quadrature"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "positive-panel",
+          "kind": "positive",
+          "subjects": [
+            "step"
+          ],
+          "label": "The quadrature panel width is positive."
+        }
+      ],
+      "activationPhrases": [
+        "trapezoidal rule",
+        "trapezoidal quadrature"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "integral-approximation = step \\cdot (left-value + right-value) / 2"
     },
     {
@@ -456,14 +962,47 @@
       "title": "Forward-difference derivative",
       "description": "A derivative approximation is the forward sample difference divided by the step.",
       "roles": [
-        {"id": "derivative-approximation", "concept": "numerical-analysis:derivative-approximation", "description": "Forward derivative approximation.", "shape": "scalar"},
-        {"id": "next-value", "concept": "numerical-analysis:sample-value", "description": "Forward sample value.", "shape": "scalar"},
-        {"id": "current-value", "concept": "numerical-analysis:sample-value", "description": "Current sample value.", "shape": "scalar"},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Positive grid step.", "shape": "scalar"}
+        {
+          "id": "derivative-approximation",
+          "concept": "numerical-analysis:derivative-approximation",
+          "description": "Forward derivative approximation.",
+          "shape": "scalar"
+        },
+        {
+          "id": "next-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Forward sample value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "current-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Current sample value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Positive grid step.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "positive-step", "kind": "positive", "subjects": ["step"], "label": "The grid step is positive."}],
-      "activationPhrases": ["forward difference"],
-      "references": ["leveque"],
+      "conditions": [
+        {
+          "id": "positive-step",
+          "kind": "positive",
+          "subjects": [
+            "step"
+          ],
+          "label": "The grid step is positive."
+        }
+      ],
+      "activationPhrases": [
+        "forward difference"
+      ],
+      "references": [
+        "leveque"
+      ],
       "canonicalRelation": "derivative-approximation = (next-value - current-value) / step"
     },
     {
@@ -471,14 +1010,48 @@
       "title": "Central-difference derivative",
       "description": "A derivative approximation is the centered sample difference over twice the step.",
       "roles": [
-        {"id": "derivative-approximation", "concept": "numerical-analysis:derivative-approximation", "description": "Centered derivative approximation.", "shape": "scalar"},
-        {"id": "right-value", "concept": "numerical-analysis:sample-value", "description": "Right sample value.", "shape": "scalar"},
-        {"id": "left-value", "concept": "numerical-analysis:sample-value", "description": "Left sample value.", "shape": "scalar"},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Positive grid step.", "shape": "scalar"}
+        {
+          "id": "derivative-approximation",
+          "concept": "numerical-analysis:derivative-approximation",
+          "description": "Centered derivative approximation.",
+          "shape": "scalar"
+        },
+        {
+          "id": "right-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Right sample value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Left sample value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Positive grid step.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "positive-step", "kind": "positive", "subjects": ["step"], "label": "The grid step is positive."}],
-      "activationPhrases": ["central difference", "centered difference"],
-      "references": ["leveque"],
+      "conditions": [
+        {
+          "id": "positive-step",
+          "kind": "positive",
+          "subjects": [
+            "step"
+          ],
+          "label": "The grid step is positive."
+        }
+      ],
+      "activationPhrases": [
+        "central difference",
+        "centered difference"
+      ],
+      "references": [
+        "leveque"
+      ],
       "canonicalRelation": "derivative-approximation = (right-value - left-value) / (2 step)"
     },
     {
@@ -486,14 +1059,45 @@
       "title": "Explicit Euler step",
       "description": "The next ODE state advances the current state by a step times its declared source.",
       "roles": [
-        {"id": "next-state", "concept": "calculus-analysis:ode-state", "description": "Next discrete ODE state."},
-        {"id": "current-state", "concept": "calculus-analysis:ode-state", "description": "Current discrete ODE state."},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Time step.", "shape": "scalar"},
-        {"id": "source", "concept": "calculus-analysis:evolution-source", "description": "ODE source evaluated at the current state."}
+        {
+          "id": "next-state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "Next discrete ODE state."
+        },
+        {
+          "id": "current-state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "Current discrete ODE state."
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Time step.",
+          "shape": "scalar"
+        },
+        {
+          "id": "source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "ODE source evaluated at the current state."
+        }
       ],
-      "conditions": [{"id": "positive-time-step", "kind": "positive", "subjects": ["step"], "label": "The time step is positive."}],
-      "activationPhrases": ["explicit Euler step", "forward Euler method"],
-      "references": ["leveque"],
+      "conditions": [
+        {
+          "id": "positive-time-step",
+          "kind": "positive",
+          "subjects": [
+            "step"
+          ],
+          "label": "The time step is positive."
+        }
+      ],
+      "activationPhrases": [
+        "explicit Euler step",
+        "forward Euler method"
+      ],
+      "references": [
+        "leveque"
+      ],
       "canonicalRelation": "next-state = current-state + step source"
     },
     {
@@ -501,14 +1105,45 @@
       "title": "Implicit Euler step",
       "description": "The next ODE state advances using the source evaluated at that next state.",
       "roles": [
-        {"id": "next-state", "concept": "calculus-analysis:ode-state", "description": "Next discrete ODE state."},
-        {"id": "current-state", "concept": "calculus-analysis:ode-state", "description": "Current discrete ODE state."},
-        {"id": "step", "concept": "numerical-analysis:discretization-step", "description": "Time step.", "shape": "scalar"},
-        {"id": "next-source", "concept": "calculus-analysis:evolution-source", "description": "ODE source evaluated at the next state."}
+        {
+          "id": "next-state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "Next discrete ODE state."
+        },
+        {
+          "id": "current-state",
+          "concept": "calculus-analysis:ode-state",
+          "description": "Current discrete ODE state."
+        },
+        {
+          "id": "step",
+          "concept": "numerical-analysis:discretization-step",
+          "description": "Time step.",
+          "shape": "scalar"
+        },
+        {
+          "id": "next-source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "ODE source evaluated at the next state."
+        }
       ],
-      "conditions": [{"id": "positive-time-step", "kind": "positive", "subjects": ["step"], "label": "The time step is positive."}],
-      "activationPhrases": ["implicit Euler step", "backward Euler method"],
-      "references": ["leveque"],
+      "conditions": [
+        {
+          "id": "positive-time-step",
+          "kind": "positive",
+          "subjects": [
+            "step"
+          ],
+          "label": "The time step is positive."
+        }
+      ],
+      "activationPhrases": [
+        "implicit Euler step",
+        "backward Euler method"
+      ],
+      "references": [
+        "leveque"
+      ],
       "canonicalRelation": "next-state = current-state + step next-source"
     },
     {
@@ -516,14 +1151,51 @@
       "title": "Relaxed residual iteration",
       "description": "The next linear-system iterate adds a scalar relaxation times the declared residual.",
       "roles": [
-        {"id": "next-iterate", "concept": "numerical-analysis:numerical-iterate", "description": "Next linear-solver iterate.", "shape": "vector"},
-        {"id": "current-iterate", "concept": "numerical-analysis:numerical-iterate", "description": "Current linear-solver iterate.", "shape": "vector"},
-        {"id": "relaxation", "concept": "numerical-analysis:relaxation-parameter", "description": "Scalar relaxation parameter.", "shape": "scalar"},
-        {"id": "residual", "concept": "numerical-analysis:numerical-residual", "description": "Current residual vector.", "shape": "vector"}
+        {
+          "id": "next-iterate",
+          "concept": "numerical-analysis:numerical-iterate",
+          "description": "Next linear-solver iterate.",
+          "shape": "vector"
+        },
+        {
+          "id": "current-iterate",
+          "concept": "numerical-analysis:numerical-iterate",
+          "description": "Current linear-solver iterate.",
+          "shape": "vector"
+        },
+        {
+          "id": "relaxation",
+          "concept": "numerical-analysis:relaxation-parameter",
+          "description": "Scalar relaxation parameter.",
+          "shape": "scalar"
+        },
+        {
+          "id": "residual",
+          "concept": "numerical-analysis:numerical-residual",
+          "description": "Current residual vector.",
+          "shape": "vector"
+        }
       ],
-      "conditions": [{"id": "compatible-update", "kind": "shape-compatible", "subjects": ["next-iterate", "current-iterate", "relaxation", "residual"], "label": "The residual and iterates share a vector space and relaxation is scalar."}],
-      "activationPhrases": ["relaxed residual iteration", "Richardson iteration"],
-      "references": ["golub-van-loan"],
+      "conditions": [
+        {
+          "id": "compatible-update",
+          "kind": "shape-compatible",
+          "subjects": [
+            "next-iterate",
+            "current-iterate",
+            "relaxation",
+            "residual"
+          ],
+          "label": "The residual and iterates share a vector space and relaxation is scalar."
+        }
+      ],
+      "activationPhrases": [
+        "relaxed residual iteration",
+        "Richardson iteration"
+      ],
+      "references": [
+        "golub-van-loan"
+      ],
       "canonicalRelation": "next-iterate = current-iterate + relaxation residual"
     },
     {
@@ -531,13 +1203,43 @@
       "title": "Least-squares approximation",
       "description": "A design-matrix prediction approximates an observation vector without asserting exact equality.",
       "roles": [
-        {"id": "observation", "concept": "linear-algebra:vector", "description": "Observed data vector.", "shape": "vector"},
-        {"id": "design", "concept": "linear-algebra:linear-operator", "description": "Design matrix.", "shape": "matrix"},
-        {"id": "parameter", "concept": "linear-algebra:vector", "description": "Least-squares parameter vector.", "shape": "vector"}
+        {
+          "id": "observation",
+          "concept": "linear-algebra:vector",
+          "description": "Observed data vector.",
+          "shape": "vector"
+        },
+        {
+          "id": "design",
+          "concept": "linear-algebra:linear-operator",
+          "description": "Design matrix.",
+          "shape": "matrix"
+        },
+        {
+          "id": "parameter",
+          "concept": "linear-algebra:vector",
+          "description": "Least-squares parameter vector.",
+          "shape": "vector"
+        }
       ],
-      "conditions": [{"id": "compatible-least-squares", "kind": "shape-compatible", "subjects": ["observation", "design", "parameter"], "label": "The design, parameter, and observation dimensions are compatible."}],
-      "activationPhrases": ["least squares approximation"],
-      "references": ["golub-van-loan"],
+      "conditions": [
+        {
+          "id": "compatible-least-squares",
+          "kind": "shape-compatible",
+          "subjects": [
+            "observation",
+            "design",
+            "parameter"
+          ],
+          "label": "The design, parameter, and observation dimensions are compatible."
+        }
+      ],
+      "activationPhrases": [
+        "least squares approximation"
+      ],
+      "references": [
+        "golub-van-loan"
+      ],
       "canonicalRelation": "observation \\approx design parameter"
     },
     {
@@ -545,15 +1247,55 @@
       "title": "Linear interpolation",
       "description": "An interpolant is a declared weighted combination of two nodal values.",
       "roles": [
-        {"id": "interpolant", "concept": "numerical-analysis:interpolant-value", "description": "Interpolated value.", "shape": "scalar"},
-        {"id": "left-weight", "concept": "numerical-analysis:interpolation-weight", "description": "Left scalar weight.", "shape": "scalar"},
-        {"id": "left-value", "concept": "numerical-analysis:sample-value", "description": "Left nodal value.", "shape": "scalar"},
-        {"id": "right-weight", "concept": "numerical-analysis:interpolation-weight", "description": "Right scalar weight.", "shape": "scalar"},
-        {"id": "right-value", "concept": "numerical-analysis:sample-value", "description": "Right nodal value.", "shape": "scalar"}
+        {
+          "id": "interpolant",
+          "concept": "numerical-analysis:interpolant-value",
+          "description": "Interpolated value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-weight",
+          "concept": "numerical-analysis:interpolation-weight",
+          "description": "Left scalar weight.",
+          "shape": "scalar"
+        },
+        {
+          "id": "left-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Left nodal value.",
+          "shape": "scalar"
+        },
+        {
+          "id": "right-weight",
+          "concept": "numerical-analysis:interpolation-weight",
+          "description": "Right scalar weight.",
+          "shape": "scalar"
+        },
+        {
+          "id": "right-value",
+          "concept": "numerical-analysis:sample-value",
+          "description": "Right nodal value.",
+          "shape": "scalar"
+        }
       ],
-      "conditions": [{"id": "compatible-interpolation", "kind": "shape-compatible", "subjects": ["interpolant", "left-value", "right-value"], "label": "The interpolant and nodal values share a space."}],
-      "activationPhrases": ["linear interpolation"],
-      "references": ["burden-faires"],
+      "conditions": [
+        {
+          "id": "compatible-interpolation",
+          "kind": "shape-compatible",
+          "subjects": [
+            "interpolant",
+            "left-value",
+            "right-value"
+          ],
+          "label": "The interpolant and nodal values share a space."
+        }
+      ],
+      "activationPhrases": [
+        "linear interpolation"
+      ],
+      "references": [
+        "burden-faires"
+      ],
       "canonicalRelation": "interpolant = left-weight left-value + right-weight right-value"
     },
     {
@@ -561,13 +1303,41 @@
       "title": "Norm condition number",
       "description": "The condition number is the product of an invertible operator norm and its inverse norm.",
       "roles": [
-        {"id": "condition-number", "concept": "numerical-analysis:condition-number", "description": "Norm-dependent condition number."},
-        {"id": "operator", "concept": "linear-algebra:invertible-operator", "description": "Invertible operator."},
-        {"id": "inverse", "concept": "linear-algebra:inverse-operator", "description": "Inverse operator."}
+        {
+          "id": "condition-number",
+          "concept": "numerical-analysis:condition-number",
+          "description": "Norm-dependent condition number."
+        },
+        {
+          "id": "operator",
+          "concept": "linear-algebra:invertible-operator",
+          "description": "Invertible operator."
+        },
+        {
+          "id": "inverse",
+          "concept": "linear-algebra:inverse-operator",
+          "description": "Inverse operator."
+        }
       ],
-      "conditions": [{"id": "declared-inverse-pair", "kind": "domain-membership", "subjects": ["condition-number", "operator", "inverse"], "label": "The condition number, operator, and inverse roles are explicitly declared."}],
-      "activationPhrases": ["matrix condition number", "norm condition number"],
-      "references": ["golub-van-loan"],
+      "conditions": [
+        {
+          "id": "declared-inverse-pair",
+          "kind": "domain-membership",
+          "subjects": [
+            "condition-number",
+            "operator",
+            "inverse"
+          ],
+          "label": "The condition number, operator, and inverse roles are explicitly declared."
+        }
+      ],
+      "activationPhrases": [
+        "matrix condition number",
+        "norm condition number"
+      ],
+      "references": [
+        "golub-van-loan"
+      ],
       "canonicalRelation": "condition-number = \\lVert operator \\rVert \\lVert inverse \\rVert"
     },
     {
@@ -575,13 +1345,41 @@
       "title": "Perturbation stability bound",
       "description": "Relative output error is bounded by the condition number times relative input error.",
       "roles": [
-        {"id": "output-error", "concept": "numerical-analysis:relative-output-error", "description": "Relative output perturbation."},
-        {"id": "condition-number", "concept": "numerical-analysis:condition-number", "description": "Condition number."},
-        {"id": "input-error", "concept": "numerical-analysis:relative-input-error", "description": "Relative input perturbation."}
+        {
+          "id": "output-error",
+          "concept": "numerical-analysis:relative-output-error",
+          "description": "Relative output perturbation."
+        },
+        {
+          "id": "condition-number",
+          "concept": "numerical-analysis:condition-number",
+          "description": "Condition number."
+        },
+        {
+          "id": "input-error",
+          "concept": "numerical-analysis:relative-input-error",
+          "description": "Relative input perturbation."
+        }
       ],
-      "conditions": [{"id": "declared-perturbation-problem", "kind": "domain-membership", "subjects": ["output-error", "condition-number", "input-error"], "label": "The two relative errors and condition number are explicitly declared for the relation."}],
-      "activationPhrases": ["perturbation bound", "conditioning bound"],
-      "references": ["golub-van-loan"],
+      "conditions": [
+        {
+          "id": "declared-perturbation-problem",
+          "kind": "domain-membership",
+          "subjects": [
+            "output-error",
+            "condition-number",
+            "input-error"
+          ],
+          "label": "The two relative errors and condition number are explicitly declared for the relation."
+        }
+      ],
+      "activationPhrases": [
+        "perturbation bound",
+        "conditioning bound"
+      ],
+      "references": [
+        "golub-van-loan"
+      ],
       "canonicalRelation": "output-error \\le condition-number input-error"
     },
     {
@@ -589,13 +1387,44 @@
       "title": "Discrete model equation",
       "description": "A declared discrete operator maps an approximate field to the source of its continuous model.",
       "roles": [
-        {"id": "discrete-operator", "concept": "numerical-analysis:discrete-operator", "description": "Discrete model operator.", "shape": "matrix"},
-        {"id": "approximate-field", "concept": "numerical-analysis:approximate-value", "description": "Discrete field approximation.", "shape": "vector"},
-        {"id": "source", "concept": "calculus-analysis:evolution-source", "description": "Source inherited from the declared continuous model.", "shape": "vector"}
+        {
+          "id": "discrete-operator",
+          "concept": "numerical-analysis:discrete-operator",
+          "description": "Discrete model operator.",
+          "shape": "matrix"
+        },
+        {
+          "id": "approximate-field",
+          "concept": "numerical-analysis:approximate-value",
+          "description": "Discrete field approximation.",
+          "shape": "vector"
+        },
+        {
+          "id": "source",
+          "concept": "calculus-analysis:evolution-source",
+          "description": "Source inherited from the declared continuous model.",
+          "shape": "vector"
+        }
       ],
-      "conditions": [{"id": "declared-discretization", "kind": "same-context", "subjects": ["discrete-operator", "approximate-field", "source"], "label": "The discrete operator, approximation, and source belong to the same declared continuous model."}],
-      "activationPhrases": ["discrete model equation", "discretized PDE"],
-      "references": ["leveque"],
+      "conditions": [
+        {
+          "id": "declared-discretization",
+          "kind": "same-context",
+          "subjects": [
+            "discrete-operator",
+            "approximate-field",
+            "source"
+          ],
+          "label": "The discrete operator, approximation, and source belong to the same declared continuous model."
+        }
+      ],
+      "activationPhrases": [
+        "discrete model equation",
+        "discretized PDE"
+      ],
+      "references": [
+        "leveque"
+      ],
       "canonicalRelation": "discrete-operator approximate-field = source"
     }
   ],
@@ -603,9 +1432,20 @@
     {
       "id": "numerical-analysis-language",
       "topic": "numerical-analysis",
-      "phrases": ["numerical approximation", "discretization error", "convergence rate", "solver tolerance", "finite difference", "quadrature rule"],
+      "phrases": [
+        "numerical approximation",
+        "discretization error",
+        "convergence rate",
+        "solver tolerance",
+        "finite difference",
+        "quadrature rule"
+      ],
       "structures": [],
-      "references": ["burden-faires", "leveque", "golub-van-loan"]
+      "references": [
+        "burden-faires",
+        "leveque",
+        "golub-van-loan"
+      ]
     }
   ],
   "roles": [],

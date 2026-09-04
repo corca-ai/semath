@@ -34,7 +34,7 @@ import {
   planSemanticEditTrace,
   planSemanticLifecycleTraces,
   shrinkEditTrace,
-} from "../packages/evaluation/src/differential";
+} from "./testing/differential";
 
 const DOCUMENT_COUNT = positiveInteger("SEMATH_BUDGET_DOCUMENTS", 60);
 const STABLE_HOST_GATE = process.env.SEMATH_BUDGET_STABLE === "1";
@@ -70,7 +70,7 @@ const wasm = await readFile(new URL("../lib/wasm/semath_wasm_bg.wasm", import.me
 const wasmArtifactBytes = (await stat(new URL("../lib/wasm/semath_wasm_bg.wasm", import.meta.url)))
   .size;
 const wasmInitStarted = performance.now();
-await init({ module_or_path: wasm });
+const wasmRuntime = await init({ module_or_path: wasm });
 const wasmInitMs = performance.now() - wasmInitStarted;
 collectGarbage();
 const rssBefore = residentBytes();
@@ -274,6 +274,7 @@ if (rssAfterIncremental > peakRss) {
   peakRssStage = "retained-editor-state";
 }
 const retainedRssGrowth = Math.max(0, rssAfterIncremental - rssBefore);
+const retainedWasmLinearMemoryBytes = wasmRuntime.memory.buffer.byteLength;
 
 // The parity rebuild is a separate lifecycle, not a second live editor engine.
 // Dispose the incremental worker first so this gate measures the maximum memory
@@ -340,6 +341,9 @@ const syntaxStats = syntax.getStats() as ReturnType<LatexSyntaxService["getStats
   snapshotBytes?: number;
 };
 const report = {
+  host: { platform: process.platform, architecture: process.arch, bun: process.versions.bun },
+  enforcement: { timing: TIMING_GATE, retainedRss: RETAINED_RSS_GATE },
+  retainedWasmLinearMemoryBytes,
   affectedDocuments: maxAffected,
   adapterColdMs,
   analysis: initial.stats,
@@ -446,7 +450,7 @@ if (RETAINED_RSS_GATE && retainedRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
 }
 if (!RETAINED_RSS_GATE && retainedRssGrowth > RETAINED_RSS_BUDGET_BYTES) {
   console.warn(
-    `budget retained RSS sample ${retainedRssGrowth}B exceeded ${RETAINED_RSS_BUDGET_BYTES}B; aggregate gate pending`,
+    `budget retained RSS sample ${retainedRssGrowth}B exceeds the Linux x64 reference ${RETAINED_RSS_BUDGET_BYTES}B; this sample is diagnostic only`,
   );
 }
 if (

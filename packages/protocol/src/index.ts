@@ -4,7 +4,7 @@ import type {
   LatexMacroEvent,
 } from "wasmtex/syntax";
 
-export const SEMATH_PROTOCOL_VERSION = 17 as const;
+export const SEMATH_PROTOCOL_VERSION = 18 as const;
 export const WASMTEX_SYNTAX_SCHEMA_VERSION = 8 as const;
 export const MATH_INTERPRETATION_HYPOTHESIS_LIMIT = 16 as const;
 
@@ -334,7 +334,6 @@ export interface LawRecognition {
   conditions: readonly LawConditionInfo[];
   description: string;
   descriptionKey: string;
-  maturity: "completion" | "diagnostic" | "recognition" | "rewrite";
   packId: string;
   packVersion: string;
   lawId: string;
@@ -347,39 +346,9 @@ export interface LawRecognition {
   title: string;
 }
 
-export type ConventionalRequirementInfo =
-  | {
-      constraint: SemanticConstraint;
-      evidence: readonly Evidence[];
-      kind: "role-declaration";
-      parameter: string;
-      requirementId: string;
-      symbol: string;
-    }
-  | {
-      condition: LawConditionInfo;
-      kind: "condition";
-      requirementId: string;
-    };
-
-export interface ConventionalCandidateInfo {
-  bindings: readonly LawBinding[];
-  candidateId: string;
-  disposition: "conventional-candidate";
-  evidence: readonly Evidence[];
-  lawId: string;
-  packId: string;
-  packVersion: string;
-  relation: RelationInfo;
-  relevance: DomainRelevance;
-  requirements: readonly ConventionalRequirementInfo[];
-  title: string;
-}
-
-export type MathAuthoringDisposition =
+export type FormulaDisposition =
   | "established"
   | "partial"
-  | "conventional"
   | "ambiguous"
   | "conflicting"
   | "unsupported"
@@ -403,7 +372,7 @@ export interface MathFormulaAnchorInfo {
   sourceNotation: string;
 }
 
-export type MathAuthoringRequirementInfo =
+export type FormulaRequirementInfo =
   | {
       evidence: readonly Evidence[];
       kind: "declaration";
@@ -453,7 +422,6 @@ export interface MathClaimEvidenceLinkInfo {
   evidence: readonly Evidence[];
   modality: "asserted" | "cited" | "hedged" | "hypothetical" | "quoted";
   polarity: "negative" | "positive";
-  strengthCeiling: "asserted" | "qualified" | "unusable";
   supportingClaimIds: readonly string[];
   supportingFormulas: readonly MathFormulaAnchorInfo[];
 }
@@ -470,8 +438,7 @@ export type MathInterpretationKind =
   | "source-meaning"
   | "typed-law"
   | "scoped-domain"
-  | "structural-alternative"
-  | "reviewed-convention";
+  | "structural-alternative";
 
 export type MathInterpretationSupportTier =
   | "explicit"
@@ -485,7 +452,6 @@ export type MathInterpretationEvidenceProvenance =
   | "typed-structure"
   | "natural-language-extraction"
   | "domain-context"
-  | "reviewed-convention"
   | "derived-evidence";
 
 export interface MathInterpretationEvidenceInfo {
@@ -564,7 +530,6 @@ export type MathInterpretationOrderingReasonKind =
   | "typed-evidence"
   | "derived-evidence"
   | "domain-relevance"
-  | "reviewed-convention"
   | "stable-source-order";
 
 export interface MathInterpretationOrderingReason {
@@ -790,12 +755,11 @@ export interface MathInterpretationSetInfo {
   truncated: boolean;
 }
 
-export interface MathAuthoringContext {
+export interface FormulaAnalysisInfo {
   approximation?: MathApproximationInfo;
   claimEvidence: readonly MathClaimEvidenceLinkInfo[];
   conditions: readonly LawConditionInfo[];
-  conventionalCandidates?: readonly ConventionalCandidateInfo[];
-  disposition: MathAuthoringDisposition;
+  disposition: FormulaDisposition;
   equationLinks: readonly MathEquationLinkInfo[];
   formula?: MathFormulaAnchorInfo;
   lifecycle: MathSourceLifecycleInfo;
@@ -829,7 +793,7 @@ export type EntitySurfaceAuthorization =
   | { reason: EntitySurfaceRefusal; status: "refused" };
 
 export interface SemanticViewInfo {
-  authoringContext: MathAuthoringContext;
+  formulaAnalysis: FormulaAnalysisInfo;
   context: SemanticContextInfo;
   decision: MeaningDecision;
   declarations: readonly Location[];

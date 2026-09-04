@@ -1284,7 +1284,6 @@ mod tests {
             title: id.into(),
             description: id.into(),
             description_key: id.into(),
-            maturity: "recognition".into(),
             status: LawRecognitionStatus::Verified,
             pack_id: "test".into(),
             pack_version: "1.0.0".into(),
@@ -1328,8 +1327,6 @@ mod tests {
                 range,
             }),
             rank: 100,
-            conventional_candidate: false,
-            non_authoritative: false,
         }
     }
 }

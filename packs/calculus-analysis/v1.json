@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "calculus-analysis",
-  "packVersion": "1.1.0",
+  "packVersion": "1.1.1",
   "packKind": "field",
   "namespace": "calculus-analysis",
   "title": "Calculus and analysis",
@@ -294,32 +294,17 @@
         {
           "id": "derivative",
           "concept": "calculus-analysis:derivative",
-          "description": "First derivative value.",
-          "notation": [
-            "fprime",
-            "g",
-            "yprime"
-          ]
+          "description": "First derivative value."
         },
         {
           "id": "function",
           "concept": "calculus-analysis:function",
-          "description": "Differentiated function.",
-          "notation": [
-            "f",
-            "g",
-            "y"
-          ]
+          "description": "Differentiated function."
         },
         {
           "id": "variable",
           "concept": "calculus-analysis:variable",
-          "description": "Differentiation variable.",
-          "notation": [
-            "x",
-            "t",
-            "s"
-          ]
+          "description": "Differentiation variable."
         }
       ],
       "conditions": [
@@ -562,32 +547,17 @@
           "id": "field",
           "concept": "calculus-analysis:pde-field",
           "description": "Diffusing PDE field.",
-          "notation": [
-            "u",
-            "v",
-            "w"
-          ],
           "shape": "function"
         },
         {
           "id": "variable",
           "concept": "calculus-analysis:variable",
-          "description": "Evolution variable.",
-          "notation": [
-            "t",
-            "s",
-            "r"
-          ]
+          "description": "Evolution variable."
         },
         {
           "id": "diffusivity",
           "concept": "fluid-mechanics:diffusivity",
           "description": "Diffusion coefficient.",
-          "notation": [
-            "kappa",
-            "D",
-            "K"
-          ],
           "shape": "scalar"
         }
       ],
@@ -685,32 +655,17 @@
           "id": "field",
           "concept": "calculus-analysis:pde-field",
           "description": "Conserved PDE field.",
-          "notation": [
-            "u",
-            "v",
-            "w"
-          ],
           "shape": "function"
         },
         {
           "id": "variable",
           "concept": "calculus-analysis:variable",
-          "description": "Evolution variable.",
-          "notation": [
-            "t",
-            "s",
-            "r"
-          ]
+          "description": "Evolution variable."
         },
         {
           "id": "flux",
           "concept": "calculus-analysis:conservation-flux",
           "description": "Conservation flux.",
-          "notation": [
-            "F",
-            "G",
-            "H"
-          ],
           "shape": "vector"
         }
       ],
@@ -950,33 +905,18 @@
         {
           "id": "operator",
           "concept": "calculus-analysis:evolution-operator",
-          "description": "Differential operator.",
-          "notation": [
-            "L",
-            "M",
-            "N"
-          ]
+          "description": "Differential operator."
         },
         {
           "id": "field",
           "concept": "calculus-analysis:pde-field",
           "description": "Eigenfunction field.",
-          "notation": [
-            "u",
-            "v",
-            "w"
-          ],
           "shape": "function"
         },
         {
           "id": "eigenvalue",
           "concept": "linear-algebra:eigenvalue",
           "description": "Differential-equation eigenvalue.",
-          "notation": [
-            "lambda",
-            "mu",
-            "rho"
-          ],
           "shape": "scalar"
         }
       ],
