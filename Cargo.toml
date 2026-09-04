@@ -6,7 +6,7 @@ resolver = "2"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/corca-ai/semath"
-version = "0.19.0"
+version = "0.19.1"
 
 [workspace.dependencies]
 regex = "1.11.2"
