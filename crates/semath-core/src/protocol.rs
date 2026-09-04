@@ -455,7 +455,7 @@ pub enum Query {
         #[serde(rename = "fileId")]
         file_id: String,
         offset: u32,
-        #[serde(default = "default_true")]
+        #[serde(rename = "includeDeclaration", default = "default_true")]
         include_declaration: bool,
     },
     PrepareRename {
@@ -1552,6 +1552,28 @@ mod tests {
         Evidence, MathInterpretationCandidateCapInfo, MathInterpretationExhaustiveness,
         MathInterpretationSetInfo, MeaningDecision, PhysicalDimensionInfo, QuantityInfo,
     };
+
+    #[test]
+    fn references_wire_option_preserves_false_and_defaults_to_true() {
+        for value in [Some(false), Some(true), None] {
+            let mut wire = serde_json::json!({"kind": "references", "fileId": "main", "offset": 4});
+            if let Some(value) = value {
+                wire["includeDeclaration"] = serde_json::json!(value);
+            }
+            let query: super::Query = serde_json::from_value(wire).unwrap();
+            let super::Query::References {
+                include_declaration,
+                ..
+            } = &query
+            else {
+                panic!("wrong query variant");
+            };
+            assert_eq!(*include_declaration, value.unwrap_or(true));
+            let serialized = serde_json::to_value(query).unwrap();
+            assert_eq!(serialized["includeDeclaration"], value.unwrap_or(true));
+            assert!(serialized.get("include_declaration").is_none());
+        }
+    }
 
     #[test]
     fn meaning_decision_rejects_fields_from_another_state() {
