@@ -4365,15 +4365,6 @@ impl SemathEngine {
             })
             .unwrap_or_default();
         let selected_root_has_source_meaning = !selected_root_meaning_evidence.is_empty();
-        let selected_root_adjudications = queried_formula_range
-            .map(|root_range| {
-                observations
-                    .formula_adjudications
-                    .iter()
-                    .filter(|fact| fact.target_range == *root_range)
-                    .collect::<Vec<_>>()
-            })
-            .unwrap_or_default();
         // Formula authoring adjudicates the complete selected syntax root. Its
         // recognitions must therefore be invariant under movement between
         // symbols or relation heads inside that root.
@@ -4503,12 +4494,6 @@ impl SemathEngine {
         let entity_symbol_proof = symbol_info.as_ref().map_or_else(Vec::new, |symbol| {
             asserted_definition_evidence(&self.index.semantic, &self.index.documents, symbol)
         });
-        let formula_meaning_may_establish = !queried_formula_is_explicitly_retracted
-            && formula_refutation_evidence.is_empty()
-            && queried_formula_range.is_none_or(|range| {
-                selected_root_has_source_meaning
-                    || observations.semantic_evidence().formula_is_asserted(range)
-            });
         let mut declarations = symbol_info
             .as_ref()
             .into_iter()
@@ -4641,19 +4626,6 @@ impl SemathEngine {
                     || self.has_prior_excluding_occurrence(observations, &symbol.occurrence_id)
                     || explicitly_excludes_external_evidence(&context, symbol))
         });
-        let formula_focus = selected_root.as_ref().and_then(|root| {
-            document
-                .semantic_occurrences
-                .iter()
-                .find(|occurrence| {
-                    root.range.start_offset <= occurrence.selection_range.start_offset
-                        && occurrence.selection_range.end_offset <= root.range.end_offset
-                })
-                .and_then(|occurrence| {
-                    self.index
-                        .cursor_focus(&document.document.file_id, occurrence)
-                })
-        });
         let formula_meaning_entity = selected_root
             .as_ref()
             .filter(|_| selected_root_has_source_meaning)
@@ -4697,16 +4669,6 @@ impl SemathEngine {
                 .engine_limited_ranges
                 .iter()
                 .any(|range| ranges_overlap(range, root_range))
-        });
-        let formula_symbol_info = formula_focus.as_ref().and_then(|focus| {
-            let formula_offset = queried_formula_range.map_or(offset, |range| range.start_offset);
-            self.symbol_info(
-                document,
-                observations,
-                focus,
-                formula_offset,
-                hygiene_enabled,
-            )
         });
         let formula_truncated = conventional_candidates_truncated
             || formula_domains_truncated
@@ -4757,61 +4719,6 @@ impl SemathEngine {
             unsupported_relation_context: unsupported_formula_context,
             truncated: formula_truncated,
         });
-        if !queried_formula_is_explicitly_retracted && !formula_retracted && !formula_engine_limited
-        {
-            if let Some(conflict) = selected_root_adjudications
-                .iter()
-                .find(|fact| fact.kind == crate::prose::FormulaAdjudicationKind::Conflicting)
-            {
-                let conflict = MeaningConflict {
-                    conflict_id: format!(
-                        "formula-source-conflict/{}/{}",
-                        conflict.target_range.start_offset, conflict.target_range.end_offset
-                    ),
-                    label: "The selected formula conflicts with its reviewed source context."
-                        .into(),
-                    evidence: vec![conflict.evidence.clone()],
-                };
-                formula_decision = MeaningDecision::Conflicting {
-                    conflicts: vec![conflict.clone()],
-                    reasons: vec![crate::DecisionReason {
-                        kind: crate::DecisionReasonKind::SourceConflict,
-                        label: conflict.label,
-                        evidence: conflict.evidence,
-                    }],
-                };
-            } else if let Some(ambiguity) = selected_root_adjudications.iter().find_map(|fact| {
-                let crate::prose::FormulaAdjudicationKind::Ambiguous { alternatives } = &fact.kind
-                else {
-                    return None;
-                };
-                Some((fact, alternatives))
-            }) {
-                formula_decision = MeaningDecision::Ambiguous {
-                    alternatives: ambiguity
-                        .1
-                        .iter()
-                        .enumerate()
-                        .map(|(index, label)| MeaningAlternative {
-                            alternative_id: format!(
-                                "source-alternative/{}/{index}",
-                                ambiguity.0.target_range.start_offset
-                            ),
-                            label: label.clone(),
-                            range: ambiguity.0.target_range.clone(),
-                            evidence: vec![ambiguity.0.evidence.clone()],
-                            relevance: None,
-                        })
-                        .collect(),
-                    reasons: vec![crate::DecisionReason {
-                        kind: crate::DecisionReasonKind::Uncertainty,
-                        label: "The reviewed source leaves multiple formula interpretations unresolved."
-                            .into(),
-                        evidence: vec![ambiguity.0.evidence.clone()],
-                    }],
-                };
-            }
-        }
         if !queried_formula_is_rejected
             && !formula_retracted
             && !formula_engine_limited
@@ -4907,37 +4814,6 @@ impl SemathEngine {
                 reasons: reasons.clone(),
             };
         }
-        let selected_source_formula_decision = (!selected_root_is_recognized
-            && selected_root_has_source_meaning
-            && formula_meaning_may_establish
-            && matches!(
-                formula_decision,
-                MeaningDecision::Partial { .. } | MeaningDecision::Unsupported { .. }
-            ))
-        .then(|| {
-            let root = selected_root.as_ref()?;
-            queried_formula_range?;
-            Some(MeaningDecision::Established {
-                meaning: crate::MeaningConclusion {
-                    label: formula_symbol_info
-                        .as_ref()
-                        .and_then(|symbol| symbol.definitions.first())
-                        .map(|definition| definition.description.clone())
-                        .or_else(|| relation_head(root).map(|(name, _)| name))
-                        .unwrap_or_else(|| "selected formula".into()),
-                    relation_id: None,
-                },
-                reasons: vec![crate::DecisionReason {
-                    kind: crate::DecisionReasonKind::Proof,
-                    label: "Established by an asserted source formula meaning.".into(),
-                    evidence: selected_root_meaning_evidence.clone(),
-                }],
-            })
-        })
-        .flatten();
-        let formula_authoring_decision = selected_source_formula_decision
-            .as_ref()
-            .unwrap_or(&formula_decision);
         let decision = semantic_focus.map_or_else(
             || MeaningDecision::Unsupported {
                 reasons: vec![crate::DecisionReason {
@@ -4960,7 +4836,7 @@ impl SemathEngine {
             },
         );
         let authoring_decision = if parsed.is_some() {
-            formula_authoring_decision
+            &formula_decision
         } else {
             &decision
         };
@@ -5771,10 +5647,6 @@ impl SemathEngine {
             && !observations
                 .semantic_evidence()
                 .formula_is_rejected(root_range)
-            && observations
-                .formula_adjudications
-                .iter()
-                .all(|fact| fact.target_range != *root_range)
             && !self.formula_is_retracted(document, formula)
     }
 

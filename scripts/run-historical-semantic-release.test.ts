@@ -3,7 +3,7 @@ import {
   assertSemanticReleaseStepPlan,
   SEMANTIC_RELEASE_STEPS,
   SEMANTIC_RELEASE_SPEND_STEPS,
-} from "./run-semantic-release";
+} from "./run-historical-semantic-release";
 
 describe("semantic release orchestration", () => {
   test("keeps the fresh engine last after committed-WASM and identity checks", () => {

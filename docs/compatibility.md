@@ -14,20 +14,32 @@ caps from unrelated authoring-view truncation and derives source-meaning
 support from evidence authority. Protocol 16 hosts must hard-cut over with the
 corresponding WASM artifact; there is no mixed-version compatibility layer.
 
-Semantic-release outcomes are recorded by the one-shot workflow in the
-permanent release ledger. A checked-in package version remains candidate
-metadata until that workflow succeeds. Only then may the exact retained
-package be published with its npm version, Git tag, and GitHub Release; hosts
-must not pin an unpublished candidate.
+## Conservative qualification
 
-Fresh release-envelope schema 2 is the immutable v0.41 contract. It replaces a
-guessed full internal authoring-context golden with a sealed safety envelope.
-Release-envelope schema 3 and authored-fixture schema 2 apply from v0.42: the
-cursor entity decision and the selected formula disposition are reviewed and
-scored independently, and every formula expectation names one exact syntax
-math root. Receipt policy 3 retains the structured authoring-safety result;
-policy-2 receipts remain readable as immutable evidence. None of these
-evaluation contracts changes protocol 17.
+The [supported scope](conservative-analysis.md) defines the release contract.
+`bun run release:check` (also available as `release:semantic`) qualifies a clean,
+committed candidate on x86_64 Linux. It rebuilds WASM, requires byte identity
+with the committed artifact, and runs code, conservative acceptance,
+foundation, full lifecycle/parity, stable performance, package, and docs checks.
+
+Qualification is repeatable. It writes `.artifacts/conservative-release.json`
+with the exact commit, package version, dependency revision, artifact digests,
+and host identity. A new attempt invalidates a previous successful report
+before checks begin. Qualification does not publish a package, tag, release,
+or message. Publication and host adoption must use the exact qualified source
+and artifact; candidate metadata alone is not release evidence.
+
+The broad-STEM one-shot workflow has been moved outside GitHub's active
+workflow directory to `.github/retired-workflows/`. Historical fixtures,
+receipts, and reservation tools are retained for audit, not current release
+qualification. No new blind fixture or GitHub ledger reservation is required.
+Historical failures remain failures under their original policies; the
+conservative scope does not relabel them as successful releases.
+
+Formula establishment now requires independently grounded typed relations and
+verified conditions. Prose descriptions and verdicts no longer establish or
+conflict a formula. Hosts must not interpret `established` symbol identity as
+verification of an enclosing equation. The wire shape remains protocol 17.
 
 Before 1.0, correctness and a concise architecture take precedence over public
 compatibility. A minor release may remove APIs and change host UI without a
@@ -35,11 +47,7 @@ compatibility layer. It must increment the protocol or pack schema when the
 corresponding wire or data contract changes. Patch releases preserve the
 active contract.
 
-Release WASM is built on a separate x86_64 Linux host, not Apple Silicon. The
-manual `bun run release:semantic` gate checks formatting, lint, unit tests,
-editable development evidence and final historical regression evidence,
-native/WASM parity, incremental
-performance, package installation, and docs before it spends the explicitly
-selected fresh blind fixture. The fresh fixture is never executed by ordinary
-CI. Its immutable receipt records the exact Semath and wasmtex revisions and
-native/WASM artifact digests.
+Release WASM is built on a separate x86_64 Linux host, not Apple Silicon.
+Use `SEMATH_BUILD_HOST=<host> scripts/build-wasm-remote.sh` to refresh local
+artifacts, then commit the tested source and artifact together before release
+qualification. A native-only test run does not establish native/WASM parity.

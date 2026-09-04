@@ -16,14 +16,42 @@ import {
   freshBlindSafetyGateFailed,
   freshBlindSafetySummary,
   freshBlindSealPayload,
+  freshBlindWholeSecondTimestamp,
   parseFreshBlindReleaseFixture,
   planFreshBlindSnapshotTransitions,
   selectFreshBlindOccurrence,
+  sortFreshBlindAuthoringSelectors,
   validateFreshBlindProfileIsolation,
   validateFreshBlindRelease,
 } from "./fresh-blind-release";
 
 describe("fresh blind release evidence", () => {
+  test("uses the one timestamp format shared by both public parsers", () => {
+    expect(
+      freshBlindWholeSecondTimestamp(new Date("2026-08-26T06:21:55.987Z")),
+    ).toBe("2026-08-26T06:21:55Z");
+    expect(() => freshBlindWholeSecondTimestamp(new Date("invalid"))).toThrow();
+  });
+
+  test("canonicalizes safety selectors by their complete stable value", () => {
+    const selectors = [
+      {
+        anchor: { fileId: "main", needle: "z" },
+        kind: "typed-law" as const,
+        relationId: "test:z",
+      },
+      {
+        anchor: { fileId: "main", needle: "a" },
+        kind: "source-meaning" as const,
+        relationId: null,
+      },
+    ];
+    expect(sortFreshBlindAuthoringSelectors(selectors)).toEqual([
+      selectors[1]!,
+      selectors[0]!,
+    ]);
+  });
+
   test("validates 48 independently commissioned cases without running an engine", () => {
     const release = fixture();
     const summary = validateFreshBlindRelease(release, validation(release));

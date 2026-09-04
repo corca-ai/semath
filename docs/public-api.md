@@ -1,7 +1,11 @@
 # Public API
 
-Semath is a library and language-service runtime. Protocol 15 is a deliberate
-hard cutover to a small meaning-first API.
+Semath is a conservative mathematical document analyzer and language-service
+runtime using protocol 17. The [supported scope](conservative-analysis.md)
+defines product guarantees; the richer authoring context is supplementary.
+An established symbol identifies a source-defined entity. An established
+formula requires grounded typed roles and verified conditions; neither a
+source description nor a prose verdict proves an equation.
 
 | Export | Responsibility |
 | --- | --- |

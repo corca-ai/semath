@@ -29,6 +29,7 @@ jobs:
       - run: bun test
       - run: bun run architecture
       - run: bun run pack:conformance
+      - run: bun run conservative
       - run: bun run parity
       - run: bun run budget
       - run: bun run budget:scale

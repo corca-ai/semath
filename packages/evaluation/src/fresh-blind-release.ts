@@ -31,7 +31,9 @@ import {
   type FreshBlindAuthoringSafetyExpectation,
 } from "./fresh-blind-authoring-safety";
 export {
+  freshBlindAuthoringSelectorKey,
   freshBlindAuthoringSafetySummary,
+  sortFreshBlindAuthoringSelectors,
   type FreshBlindAuthoringHypothesisSelector,
   type FreshBlindAuthoringSafetyExpectation,
   type FreshBlindAuthoringSafetySummary,
@@ -248,6 +250,13 @@ export function freshBlindSealPayload(
 ): string {
   const { seal: _seal, ...metadata } = release.release;
   return stableJson({ ...release, release: metadata });
+}
+
+/** Emit the timestamp form accepted by both authored and release parsers. */
+export function freshBlindWholeSecondTimestamp(
+  value: Date = new Date(),
+): string {
+  return value.toISOString().replace(/\.\d{3}Z$/u, "Z");
 }
 
 export function validateFreshBlindRelease(

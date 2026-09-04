@@ -1,17 +1,19 @@
 # Semath documentation
 
-Semath is an embeddable Rust/WASM semantic engine for mathematical and
-engineering Markdown and LaTeX. CorTeX is its first host, but the core and
-public contracts are host-independent.
+Semath is a conservative Rust/WASM analyzer for mathematical Markdown and
+LaTeX. It tracks explicit definitions, checks grounded constraints, and
+preserves source identity through edits. CorTeX is its first host.
 
 ## Start here
 
+- [Supported scope](conservative-analysis.md) defines conservative analysis,
+  authority, refusal, and the boundary around research features.
 - [Architecture](architecture.md) explains the current durable design and
   boundaries.
 - [Public API](public-api.md) describes snapshots, updates, queries, source
   ranges, and result contracts.
-- [GitHub issues](https://github.com/corca-ai/semath/issues) contain current
-  plans and acceptance criteria.
+- [GitHub issues](https://github.com/corca-ai/semath/issues) track work. The
+  earlier broad-STEM release program is superseded by the supported scope.
 
 Install dependencies with `bun install` and run the fast local verification
 suite with:
@@ -21,9 +23,10 @@ bun run check
 awiki lint -r
 ```
 
-`bun run check` is the fast code gate used by pull requests. Expensive semantic
-corpus evaluation is intentionally manual; run `bun run quality` for semantic
-releases and changes to packs, corpora, inference, or quality thresholds.
+`bun run check` is the local code and supported-behavior gate.
+Run `bun run quality` for semantic releases and changes to packs, corpora,
+inference, or quality thresholds. The historical broad-recognition evaluation
+is retained separately as `bun run quality:research`.
 
 Release WASM must be built on an x86_64 Linux host. Apple Silicon machines may
 run native tests but must use `scripts/build-wasm-remote.sh` for release
@@ -44,10 +47,12 @@ artifacts.
 
 - [Capability and test-layer matrix](capability-test-matrix.md) — choose the
   smallest authoritative test layer for each capability.
-- [Semantic quality scorecards](semantic-quality-scorecards.md) — interpret and
-  change calibration, refusal, corpus, parity, and performance budgets.
+- [Historical STEM scorecards](semantic-quality-scorecards.md) — interpret the
+  earlier calibration, corpus, and broad-recognition release evidence.
 - [Spent holdout postmortems](spent-holdout-postmortems.md) — understand the
-  historical v0.38/v0.39 failures, public regression atlas, and reuse boundary.
+  historical v0.38–v0.43 failures, public regression atlas, and reuse boundary.
+- [Fresh-fixture commissioning history](commissioning-history.md) — review the
+  v0.40–v0.94 development ledger and final-holdout isolation boundary.
 - [Practical STEM breadth benchmark](stem-breadth-benchmark.md) — interpret the
   reviewed field-by-capability development matrix and its commissioned gaps.
 - Inspect the dated cursor, identity, navigation, and lifecycle fixture review in

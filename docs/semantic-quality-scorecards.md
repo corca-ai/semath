@@ -1,4 +1,14 @@
-# Semantic quality scorecards
+# Historical broad-STEM quality scorecards
+
+This document preserves the broad-recognition evaluation policy and its
+historical evidence. Its field-wide coverage and one-shot commissioning gates
+are superseded for product releases by [conservative analysis](conservative-analysis.md)
+and the [current release policy](compatibility.md). The old corpus suite remains
+available as `bun run quality:research`; its old acceptance thresholds and
+failed outcomes are not rewritten to claim a successful conservative release.
+References below to the one-shot `release:semantic` command describe the
+retired orchestrator in `scripts/run-historical-semantic-release.ts`, not the
+current command.
 
 Semath evaluates semantic behavior with separate signals rather than a blended
 accuracy number. The checked-in [quality manifest](../fixtures/corpus-manifest.json)

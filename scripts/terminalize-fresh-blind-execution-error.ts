@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
-import { checkFreshBlindReservation } from "./check-fresh-blind-reservation";
+import { checkFreshBlindReservationIdentity } from "./check-fresh-blind-reservation";
 import { sha256 } from "./fresh-blind-evidence";
 import {
   createFreshBlindExecutionErrorReceipt,
@@ -46,7 +46,7 @@ async function terminalize(): Promise<void> {
   const reservationPath = requiredPath("SEMATH_FRESH_BLIND_RESERVATION");
   const manifestPath = requiredPath("SEMATH_FRESH_BLIND_PREFLIGHT_MANIFEST");
   const reservationBytes = await readFile(reservationPath);
-  const reservation = await checkFreshBlindReservation({
+  const reservation = await checkFreshBlindReservationIdentity({
     candidateSha,
     fixturePath,
     releaseId,

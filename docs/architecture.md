@@ -1,9 +1,10 @@
 # Architecture
 
-Semath is an embeddable Rust/WASM semantic engine for mathematical and
-engineering documents. Hosts such as CorTeX own editing and presentation;
-Semath owns deterministic semantic analysis. It is not a web application,
-computer algebra system, or theorem prover.
+Semath is a conservative Rust/WASM mathematical document analyzer. Its
+[supported scope](conservative-analysis.md) is explicit definitions, grounded
+constraints, safe source edits, and deterministic retraction. Hosts such as
+CorTeX own editing and presentation. Existing domain and authoring projections
+are supplementary research surfaces, not a promise of broad STEM understanding.
 
 ## Pipeline
 
@@ -348,8 +349,12 @@ Positive subject-bound regularity evidence such as differentiability can prove
 the function role it entails. Once an operator assignment has a complete typed
 role plan, domain conditions reuse that plan and its evidence instead of
 deriving a second, potentially divergent authority.
-An exact formula-owned structural occurrence can consume its own asserted
-formula fact, but that proof is not copied to nested symbols. Conversely, when
+An exact formula-owned structural occurrence can retain an asserted source
+description, but that description cannot establish the equation or its nested
+symbols. Formula establishment requires a supported typed relation with
+grounded roles and verified conditions. Prose verdict matching is not a
+decision path: calling an equation incorrect, ambiguous, or contradictory
+cannot override the typed decision. When
 an established law activation and a rejected formula differ by exactly one
 explicit relation sign, the bounded structural comparison reports a
 source-grounded conflict rather than recognizing the rejected formula as the

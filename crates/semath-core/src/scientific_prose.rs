@@ -2297,7 +2297,12 @@ fn assumption_phrase_polarity(
     }
     let negations = words
         .iter()
-        .filter(|(_, _, word)| matches!(*word, "no" | "not" | "never" | "neither" | "without"))
+        .filter(|(_, _, word)| {
+            matches!(
+                *word,
+                "no" | "not" | "never" | "neither" | "nowhere" | "without"
+            )
+        })
         .collect::<Vec<_>>();
     if negations.is_empty() {
         if kind == "sign-convention"
@@ -2312,7 +2317,15 @@ fn assumption_phrase_polarity(
         return AssumptionPhrasePolarity::Ignored;
     }
     let &(start, end, _) = negations[0];
-    if words.first().map(|(start, _, _)| *start) != Some(start) {
+    let directly_modifies_phrase = words
+        .iter()
+        .position(|(candidate, _, _)| *candidate == start)
+        .is_some_and(|index| {
+            words[index + 1..]
+                .iter()
+                .all(|(_, _, word)| *word == "yet" || word.ends_with("ly"))
+        });
+    if words.first().map(|(start, _, _)| *start) != Some(start) && !directly_modifies_phrase {
         return AssumptionPhrasePolarity::Ignored;
     }
     if !negation_precedes_positive_phrase(&prefix[end..]) {

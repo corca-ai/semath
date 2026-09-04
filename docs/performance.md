@@ -14,6 +14,21 @@ bun run budget:stable
 mkdir -p .artifacts && bun run budget:report
 ```
 
+Absolute time and process-RSS limits are calibrated for x86_64 Linux. On other
+hosts `budget` still verifies semantic work, invalidation, transfer, fanout,
+artifact, and parity bounds, but reports time and RSS as diagnostics. Reports
+include the host, Bun version, enforced limits, and live WASM linear-memory
+size. `budget:stable` refuses other hosts so their samples cannot qualify a
+release. Explicit `SEMATH_BUDGET_TIMING_GATE=1` and `SEMATH_BUDGET_RSS_GATE=1`
+remain available for investigating a local reference-limit violation.
+
+This separation is based on a same-artifact comparison: the former candidate
+retained about 82 MiB of process-RSS growth on Linux x64 and about 147 MiB on
+macOS arm64, while the latter's WASM linear memory was about 10 MiB. Process
+RSS includes host allocator and runtime memory; it is not interchangeable with
+the engine's live allocations or macOS physical footprint. These are diagnostic
+observations, not a new limit. Linux release limits remain 112/192 MiB.
+
 The fixture set deterministically rotates through the reported ECE expression,
 nested modifiers and styles, dense matrices, Unicode and combining characters,
 malformed recovery, binder/rename notation, sectioned multi-equation reports,

@@ -3,15 +3,18 @@ import type { MathInterpretationSetInfo } from "../../protocol/src/index";
 import {
   AUTHORED_AREA_ALLOCATION,
   DOCUMENT_REASONING_FAMILIES,
+  authoredCursorSourceAnchor,
   authoredFixtureSealPayload,
   authoredProbeIdentityFailures,
   authoredRenameNotationFamilyMatches,
   authoredRelationRangeMatches,
+  authoredScenarioRawPayload,
   authoredScenarioReviewPayload,
   observeAuthoredScientificProbe,
   observeAuthoredRelations,
   parseAuthoredScientificFixture,
   scoreAuthoredScientificFixture,
+  sortAuthoredAnchors,
   validateAuthoredScientificTranche,
   type AuthoredArea,
   type AuthoredScientificFixture,
@@ -715,6 +718,95 @@ describe("independently authored scientific corpus", () => {
     expect(authoredFixtureSealPayload(reordered)).toBe(
       authoredFixtureSealPayload(fixture),
     );
+  });
+
+  test("raw lineage is non-self-referential and ignores review corrections", () => {
+    const fixture = parseAuthoredScientificFixture(fixtureValue("holdout", 1));
+    const original = authoredScenarioRawPayload(fixture, "scenario-0");
+    const scenario = fixture.scenarios[0]!;
+    const probe = fixture.probes[0]!;
+    const corrected: AuthoredScientificFixture = {
+      ...fixture,
+      probes: [{
+        ...probe,
+        expected: { ...probe.expected, decision: "ambiguous" },
+      }],
+      scenarios: [{
+        ...scenario,
+        lawIds: ["test:corrected-law"],
+        review: {
+          ...scenario.review,
+          correctionSummary: ["reviewed expectation correction"],
+        },
+      }],
+    };
+
+    expect(authoredScenarioRawPayload(corrected, "scenario-0")).toBe(original);
+    expect(original).not.toContain(scenario.provenance.rawDigest);
+    expect(original).not.toContain("finalDigest");
+    expect(original).not.toContain("test:corrected-law");
+
+    const document = scenario.snapshots[0]!.documents[0]!;
+    const changedSource: AuthoredScientificFixture = {
+      ...fixture,
+      scenarios: [{
+        ...scenario,
+        snapshots: [{
+          ...scenario.snapshots[0]!,
+          documents: [{ ...document, content: `${document.content} Changed.` }],
+        }],
+      }],
+    };
+    expect(authoredScenarioRawPayload(changedSource, "scenario-0")).not.toBe(
+      original,
+    );
+  });
+
+  test("projects cursor fields and sorts navigation by resolved source keys", () => {
+    const fixture = parseAuthoredScientificFixture(fixtureValue("holdout", 1));
+    const probe = fixture.probes[0]!;
+    expect(authoredCursorSourceAnchor(probe.cursor)).toEqual({
+      fileId: "main",
+      needle: "$x_0=y_0$",
+    });
+    const snapshot = fixture.scenarios[0]!.snapshots[0]!;
+    const anchors = [
+      { fileId: "main", needle: "y_0" },
+      { fileId: "main", needle: "x_0" },
+    ];
+    expect(sortAuthoredAnchors(snapshot, anchors)).toEqual([
+      anchors[1]!,
+      anchors[0]!,
+    ]);
+  });
+
+  test("keeps cursor-entity and selected-formula decisions independent", () => {
+    const fixture = parseAuthoredScientificFixture(fixtureValue("holdout", 1));
+    const probe = fixture.probes[0]!;
+    const schema2: AuthoredScientificFixture = {
+      ...fixture,
+      probes: [{
+        ...probe,
+        expected: {
+          ...probe.expected,
+          cursorOccurrence: { fileId: "main", needle: "x_0" },
+          decision: "partial",
+          formulaDecision: {
+            anchor: { fileId: "main", needle: "x_0=y_0" },
+            status: "ambiguous",
+          },
+          navigation: {
+            ...probe.expected.navigation,
+            rename: {
+              ...probe.expected.navigation.rename,
+              newName: "z_0",
+            },
+          },
+        },
+      }],
+      schemaVersion: 2,
+    };
+    expect(() => parseAuthoredScientificFixture(schema2)).not.toThrow();
   });
 });
 

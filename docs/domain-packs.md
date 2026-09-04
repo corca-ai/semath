@@ -9,7 +9,9 @@ executable code.
 ## Capability maturity
 
 The checked-in [quality manifest](../fixtures/corpus-manifest.json) is the
-authoritative approved support policy. Maturity is declared separately for
+pack evaluation policy. Product support is defined by
+[conservative analysis](conservative-analysis.md), independently of pack counts.
+Pack maturity is declared separately for
 concept vocabulary, English declarations and roles, shape/quantity/unit
 typing, law recognition, diagnostic refusal, project/macro provenance, and
 navigation/explanation. The dated [maturity report](pack-maturity.md) records

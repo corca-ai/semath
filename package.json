@@ -60,7 +60,7 @@
     "continuity:baseline": "SEMATH_CONTINUITY_ALLOW_FAILURES=1 SEMATH_CONTINUITY_REPORT=.artifacts/semantic-continuity.json bun scripts/check-semantic-continuity.ts",
     "continuity:fixture": "bun scripts/check-semantic-continuity-fixture.ts && bun test packages/evaluation/src/semantic-continuity.test.ts",
     "continuity:release": "bun scripts/check-semantic-continuity-release.ts",
-    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run architecture && bun run spent-holdout:check && bun run legacy:audit:check && bun run corpus:generate:check && bun run engineering:generate:check && bun run corpus:materialization && bun run foundation:generate:check && bun run authored:fixture && bun run stem:fixture && bun run domain:fixture && bun run frontier:fixture && bun run continuity:fixture && bun run semantic:safety:fixture && bun run pack:authoring && bun run pack:conformance && bun run parity && bun run budget && bun run package:smoke",
+    "check": "cargo fmt --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && bun run typecheck && bun test && bun run architecture && bun run legacy:audit:check && bun run pack:authoring && bun run pack:conformance && bun run conservative && bun run parity && bun run budget && bun run package:smoke",
     "corpus": "bun scripts/check-corpus.ts",
     "corpus:generate": "bun scripts/generate-synthetic-corpus.ts",
     "corpus:generate:check": "bun scripts/generate-synthetic-corpus.ts --check",
@@ -84,11 +84,15 @@
     "semantic:safety:fixture": "bun scripts/check-semantic-safety-fixture.ts && bun test packages/evaluation/src/semantic-safety.test.ts",
     "stem:baseline": "SEMATH_STEM_BREADTH_REPORT=.artifacts/stem-breadth-baseline.json bun scripts/check-stem-breadth.ts",
     "stem:fixture": "bun scripts/check-stem-breadth.ts",
-    "quality": "bun run corpus:generate:check && bun run engineering:generate:check && bun run corpus:materialization && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run challenge && bun run equivalence:challenge && bun run domain:challenge && bun run frontier && bun run semantic:safety && bun run stem:baseline && bun run corpus && bun run foundation && SEMATH_LIFECYCLE_FULL=1 bun run parity && bun run budget:stable && bun run package:smoke",
-    "release:semantic": "bun scripts/run-semantic-release.ts",
+    "quality": "bun run foundation && bun run conservative && SEMATH_LIFECYCLE_FULL=1 bun run parity && bun run budget:stable && bun run package:smoke",
+    "release:semantic": "bun run release:check",
     "test": "cargo test --workspace && bun test",
     "typecheck": "bun node_modules/typescript/bin/tsc --noEmit",
-    "verify": "bun run check"
+    "verify": "bun run check",
+    "quality:research": "bun run corpus:generate:check && bun run engineering:generate:check && bun run corpus:materialization && bun run foundation:generate:check && bun run pack:authoring && bun run pack:conformance && bun run challenge && bun run equivalence:challenge && bun run domain:challenge && bun run frontier && bun run semantic:safety && bun run stem:baseline && bun run corpus && bun run foundation && SEMATH_LIFECYCLE_FULL=1 bun run parity && bun run budget:stable && bun run package:smoke",
+    "conservative": "bun scripts/check-conservative.mjs",
+    "conservative:native": "bun scripts/check-conservative.mjs --native-only",
+    "release:check": "bun scripts/run-semantic-release.ts"
   },
   "dependencies": {
     "wasmtex": "github:corca-ai/wasmtex#e2290156c5a1867156fd51bca782882ab647af59"

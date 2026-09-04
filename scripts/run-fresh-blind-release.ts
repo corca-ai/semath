@@ -19,7 +19,7 @@ import {
   type MathAuthoringFailureKind,
 } from "../packages/evaluation/src/index";
 import {
-  checkFreshBlindReservation,
+  checkFreshBlindReservationIdentity,
   type FreshBlindReservation,
 } from "./check-fresh-blind-reservation";
 import { loadFreshBlindEvidence, sha256 } from "./fresh-blind-evidence";
@@ -71,7 +71,7 @@ async function runFreshBlindRelease(): Promise<void> {
     fixtureSha256: sha256(await readFile(fixturePath)),
   });
   const reservationBytes = await readFile(reservationPath);
-  const reservation = await checkFreshBlindReservation({
+  const reservation = await checkFreshBlindReservationIdentity({
     candidateSha,
     fixturePath,
     releaseId,

@@ -3,6 +3,13 @@
 The lowest layer that can state a behavior owns its permutations. E2E tests are
 reserved for real editor, Worker, and deployment wiring.
 
+The release scope is [conservative analysis](conservative-analysis.md).
+`bun run conservative` exercises positive definition/rename and grounded
+constraint contracts alongside abstention through real TeX/Markdown syntax,
+native, and WASM boundaries. Rust tests own source-order, scope, capture,
+retraction, and negative-language permutations. Broad recognition fixtures
+below remain research and regression evidence, not product coverage promises.
+
 | Capability | Authoritative test | Boundary evidence | E2E responsibility |
 | --- | --- | --- | --- |
 | Notation CST, UTF-16, cursor paths, malformed input | wasmtex contract plus `bun run notation:conformance` matrix/generative tests | adapter and clean/incremental parity | editor selection wiring |
@@ -11,7 +18,7 @@ reserved for real editor, Worker, and deployment wiring.
 | Canonical meaning and typed laws | Rust canonical/unifier tests plus manifest-owned corpus | protocol and native/WASM equality | one meaning-first view |
 | Shapes, quantities, roles, diagnostics | pure extractors and contradiction tests | Worker/LSP result mapping | reveal one source-linked conflict |
 | Domain packs | Rust schema-12 compiler tests, conformance, pack-derived property planning, and evaluated or probe corpus | clean package and compiled catalog | none |
-| Document-level scientific reasoning | pure authored-fixture schema, source-anchor, review-seal, wasmtex CST fingerprint, prose-shingle, and risk-scorer tests | manual six-surface native evaluation; one-shot sealed fresh-blind evaluation with clean/incremental lifecycle parity and an immutable receipt | unchanged meaning, navigation, and real-conflict journeys |
+| Document-level scientific reasoning (research) | authored-fixture, source-anchor, and risk-scorer tests | historical manual evaluation; outside conservative release qualification | no release requirement |
 | Incremental analysis | pure six-family lifecycle planning, first-divergence comparison, shrinking, reverse-include closure, and clean-rebuild equivalence | fixed-sample and manual full-lifecycle parity plus 61/501-document budgets | one rapid-edit wiring case |
 | Worker lifecycle | pure queue and generation policy tests | real engine recreation | one project-switch or crash case |
 | CorTeX formula meaning | pure calm-presentation and bounded view-model tests | component integration tests | one meaning and one real-conflict journey |

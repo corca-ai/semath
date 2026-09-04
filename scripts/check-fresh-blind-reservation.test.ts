@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { parseFreshBlindReservation } from "./check-fresh-blind-reservation";
+import {
+  assertFreshBlindReservationExecution,
+  parseFreshBlindReservation,
+  proveFreshBlindReservation,
+} from "./check-fresh-blind-reservation";
 import { freshBlindReservationMarker } from "./fresh-blind-reservation";
 
 const identity = {
@@ -41,5 +45,35 @@ describe("fresh blind reservation parser", () => {
     expect(() =>
       parseFreshBlindReservation({ ...reservation(), reservedAt: "yesterday" }),
     ).toThrow("timestamp");
+  });
+
+  test("keeps local execution identity checks independent of GitHub", () => {
+    expect(() =>
+      assertFreshBlindReservationExecution(reservation(), identity)
+    ).not.toThrow();
+    expect(() =>
+      assertFreshBlindReservationExecution(reservation(), {
+        ...identity,
+        runAttempt: "2",
+      })
+    ).toThrow("runAttempt does not match execution");
+  });
+
+  test("authenticates the separate permanent-ledger proof", async () => {
+    let authorization = "";
+    const request = (async (_input, init) => {
+      authorization = new Headers(init?.headers).get("Authorization") ?? "";
+      return Response.json({
+        body: reservation().marker,
+        created_at: reservation().reservedAt,
+        html_url:
+          "https://github.com/corca-ai/semath/issues/354#issuecomment-456",
+        id: 456,
+        issue_url: "https://api.github.com/repos/corca-ai/semath/issues/354",
+        user: { login: "github-actions[bot]" },
+      });
+    }) as typeof fetch;
+    await proveFreshBlindReservation(reservation(), "release-token", request);
+    expect(authorization).toBe("Bearer release-token");
   });
 });

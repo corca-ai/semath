@@ -4399,19 +4399,10 @@ fn structural_condition_evidence(
             source_anchors: Vec::new(),
         });
     }
-    if condition.kind == PackConditionKind::Differentiable && condition.subjects.len() == 2 {
-        let function = bindings.get(&condition.subjects[0])?;
-        let variable = bindings.get(&condition.subjects[1])?;
-        if expression_asserts_derivative(actual, function, variable) {
-            return Some(Evidence {
-                rule_id: "canonical-regularity/asserted-derivative".into(),
-                kind: "canonical-binding".into(),
-                strength: "hard".into(),
-                source_ranges: vec![actual.range.clone()],
-                source_anchors: Vec::new(),
-            });
-        }
-    }
+    // A derivative expression identifies the function and variable roles, but
+    // it cannot prove its own differentiability precondition.  That would make
+    // every asserted derivative circularly self-justifying and would override
+    // explicit prose that withholds or contradicts regularity.
     if condition.kind == PackConditionKind::SameContext
         && application_roles_share_arguments(&condition.subjects, bindings, actual)
     {
@@ -4706,26 +4697,6 @@ fn collect_application_arguments<'a>(
     }
 }
 
-fn expression_asserts_derivative(
-    expression: &SemanticExpr,
-    function: &SemanticExpr,
-    variable: &SemanticExpr,
-) -> bool {
-    if let SemanticExprKind::Derivative {
-        expression,
-        variable: derivative_variable,
-        ..
-    } = &expression.kind
-        && equivalent(expression, function)
-        && semantic_symbol(variable).is_some_and(|name| name == derivative_variable.value)
-    {
-        return true;
-    }
-    crate::canonical::expression_children(expression)
-        .into_iter()
-        .any(|child| expression_asserts_derivative(child, function, variable))
-}
-
 const MAX_ASSUMPTION_DISTANCE: u32 = 640;
 const MAX_ATTACHED_ASSUMPTION_GAP: u32 = 16;
 
@@ -4821,6 +4792,21 @@ fn assumption_condition_evidence(
                 .iter()
                 .all(|subject| condition_symbols_contain(&symbols, subject));
         }
+        if condition.kind == PackConditionKind::Differentiable
+            && assumption.kind == "regularity"
+            && matches!(assumption_value, "differentiable" | "not-differentiable")
+        {
+            let function_symbols = condition
+                .subjects
+                .first()
+                .and_then(|role| bindings.get(role))
+                .map(semantic_symbols)
+                .unwrap_or_default();
+            return !function_symbols.is_empty()
+                && function_symbols
+                    .iter()
+                    .all(|symbol| condition_symbols_contain(&assumption.subjects, symbol));
+        }
         symbols
             .iter()
             .all(|symbol| condition_symbols_contain(&assumption.subjects, symbol))
@@ -4904,10 +4890,7 @@ fn assumption_condition_evidence(
         {
             resolution.supporting = Some(assumption_public_evidence(assumption));
         }
-        if resolution.refuting.is_none()
-            && condition.kind == PackConditionKind::SignConvention
-            && typed_assumption(assumption) == TypedAssumption::OpposedSignConvention
-        {
+        if resolution.refuting.is_none() && assumption_refutes_condition(condition, assumption) {
             resolution.refuting = Some(assumption_public_evidence(assumption));
         }
         if resolution.supporting.is_some() && resolution.refuting.is_some() {
@@ -4915,6 +4898,22 @@ fn assumption_condition_evidence(
         }
     }
     resolution
+}
+
+fn assumption_refutes_condition(condition: &PackLawCondition, assumption: &AssumptionInfo) -> bool {
+    let value = assumption_value_and_target(&assumption.value).0;
+    if value.strip_prefix("not-") == Some(condition.id.as_str()) {
+        return true;
+    }
+    match (condition.kind, assumption.kind.as_str(), value) {
+        (PackConditionKind::Differentiable, "regularity", "not-differentiable") => true,
+        (PackConditionKind::Positive, "sign", "not-positive" | "nonpositive") => true,
+        (PackConditionKind::Uniform, "uniformity", "not-uniform") => true,
+        (PackConditionKind::SignConvention, _, _) => {
+            typed_assumption(assumption) == TypedAssumption::OpposedSignConvention
+        }
+        _ => false,
+    }
 }
 
 fn assumption_supports_condition(
@@ -7723,13 +7722,13 @@ P_s=V_sI_s.
         let condition = &derivative[0].conditions[0];
         assert_eq!(condition.condition_id, "function-differentiable");
         assert_eq!(condition.kind, ScientificConstraintKind::Differentiable);
-        assert_eq!(condition.status, ConstraintStatus::Verified);
         assert_eq!(condition.subjects, ["f", "x"]);
+        assert_eq!(condition.status, ConstraintStatus::Required);
         assert!(
             condition
                 .evidence
                 .iter()
-                .any(|evidence| { evidence.rule_id == "canonical-regularity/asserted-derivative" })
+                .all(|evidence| evidence.rule_id != "canonical-regularity/asserted-derivative")
         );
         assert!(
             condition

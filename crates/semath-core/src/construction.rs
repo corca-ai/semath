@@ -427,7 +427,7 @@ fn role_first_nominal_candidates_with_whitespace(
     {
         return Vec::new();
     }
-    let mut candidates = [" of ", " with ", " at ", " as ", " having "]
+    let mut candidates = [" of ", " with ", " at ", " as ", " having ", " over "]
         .iter()
         .filter_map(|separator| {
             let offset = lower.rfind(separator)? + separator.len();

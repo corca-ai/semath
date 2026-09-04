@@ -152,7 +152,8 @@ struct EvidenceGradedDevelopmentCase {
     cursor_needle: String,
     expected_decision: String,
     expected_support: Option<String>,
-    required_evidence_role: String,
+    required_evidence_role: Option<String>,
+    formula_decision: bool,
     required_provenance: Vec<String>,
     required_missing_discriminator_prefix: Option<String>,
     minimum_hypotheses: usize,
@@ -171,11 +172,11 @@ struct EvidenceGradedAuthoredScenarioCoverage {
 #[test]
 fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
     let fixture: EvidenceGradedDevelopmentFixture = serde_json::from_str(include_str!(
-        "../../../fixtures/development/evidence-graded-hypotheses-v1.json"
+        "../../../fixtures/development/evidence-graded-hypotheses-v2.json"
     ))
     .expect("strict evidence-graded development fixture");
-    assert_eq!(fixture.schema_version, 1);
-    assert_eq!(fixture.id, "evidence-graded-hypotheses-v1");
+    assert_eq!(fixture.schema_version, 2);
+    assert_eq!(fixture.id, "evidence-graded-hypotheses-v2");
     assert_eq!(
         fixture.provenance.authoring_method,
         "project-original-reviewed-development"
@@ -232,11 +233,7 @@ fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
         };
         let cursor_only_conflict = case.expected_decision == "conflicting"
             && case.expected_support.as_deref() == Some("contradicted");
-        let formula_scoped_expectation = matches!(
-            case.expected_support.as_deref(),
-            Some("derived" | "supported")
-        );
-        let actual_decision = if formula_scoped_expectation {
+        let actual_decision = if case.formula_decision {
             authoring_disposition_name(view.authoring_context.disposition)
         } else {
             meaning_decision_name(&view.decision)
@@ -293,18 +290,17 @@ fn public_evidence_graded_hypotheses_are_source_grounded_and_format_paired() {
                 view.authoring_context.interpretations.hypotheses
             );
         }
-        if !cursor_only_conflict {
+        if !cursor_only_conflict && let Some(required_role) = &case.required_evidence_role {
             assert!(
                 view.authoring_context
                     .interpretations
                     .hypotheses
                     .iter()
                     .flat_map(|hypothesis| &hypothesis.evidence)
-                    .any(|item| interpretation_evidence_role_name(item.role)
-                        == case.required_evidence_role),
+                    .any(|item| interpretation_evidence_role_name(item.role) == *required_role),
                 "{} evidence role {}: {:#?}",
                 case.id,
-                case.required_evidence_role,
+                required_role,
                 view.authoring_context.interpretations.hypotheses
             );
         }
@@ -2610,7 +2606,7 @@ fn established_equation_routes_a_later_formula_identically_after_incremental_ups
 }
 
 #[test]
-fn formula_metadescription_establishes_only_the_attached_relation() {
+fn formula_metadescription_does_not_prove_the_attached_relation() {
     let content = "The selected constitutive model is\n\\[J=-D\\nabla c-q\\nabla\\phi.\\]";
     let offset = content.rfind("\\phi").unwrap() as u32 + "\\phi".len() as u32;
     let mut engine = SemathEngine::default();
@@ -2634,7 +2630,7 @@ fn formula_metadescription_establishes_only_the_attached_relation() {
     );
     assert_eq!(
         view.authoring_context.disposition,
-        crate::MathAuthoringDisposition::Established,
+        crate::MathAuthoringDisposition::Unsupported,
         "{view:#?}",
     );
     assert!(view.symbol.is_some_and(|symbol| symbol.entity_id.is_none()));
@@ -2681,13 +2677,7 @@ fn formula_metadescription_establishes_only_the_attached_relation() {
         "{view:#?}"
     );
     assert!(view.context.entity_id.is_none());
-    assert!(
-        view.authoring_context
-            .interpretations
-            .hypotheses
-            .iter()
-            .any(|hypothesis| hypothesis.hypothesis_id == "source-meaning")
-    );
+    assert!(view.authoring_context.formula.is_some());
 }
 
 #[test]
@@ -2714,32 +2704,9 @@ fn formula_metadescription_retains_its_meaning_after_trailing_punctuation() {
         };
         assert_eq!(
             view.authoring_context.disposition,
-            crate::MathAuthoringDisposition::Established
+            crate::MathAuthoringDisposition::Unsupported
         );
-        let formula_range = &view
-            .authoring_context
-            .formula
-            .as_ref()
-            .expect("selected formula")
-            .location
-            .range;
-        assert!(
-            view.authoring_context
-                .interpretations
-                .hypotheses
-                .iter()
-                .any(|hypothesis| {
-                    hypothesis.hypothesis_id == "source-meaning"
-                        && hypothesis.evidence.iter().any(|evidence| {
-                            evidence.evidence.rule_id == "english-equation-flow-meaning"
-                                && evidence.evidence.source_ranges.iter().any(|range| {
-                                    range.start_offset <= formula_range.start_offset
-                                        && formula_range.end_offset <= range.end_offset
-                                })
-                        })
-                }),
-            "offset {offset}: {view:#?}"
-        );
+        assert!(view.authoring_context.formula.is_some());
     }
 }
 
@@ -2763,15 +2730,9 @@ fn formula_metadescription_does_not_escalate_an_existing_source_meaning() {
     let QueryValue::SemanticView { view } = result.value else {
         panic!("expected semantic view")
     };
-    assert!(
-        view.authoring_context
-            .interpretations
-            .hypotheses
-            .iter()
-            .any(|hypothesis| {
-                hypothesis.label == "rectangular area"
-                    && hypothesis.support == crate::MathInterpretationSupportTier::Supported
-            })
+    assert_ne!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Established
     );
     assert!(
         !view
@@ -4548,7 +4509,7 @@ fn semantic_view_follows_a_law_across_its_rhs_and_boundary() {
 
 #[test]
 fn semantic_view_projects_a_chained_relation_at_its_trailing_boundary() {
-    let content = r"This example states a first derivative. Let $f$ be a function of $x$, $x$ the differentiation variable, and $g$ its first derivative.
+    let content = r"This example states a first derivative. Let $f$ be differentiable in $x$, $x$ the differentiation variable, and $g$ its first derivative.
 \[
 g=\frac{d f}{d x}=\lim_{h\to0}\frac{f(x+h)-f(x)}{h}.
 \]";
@@ -5174,6 +5135,86 @@ fn cursor_entity_and_selected_formula_have_independent_decisions() {
 }
 
 #[test]
+fn derivative_notation_does_not_prove_its_own_regularity_precondition() {
+    let uncertified = "Let $g$ be the recorded result and $f$ a function of $x$. Differentiability of $f$ with respect to $x$ has not been certified. The recorded equation is $g=\\frac{df}{dx}$.";
+    let view = semantic_view_at(uncertified, uncertified.rfind("g=").unwrap() as u32);
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial,
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .all(|hypothesis| hypothesis.conditions.iter().all(|condition| {
+                condition.condition_id != "function-differentiable"
+                    || condition.status != crate::ConstraintStatus::Verified
+            }))
+    );
+
+    let contradicted = "Let $g$ be the recorded result and $f$ a function of $x$. The premise states that $f$ is nowhere differentiable at the selected $x$, while the equation presents a first derivative value there. The recorded relation is $g=\\frac{df}{dx}$. The premise directly contradicts the differentiability condition for this relation.";
+    let view = semantic_view_at(contradicted, contradicted.rfind("g=").unwrap() as u32);
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial,
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn a_named_mass_flow_result_keeps_the_products_physical_dimension() {
+    let content = "For one uniform duct section, the author declares $r$ and the mean normal velocity $v$ constant over area $A$. Integrating the local flux gives the reported mass-flow symbol $m$. The recorded relation is $m=rAv$. Every factor refers to that same section.";
+    let view = semantic_view_at(content, content.rfind("m=rAv").unwrap() as u32);
+    assert_eq!(
+        view.authoring_context.disposition,
+        crate::MathAuthoringDisposition::Partial,
+        "{view:#?}"
+    );
+    assert!(
+        view.authoring_context
+            .interpretations
+            .hypotheses
+            .iter()
+            .all(|hypothesis| hypothesis.hypothesis_id != "quantity-assignment-dimension-mismatch"),
+        "{view:#?}"
+    );
+}
+
+#[test]
+fn prose_verdicts_do_not_establish_mathematical_conflicts_or_alternatives() {
+    for suffix in [
+        "This equation does not contradict the stated assumptions.",
+        "If this equation were incorrect, we would revise the model.",
+        "The reviewer asked whether this equation is incorrect.",
+        "The diagram can be red or blue.",
+        "The formula remains ambiguous.",
+        "The reviewer says this equation is incorrect.",
+    ] {
+        let content = format!("The recorded equation is $q=Av$. {suffix}");
+        let view = semantic_view_at(&content, content.find("q=Av").unwrap() as u32);
+        assert!(
+            !matches!(
+                view.authoring_context.disposition,
+                crate::MathAuthoringDisposition::Conflicting
+                    | crate::MathAuthoringDisposition::Ambiguous
+                    | crate::MathAuthoringDisposition::Established
+            ),
+            "{suffix}: {:?}",
+            view.authoring_context.disposition
+        );
+        assert!(
+            view.authoring_context
+                .interpretations
+                .hypotheses
+                .iter()
+                .all(|hypothesis| { hypothesis.label != "red" && hypothesis.label != "blue" })
+        );
+    }
+}
+
+#[test]
 fn an_explicit_formula_disjunction_is_ambiguous_at_every_nested_cursor() {
     let content = "The specification permits either\n\\[R=A\\cap B\\qquad\\text{or}\\qquad R=A\\cup B.\\]\nNo alternative is selected.";
     for needle in ["R=A\\cap B", "R=A\\cup B"] {
@@ -5201,7 +5242,7 @@ fn an_explicit_formula_disjunction_is_ambiguous_at_every_nested_cursor() {
 }
 
 #[test]
-fn reviewed_formula_ambiguity_is_bound_to_the_nearest_root() {
+fn prose_alternatives_do_not_invent_formula_interpretations() {
     for (content, needle) in [
         (
             "The stored kinematics are\n\\[L=\\nabla u,\\qquad S=(L+L^T)/2.\\]\nReview leaves S unresolved between infinitesimal strain and rate of deformation.",
@@ -5215,14 +5256,35 @@ fn reviewed_formula_ambiguity_is_bound_to_the_nearest_root() {
         let view = semantic_view_at(content, content.find(needle).unwrap() as u32);
         assert_eq!(
             view.authoring_context.disposition,
-            crate::MathAuthoringDisposition::Ambiguous,
+            crate::MathAuthoringDisposition::Unsupported,
             "{content}: {view:#?}"
         );
     }
 }
 
 #[test]
-fn reviewed_formula_conflict_is_bound_to_the_nearest_root() {
+fn prose_uncertainty_does_not_invent_formula_interpretations() {
+    for (content, needle) in [
+        (
+            "The recorded relation is $r=A\\cap B$. The glossary leaves open whether the operands are ordinary sets or probability events, so two readings remain live.",
+            "r=A",
+        ),
+        (
+            "The recorded relation is $q=Av$. The formula can represent a matrix-vector application or an area-times-velocity product without a discriminator.",
+            "q=Av",
+        ),
+    ] {
+        let view = semantic_view_at(content, content.find(needle).unwrap() as u32);
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Unsupported,
+            "{content}: {view:#?}"
+        );
+    }
+}
+
+#[test]
+fn prose_criticism_does_not_prove_a_formula_conflict() {
     for (content, needle) in [
         (
             "The draft used\n\\[d(v)=2|E|.\\]\nThat statement is incorrect under the declared convention. The corrected equation is $d(v)=|E|$.",
@@ -5240,7 +5302,7 @@ fn reviewed_formula_conflict_is_bound_to_the_nearest_root() {
         let view = semantic_view_at(content, content.find(needle).unwrap() as u32);
         assert_eq!(
             view.authoring_context.disposition,
-            crate::MathAuthoringDisposition::Conflicting,
+            crate::MathAuthoringDisposition::Unsupported,
             "{content}: {view:#?}"
         );
         assert!(view.context.relations.is_empty(), "{content}: {view:#?}");
@@ -5253,6 +5315,27 @@ fn reviewed_formula_conflict_is_bound_to_the_nearest_root() {
         crate::MathAuthoringDisposition::Conflicting,
         "a conflict without a preceding formula cannot bleed through a later contrast: {view:#?}"
     );
+}
+
+#[test]
+fn named_condition_criticism_requires_actual_typed_evidence() {
+    for (content, needle) in [
+        (
+            "The recorded equation is $V=RI$. The stated terminal references contradict the sign convention required for this relation.",
+            "V=RI",
+        ),
+        (
+            "The recorded factorization is $A=LL^T$. The matrix declaration contradicts the positive-definite requirement for that factorization.",
+            "A=LL",
+        ),
+    ] {
+        let view = semantic_view_at(content, content.find(needle).unwrap() as u32);
+        assert_eq!(
+            view.authoring_context.disposition,
+            crate::MathAuthoringDisposition::Unsupported,
+            "{content}: {view:#?}"
+        );
+    }
 }
 
 #[test]
@@ -5558,8 +5641,17 @@ fn compacted_snapshot_keeps_the_analyzed_selected_root() {
 
     assert_eq!(
         view.authoring_context.disposition,
-        crate::MathAuthoringDisposition::Established,
+        crate::MathAuthoringDisposition::Unsupported,
         "{view:#?}"
+    );
+    assert_eq!(
+        view.authoring_context
+            .formula
+            .as_ref()
+            .expect("selected root")
+            .location
+            .range,
+        range(start, start + 3),
     );
 }
 
@@ -5644,19 +5736,19 @@ fn coordinated_recorded_formulae_share_the_explicit_source_adoption() {
 
     assert_eq!(
         view.authoring_context.disposition,
-        crate::MathAuthoringDisposition::Established,
+        crate::MathAuthoringDisposition::Unsupported,
         "{view:#?}"
     );
 }
 
 #[test]
-fn an_adopted_equation_flow_preserves_both_role_and_root_meaning() {
+fn an_adopted_equation_description_does_not_prove_an_untyped_root() {
     let content = "For the alloy, $H(T)$ denotes specific enthalpy. The advected normal enthalpy flux is\n\\[q_n=\\rho u_n H(T).\\]";
     let view = semantic_view_at(content, content.rfind("q_n=").unwrap() as u32);
 
     assert_eq!(
         view.authoring_context.disposition,
-        crate::MathAuthoringDisposition::Established,
+        crate::MathAuthoringDisposition::Unsupported,
         "{view:#?}"
     );
 }

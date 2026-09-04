@@ -4,8 +4,8 @@ use crate::domain::{DomainObservations, observe_domains};
 use crate::law::{ExternalTypeEnvironment, LawAnalysisContext, LawObservations, observe_laws};
 use crate::parser::ParsedMath;
 use crate::prose::{
-    FormulaAdjudicationFact, FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence,
-    assumption_formula_targets, observe_prose, public_assumption,
+    FormulaMeaningFact, ProseMatchStats, ScientificSemanticEvidence, assumption_formula_targets,
+    observe_prose, public_assumption,
 };
 use crate::quantity::{QuantityObservations, observe_quantities};
 use crate::scope::ScopeGraph;
@@ -90,7 +90,6 @@ pub(crate) struct DocumentSemanticObservations {
     pub definitions: Vec<DefinitionInfo>,
     pub project_references: Vec<crate::ProjectInclude>,
     pub formula_meanings: Vec<FormulaMeaningFact>,
-    pub formula_adjudications: Vec<FormulaAdjudicationFact>,
     pub shapes: ShapeObservations,
     pub quantities: QuantityObservations,
     pub roles: RoleObservations,
@@ -146,7 +145,6 @@ impl DocumentSemanticObservations {
             definitions: prose.definitions,
             project_references: prose.project_references,
             formula_meanings: prose.formula_meanings,
-            formula_adjudications: prose.formula_adjudications,
             shapes,
             quantities,
             roles,

@@ -1,11 +1,12 @@
 # Project agent guide
 
-Semath is a host-independent Rust/WASM semantic engine, not a web application.
-CorTeX is the first host.
+Semath is a host-independent conservative Rust/WASM mathematical document
+analyzer. CorTeX is the first host.
 
 ## Read first
 
 - Use [`docs/index.md`](docs/index.md) as the documentation entry point.
+- Follow the [supported scope](docs/conservative-analysis.md) for product behavior.
 - Treat [`docs/architecture.md`](docs/architecture.md) as durable design and
   GitHub issues as current plans.
 - Follow [`docs/metadoc.md`](docs/metadoc.md) for documentation changes.
@@ -22,6 +23,9 @@ CorTeX is the first host.
 ## Working rules
 
 - Prefer pure, bounded, evidence-preserving core transformations.
+- Prioritize explicit definitions, grounded constraints, safe edits, and
+  retraction. Broad STEM recognition and prose intent inference are research
+  surfaces, not release requirements. Never promote prose verdicts to proof.
 - Preserve native/WASM behavior parity. Prefer the correct architecture and
   concise code over compatibility; breaking API and host UI changes are allowed.
 - Add focused tests at the lowest authoritative layer; minimize E2E coverage.

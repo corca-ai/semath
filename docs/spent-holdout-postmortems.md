@@ -1,10 +1,10 @@
 # Spent holdout postmortems
 
-This document is a historical record of the terminal v0.38 through v0.42 semantic
+This document is a historical record of the terminal v0.38 through v0.43 semantic
 release evaluations. It is not a current scorecard, a release plan, or a source
 of expected answers for another holdout.
 
-All five fixtures are permanently spent. They must not be rerun, edited into a new
+All six fixtures are permanently spent. They must not be rerun, edited into a new
 holdout, or used as answer templates. Public regressions derived from them use
 new source text and the lowest authoritative public test layer.
 
@@ -17,6 +17,7 @@ new source text and the lowest authoritative public test layer.
 | v0.40 | `32730705424` | `9522100540` | `1fea214aa45224cc1767047dd78f46b02292183e` | `2e32389b8386845ee8ce491b3fc0a3fa55114abc3b1351c0f29152fba7a92e17` | `789011bea34fba2c4249231f9c70c7cebac6197b18b9c8c7447ce9c2abd1544d` |
 | v0.41 | `32800370262` | `9546760981` | `15ca913b4a19c81e3ad3d6a6054bee1059a7561f` | `1bf5870f1a8555a425061a9b280897f0ae0fb703e0b47625d8621e08bbda1b59` | `1f89a11044dc33ce43cf16f8d52046204dcd05ee171d9090eff62cd464ca4b12` |
 | v0.42 | `32820656318` | `9553675078` | `db15c0bacbc0d9f8b9a247fb6c6132481e28448c` | `672154b236f9fc73d4d0c5d24ee225ef2949f0ada72da5c6757a68fa545d0d34` | `d2edad8f07ac80b0f8a3f47a6718ea685047e68f29b95e3fc35e380d052276a1` |
+| v0.43 | `32925794681` | `9591749329` | `69eda99dffdd776101ed7554939823de26226687` | `9325d50f44fcf4d2c5460acc20a7bcbdd2e5a4a26474c188a9868600d4b81ebd` | `afabea9f369ed842ed86a28201ffb0f9157631a0a09e607d49c450c010d20f34` |
 
 Each run passed the pre-reservation gates, permanently reserved its release
 identity, executed the engine once, terminalized, and retained its result. The
@@ -185,6 +186,28 @@ entity/formula decisions, syntax-backed composite cursor ownership, exact
 negative-frame propagation to nested identities, non-authoritative conventional
 candidates, and anchored formula contradictions. v0.42 remains immutable spent
 evidence and must not be rerun.
+
+## Lessons retained from v0.43
+
+The schema-3 run completed as `safety-failed`: 7 of 48 probe scores passed,
+with risk 204, and 44 cases had at least one authoring-safety finding. One
+ambiguous conditional-probability root was genuinely over-established because
+condition-name tokens and formula shape were treated as verified preconditions.
+Public engine regressions now cover that authority boundary.
+
+The remaining output separated into useful development work rather than one
+undifferentiated failure. Explicit incomplete candidates were often lost as
+unsupported or conventional; unresolved alternatives collapsed instead of
+remaining ambiguous; reviewed negative roots lacked anchored contradiction;
+and independent entity declarations did not authorize navigation. The scorer
+also called conservative refusals unsafe and often attributed the first loss to
+formula disposition after an earlier source-meaning or condition failure.
+
+Two lifecycle expectations were not derivable from the structured fixture at
+all: generation and retraction existed only in prose and the out-of-band oracle.
+Future lifecycle evaluation must provide authoritative structured input or
+treat prose only as evidence. v0.43 is now in the machine-readable spent
+registry, while its generic findings remain available for development.
 
 ## Public regression atlas
 

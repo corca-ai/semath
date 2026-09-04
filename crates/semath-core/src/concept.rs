@@ -232,6 +232,44 @@ fn classify_single_role(description: &str) -> Option<String> {
         .find(|word| !matches!(*word, "a" | "an" | "the"));
     let last = words.last().copied();
 
+    // Pack vocabulary is semantic only when it is the noun phrase's role, not
+    // when it occurs inside a metalinguistic label ("output symbol") or as a
+    // reporting verb ("the author states that").  Treating those surface words
+    // as typed roles manufactures evidence and can create false conflicts.
+    let metalinguistic_noun = words.iter().any(|word| {
+        [
+            "identifier",
+            "name",
+            "notation",
+            "placeholder",
+            "symbol",
+            "token",
+        ]
+        .iter()
+        .any(|head| singular_or_plural(word, head))
+    });
+    let reporting_complement = words.windows(2).any(|pair| {
+        pair[1] == "that"
+            && [
+                "claim", "claims", "claimed", "note", "notes", "noted", "observe", "observes",
+                "observed", "record", "records", "recorded", "report", "reports", "reported",
+                "state", "states", "stated",
+            ]
+            .contains(&pair[0])
+    });
+    let explicit_representation = words
+        .iter()
+        .any(|word| word.starts_with("represent") || word.starts_with("denot"));
+    let specific_pack_term = PACK_ROLE_TERMS
+        .iter()
+        .filter(|(term, _, _)| contains_term(&words, term))
+        .any(|(term, _, _)| term.len() > 1);
+    if reporting_complement
+        || (metalinguistic_noun && !specific_pack_term && !explicit_representation)
+    {
+        return None;
+    }
+
     if let Some(role) = classified_pack_concept(&words) {
         Some(role)
     } else if contains_singular_or_plural(&words, "event") {
@@ -449,6 +487,28 @@ mod tests {
                 "quantities-units:energy".to_owned(),
                 "quantities-units:stiffness".to_owned(),
             ]
+        );
+    }
+
+    #[test]
+    fn metalinguistic_heads_do_not_become_scientific_roles() {
+        assert_eq!(classify_role("reviewed output symbol"), None);
+        assert_eq!(classify_role("the author states that"), None);
+        assert_eq!(classify_role("the report noted that"), None);
+        assert_eq!(classify_role("the reviewer claims that"), None);
+        assert_eq!(classify_role("opaque state placeholder"), None);
+
+        assert_eq!(
+            classify_role("state vector").as_deref(),
+            Some("control-systems:state")
+        );
+        assert_eq!(
+            classify_role("symbol representing voltage").as_deref(),
+            Some("quantities-units:voltage")
+        );
+        assert_eq!(
+            classify_role("reported mass-flow symbol").as_deref(),
+            Some("quantities-units:mass-flow-rate")
         );
     }
 }

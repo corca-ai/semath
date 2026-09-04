@@ -90,24 +90,10 @@ pub(crate) struct ProseObservations {
     pub semantic_role_definitions: Vec<DefinitionInfo>,
     pub project_references: Vec<ProjectInclude>,
     pub formula_meanings: Vec<FormulaMeaningFact>,
-    pub formula_adjudications: Vec<FormulaAdjudicationFact>,
     pub shapes: Vec<ProseShapeClaim>,
     pub assumptions: Vec<AssumptionInfo>,
     pub semantic_evidence: ScientificSemanticEvidence,
     pub match_stats: ProseMatchStats,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct FormulaAdjudicationFact {
-    pub target_range: SourceRange,
-    pub kind: FormulaAdjudicationKind,
-    pub evidence: Evidence,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum FormulaAdjudicationKind {
-    Ambiguous { alternatives: Vec<String> },
-    Conflicting,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -452,15 +438,6 @@ pub(crate) fn observe_prose(
         parsed,
         canonical_expressions,
         &construction_targets,
-    );
-    analysis.formula_adjudications = collect_formula_adjudications(
-        document,
-        source,
-        &index,
-        &clauses,
-        parsed,
-        canonical_expressions,
-        &analysis.semantic_evidence,
     );
     analysis.match_stats.matcher_work += analysis.semantic_evidence.attachment.candidate_edges();
     collect_assumptions(
@@ -921,173 +898,6 @@ pub(crate) fn observe_prose(
     );
     attach_formula_occurrence_roles(document, parsed, canonical_expressions, &mut analysis);
     analysis
-}
-
-fn collect_formula_adjudications(
-    document: &ProjectDocument,
-    source: &str,
-    index: &SourceIndex,
-    clauses: &[ScientificClause<'_>],
-    parsed: &[ParsedMath],
-    canonical_expressions: &[SemanticExpr],
-    semantic_evidence: &ScientificSemanticEvidence,
-) -> Vec<FormulaAdjudicationFact> {
-    let attachment = AttachmentGraph::new(document);
-    let scopes = ScopeGraph::new(document);
-    let formula_roots = parsed
-        .iter()
-        .enumerate()
-        .filter(|(math_index, _)| {
-            canonical_expressions
-                .get(*math_index)
-                .is_some_and(|expression| {
-                    matches!(
-                        expression.kind,
-                        SemanticExprKind::Relation { .. } | SemanticExprKind::System(_)
-                    )
-                })
-        })
-        .map(|(_, math)| math.region.content_range.clone())
-        .collect::<Vec<_>>();
-    let mut facts = Vec::new();
-
-    for clause in clauses {
-        let clause_text = &source[clause.start..clause.end];
-        let kind = bounded_formula_ambiguity(clause_text)
-            .map(|alternatives| FormulaAdjudicationKind::Ambiguous { alternatives })
-            .or_else(|| {
-                bounded_formula_conflict(clause_text)
-                    .then_some(FormulaAdjudicationKind::Conflicting)
-            });
-        let Some(kind) = kind else {
-            continue;
-        };
-        let clause_range = SourceRange {
-            start_offset: index.utf16_for_byte(clause.start),
-            end_offset: index.utf16_for_byte(clause.end),
-        };
-        let clause_scope = scopes.path_at(clause_range.start_offset);
-        let mut candidates = formula_roots
-            .iter()
-            .filter(|formula| {
-                !matches!(kind, FormulaAdjudicationKind::Conflicting)
-                    || formula.end_offset <= clause_range.start_offset
-            })
-            .filter(|formula| {
-                scope_visible(&clause_scope, &scopes.path_at(formula.start_offset))
-                    && attachment.permits(&clause_range, formula)
-            })
-            .filter_map(|formula| {
-                let distance = if formula.end_offset <= clause_range.start_offset {
-                    clause_range.start_offset - formula.end_offset
-                } else if clause_range.end_offset <= formula.start_offset {
-                    formula.start_offset.saturating_sub(clause_range.end_offset)
-                } else {
-                    0
-                };
-                (distance <= MAX_ATTACHMENT_DISTANCE_BYTES as u32)
-                    .then_some((distance, formula.clone()))
-            })
-            .collect::<Vec<_>>();
-        candidates.sort_by_key(|(distance, formula)| {
-            (*distance, formula.start_offset, formula.end_offset)
-        });
-        let Some((distance, target_range)) = candidates.first().cloned() else {
-            continue;
-        };
-        if candidates.get(1).is_some_and(|next| next.0 == distance) {
-            continue;
-        }
-        if semantic_evidence.formula_is_explicitly_retracted(&target_range)
-            && !matches!(kind, FormulaAdjudicationKind::Conflicting)
-        {
-            continue;
-        }
-        facts.push(FormulaAdjudicationFact {
-            target_range,
-            kind: kind.clone(),
-            evidence: Evidence {
-                rule_id: match kind {
-                    FormulaAdjudicationKind::Ambiguous { .. } => {
-                        "scientific-prose/formula-ambiguity"
-                    }
-                    FormulaAdjudicationKind::Conflicting => "scientific-prose/formula-conflict",
-                }
-                .into(),
-                kind: "explicit-prose".into(),
-                strength: "hard".into(),
-                source_ranges: vec![clause_range],
-                source_anchors: Vec::new(),
-            },
-        });
-    }
-    facts.sort_by_key(|fact| {
-        (
-            fact.target_range.start_offset,
-            fact.target_range.end_offset,
-            fact.evidence.source_ranges[0].start_offset,
-        )
-    });
-    facts.dedup();
-    facts
-}
-
-fn bounded_formula_ambiguity(value: &str) -> Option<Vec<String>> {
-    let lower = value.to_ascii_lowercase();
-    for (marker, separator) in [
-        ("unresolved between ", " and "),
-        ("may represent ", " rather than "),
-    ] {
-        let Some(start) = lower.find(marker).map(|start| start + marker.len()) else {
-            continue;
-        };
-        let tail = lower[start..]
-            .split(['.', ';', ':'])
-            .next()
-            .unwrap_or("")
-            .trim();
-        let (left, right) = tail.split_once(separator)?;
-        let alternatives = [left.trim(), right.trim()]
-            .into_iter()
-            .filter(|item| {
-                !item.is_empty() && item.len() <= 80 && item.split_whitespace().count() <= 12
-            })
-            .map(str::to_owned)
-            .collect::<Vec<_>>();
-        if alternatives.len() == 2 {
-            return Some(alternatives);
-        }
-    }
-    None
-}
-
-fn bounded_formula_conflict(value: &str) -> bool {
-    let lower = value.to_ascii_lowercase();
-    let has_formula_target = [
-        "calculation",
-        "equation",
-        "formula",
-        "assertion",
-        "line",
-        "model",
-        "proposal",
-        "relation",
-        "statement",
-        "value",
-    ]
-    .iter()
-    .any(|word| {
-        lower
-            .split(|character: char| !character.is_ascii_alphabetic())
-            .any(|item| item == *word)
-    });
-    has_formula_target
-        && (lower.contains(" incorrect")
-            || lower.contains("conflicting with")
-            || lower.contains("incompatible with")
-            || lower.contains("does not describe")
-            || ((lower.contains("reject") || lower.contains("rejected"))
-                && (lower.contains(" that ") || lower.contains(" this "))))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1574,7 +1384,20 @@ fn collect_role_first_nominal_definitions(
                 continue;
             }
             let mut semantic_only = false;
-            let selected = if let Some(role) = classify_role(base.description) {
+            let nested_role = candidates
+                .iter()
+                .filter(|candidate| candidate.relative_start > base.relative_start)
+                .filter_map(|candidate| {
+                    classify_role(candidate.description).map(|role| (candidate, role))
+                })
+                .max_by_key(|(candidate, _)| candidate.relative_start)
+                .filter(|(_, nested)| {
+                    classify_role(base.description).is_some_and(|base| base != *nested)
+                });
+            let selected = if let Some((candidate, _)) = nested_role {
+                semantic_only = true;
+                candidate
+            } else if let Some(role) = classify_role(base.description) {
                 candidates
                     .iter()
                     .find(|candidate| {
@@ -4884,7 +4707,21 @@ fn collect_clause_definitions(
             let next = regions.get(position + 1).map_or(sentence_end, |next| {
                 index.byte_for_utf16(next.region.full_range.start_offset)
             });
-            let (description, _) = definition_clause(&source[end..next]);
+            let between = &source[end..next];
+            let lower_between = between.trim_start().to_ascii_lowercase();
+            let describes_following_mention = regions.get(position + 1).is_some()
+                && (lower_between.starts_with("and ")
+                    || (lower_between.contains(" over ")
+                        && role_first_nominal_candidates(between)
+                            .iter()
+                            .any(|candidate| {
+                                candidate.relative_start > 0
+                                    && classify_role(candidate.description).is_some()
+                            })));
+            if describes_following_mention {
+                continue;
+            }
+            let (description, _) = definition_clause(between);
             let Some(description) = description else {
                 continue;
             };

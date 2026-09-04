@@ -1,3 +1,4 @@
+# Historical broad-STEM qualification workflow; intentionally outside workflows/.
 name: fresh-blind-release
 
 on:
@@ -89,7 +90,7 @@ jobs:
           SEMATH_RELEASE_ID: ${{ inputs.release_id }}
           SEMATH_RELEASE_LEDGER_ISSUE: "354"
           SEMATH_RELEASE_PHASE: preflight
-        run: bun run release:semantic
+        run: bun scripts/run-historical-semantic-release.ts
       - name: Permanently reserve the release identity and fixture seal
         id: reserve
         env:
@@ -102,6 +103,17 @@ jobs:
           SEMATH_RELEASE_ID: ${{ inputs.release_id }}
           SEMATH_RELEASE_LEDGER_ISSUE: "354"
         run: bun scripts/fresh-blind-reservation.ts
+      - name: Prove the permanent reservation before execution
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_WORKFLOW_REF: ${{ github.workflow_ref }}
+          GITHUB_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SEMATH_CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+          SEMATH_FRESH_BLIND_FIXTURE: ${{ inputs.fixture_path }}
+          SEMATH_FRESH_BLIND_RESERVATION: .artifacts/fresh-release/reservation.json
+          SEMATH_RELEASE_ID: ${{ inputs.release_id }}
+          SEMATH_RELEASE_LEDGER_ISSUE: "354"
+        run: bun scripts/check-fresh-blind-reservation.ts
       - name: Execute the reserved fresh fixture exactly once
         id: execute
         env:
@@ -116,7 +128,7 @@ jobs:
           SEMATH_RELEASE_ID: ${{ inputs.release_id }}
           SEMATH_RELEASE_LEDGER_ISSUE: "354"
           SEMATH_RELEASE_PHASE: execute
-        run: bun run release:semantic
+        run: bun scripts/run-historical-semantic-release.ts
       - name: Terminalize every normally returned reserved execution
         if: always() && steps.reserve.outcome == 'success'
         env:

@@ -155,7 +155,10 @@ export function validateFreshAuthoringSafetyExpectations(
       probe,
     );
     for (const [label, values] of selectorSets(expectation)) {
-      sortedUnique(values.map(selectorKey), `${expectation.probeId}.${label}`);
+      sortedUnique(
+        values.map(freshBlindAuthoringSelectorKey),
+        `${expectation.probeId}.${label}`,
+      );
       for (const selector of values) resolveAuthoredAnchor(snapshot, selector.anchor);
     }
     assertSubset(
@@ -369,8 +372,9 @@ function assertSubset(
   subset: readonly FreshBlindAuthoringHypothesisSelector[],
   superset: readonly FreshBlindAuthoringHypothesisSelector[],
 ): void {
-  const allowed = new Set(superset.map(selectorKey));
-  if (subset.some((selector) => !allowed.has(selectorKey(selector)))) {
+  const allowed = new Set(superset.map(freshBlindAuthoringSelectorKey));
+  if (subset.some((selector) =>
+    !allowed.has(freshBlindAuthoringSelectorKey(selector)))) {
     throw new Error(`${probeId}.${label}: required selectors must be allowed`);
   }
 }
@@ -382,8 +386,20 @@ function sortedUnique(values: readonly string[], path: string): void {
   }
 }
 
-function selectorKey(value: FreshBlindAuthoringHypothesisSelector): string {
+export function freshBlindAuthoringSelectorKey(
+  value: FreshBlindAuthoringHypothesisSelector,
+): string {
   return stableJson(value);
+}
+
+export function sortFreshBlindAuthoringSelectors(
+  values: readonly FreshBlindAuthoringHypothesisSelector[],
+): readonly FreshBlindAuthoringHypothesisSelector[] {
+  return [...values].sort((left, right) => {
+    const leftKey = freshBlindAuthoringSelectorKey(left);
+    const rightKey = freshBlindAuthoringSelectorKey(right);
+    return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
+  });
 }
 
 function sameRange(left: SourceRange, right: SourceRange): boolean {

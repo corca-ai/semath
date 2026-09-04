@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, test } from "bun:test";
 
 const workflow = await readFile(
-  new URL("../.github/workflows/fresh-blind-release.yml", import.meta.url),
+  new URL("../.github/retired-workflows/fresh-blind-release.yml", import.meta.url),
   "utf8",
 );
 
@@ -12,12 +12,24 @@ describe("fresh blind workflow integrity", () => {
     expect(workflow).toContain("cancel-in-progress: false");
   });
 
-  test("keeps the release token out of preflight, execution, and terminalization", () => {
-    expect(workflow.match(/GITHUB_TOKEN:/gu)).toHaveLength(2);
+  test("proves the reservation with credentials before token-free execution", () => {
+    expect(workflow.match(/GITHUB_TOKEN:/gu)).toHaveLength(3);
+    const reservation = workflow.indexOf(
+      "- name: Permanently reserve the release identity and fixture seal",
+    );
+    const proof = workflow.indexOf(
+      "- name: Prove the permanent reservation before execution",
+    );
+    const execute = workflow.indexOf(
+      "- name: Execute the reserved fresh fixture exactly once",
+    );
+    expect(reservation).toBeGreaterThan(-1);
+    expect(proof).toBeGreaterThan(reservation);
+    expect(execute).toBeGreaterThan(proof);
+    expect(workflow.slice(proof, execute)).toContain("GITHUB_TOKEN");
+
     const execution = workflow.slice(
-      workflow.indexOf(
-        "- name: Execute the reserved fresh fixture exactly once",
-      ),
+      execute,
       workflow.indexOf(
         "- name: Terminalize every normally returned reserved execution",
       ),

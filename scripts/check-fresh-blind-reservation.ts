@@ -84,7 +84,12 @@ export interface FreshBlindReservationCheck {
   readonly runId: string;
 }
 
-export async function checkFreshBlindReservation(
+export interface FreshBlindPermanentReservationCheck
+  extends FreshBlindReservationCheck {
+  readonly githubToken: string;
+}
+
+export async function checkFreshBlindReservationIdentity(
   input: FreshBlindReservationCheck,
 ): Promise<FreshBlindReservation> {
   const reservation = parseFreshBlindReservation(
@@ -98,20 +103,45 @@ export async function checkFreshBlindReservation(
     runAttempt: input.runAttempt,
     runId: input.runId,
   } satisfies FreshBlindReservationIdentity;
-  for (const key of Object.keys(
-    expected,
-  ) as (keyof FreshBlindReservationIdentity)[]) {
+  assertFreshBlindReservationExecution(reservation, expected);
+  return reservation;
+}
+
+export function assertFreshBlindReservationExecution(
+  reservation: FreshBlindReservation,
+  expected: FreshBlindReservationIdentity,
+): void {
+  for (const key of Object.keys(expected) as (keyof FreshBlindReservationIdentity)[]) {
     if (reservation[key] !== expected[key]) {
       throw new Error(
         `fresh blind reservation ${key} does not match execution`,
       );
     }
   }
-  const response = await fetch(
+}
+
+export async function checkFreshBlindReservation(
+  input: FreshBlindPermanentReservationCheck,
+  request: typeof fetch = fetch,
+): Promise<FreshBlindReservation> {
+  const reservation = await checkFreshBlindReservationIdentity(input);
+  await proveFreshBlindReservation(reservation, input.githubToken, request);
+  return reservation;
+}
+
+export async function proveFreshBlindReservation(
+  reservation: FreshBlindReservation,
+  githubToken: string,
+  request: typeof fetch = fetch,
+): Promise<void> {
+  const token = githubToken.trim();
+  if (!token) throw new Error("GitHub token is required to prove the reservation");
+  const response = await request(
     `https://api.github.com/repos/${FRESH_BLIND_REPOSITORY}/issues/comments/${reservation.ledgerCommentId}`,
     {
       headers: {
         Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
         "X-GitHub-Api-Version": "2022-11-28",
       },
     },
@@ -135,25 +165,36 @@ export async function checkFreshBlindReservation(
       "permanent release reservation comment differs from the local record",
     );
   }
-  return reservation;
 }
 
 if (import.meta.main) await checkReservationFromEnvironment();
 
 async function checkReservationFromEnvironment(): Promise<void> {
+  const args = Bun.argv.slice(2);
+  if (args.length > 1 || (args.length === 1 && args[0] !== "--local")) {
+    throw new Error("usage: check-fresh-blind-reservation.ts [--local]");
+  }
   const candidateSha = required("SEMATH_CANDIDATE_SHA");
   assertFreshBlindWorkflowBoundary(
     freshBlindWorkflowBoundaryFromEnvironment(candidateSha),
   );
-  const reservation = await checkFreshBlindReservation({
+  const input: FreshBlindReservationCheck = {
     candidateSha,
     fixturePath: required("SEMATH_FRESH_BLIND_FIXTURE"),
     releaseId: required("SEMATH_RELEASE_ID"),
     reservationPath: requiredPath("SEMATH_FRESH_BLIND_RESERVATION"),
     runAttempt: required("GITHUB_RUN_ATTEMPT"),
     runId: required("GITHUB_RUN_ID"),
-  });
-  console.log(`fresh blind reservation OK: ${reservation.releaseId}`);
+  };
+  const reservation = args[0] === "--local"
+    ? await checkFreshBlindReservationIdentity(input)
+    : await checkFreshBlindReservation({
+        ...input,
+        githubToken: required("GITHUB_TOKEN"),
+      });
+  console.log(
+    `fresh blind reservation ${args[0] === "--local" ? "identity " : ""}OK: ${reservation.releaseId}`,
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

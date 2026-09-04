@@ -994,6 +994,34 @@ export function authoredScenarioReviewPayload(
   });
 }
 
+/**
+ * Stable source-lineage payload for commissioning handoffs.
+ *
+ * Reviewed expectations, catalog annotations, review attestations, and the
+ * digest itself are deliberately excluded. Reviewers may correct those fields
+ * without changing the identity of the independently authored source packet.
+ */
+export function authoredScenarioRawPayload(
+  fixture: AuthoredScientificFixture,
+  scenarioId: string,
+): string {
+  const scenario = fixture.scenarios.find((item) => item.id === scenarioId);
+  if (!scenario) throw new Error(`${scenarioId}: unknown scenario`);
+  const {
+    lawIds: _lawIds,
+    provenance,
+    review: _review,
+    ...scenarioBody
+  } = scenario;
+  const { rawDigest: _rawDigest, ...rawProvenance } = provenance;
+  return stableJson({
+    probes: fixture.probes
+      .filter((probe) => probe.scenarioId === scenarioId)
+      .map(({ expected: _expected, ...probe }) => probe),
+    scenario: { ...scenarioBody, provenance: rawProvenance },
+  });
+}
+
 export function authoredFixtureSealPayload(fixture: AuthoredScientificFixture): string {
   const { seal: _seal, ...batch } = fixture.batch;
   return stableJson({ ...fixture, batch });
@@ -1755,6 +1783,39 @@ export function resolveAuthoredAnchor(
         (anchor.selection?.length ?? anchor.needle.length),
     },
   };
+}
+
+/** Project cursor-only fields away before passing a cursor to anchor tooling. */
+export function authoredCursorSourceAnchor(
+  cursor: AuthoredScientificProbe["cursor"],
+): AuthoredSourceAnchor {
+  return {
+    fileId: cursor.fileId,
+    needle: cursor.needle,
+    ...(cursor.occurrence === undefined
+      ? {}
+      : { occurrence: cursor.occurrence }),
+  };
+}
+
+export function authoredResolvedAnchorKey(
+  snapshot: AuthoredScientificSnapshot,
+  anchor: AuthoredSourceAnchor,
+): string {
+  const resolved = resolveAuthoredAnchor(snapshot, anchor);
+  return `${resolved.fileId}:${resolved.range.startOffset}:${resolved.range.endOffset}`;
+}
+
+/** Canonical navigation order uses default string ordering of resolved keys. */
+export function sortAuthoredAnchors(
+  snapshot: AuthoredScientificSnapshot,
+  anchors: readonly AuthoredSourceAnchor[],
+): readonly AuthoredSourceAnchor[] {
+  return [...anchors].sort((left, right) => {
+    const leftKey = authoredResolvedAnchorKey(snapshot, left);
+    const rightKey = authoredResolvedAnchorKey(snapshot, right);
+    return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
+  });
 }
 
 export function authoredProbeIdentityMatches(
