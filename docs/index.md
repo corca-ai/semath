@@ -6,62 +6,24 @@ preserves source identity through edits. CorTeX is its first host.
 
 ## Start here
 
-- [Supported scope](conservative-analysis.md) defines conservative analysis,
-  authority, refusal, and the boundary around research features.
-- [Architecture](architecture.md) explains the current durable design and
-  boundaries.
-- [Public API](public-api.md) describes snapshots, updates, queries, source
-  ranges, and result contracts.
-- [GitHub issues](https://github.com/corca-ai/semath/issues) track work. The
-  earlier broad-STEM release program is superseded by the supported scope.
+- [Supported scope](conservative-analysis.md): supported work and refusal rules.
+- [Architecture](architecture.md): data flow, evidence authority, and boundaries.
+- [Lessons](lessons.md): mistakes to avoid when changing the analyzer.
 
-Install dependencies with `bun install` and run the fast local verification
-suite with:
+Install dependencies with `bun install`, then run `bun run check` and
+`awiki lint -r`. Run `bun run quality` on x86_64 Linux for semantic, pack,
+fixture, or threshold changes. Build release WASM only on that platform.
 
-```sh
-bun run check
-awiki lint -r
-```
+## Integrate and maintain
 
-`bun run check` is the local code and supported-behavior gate.
-Run `bun run quality` for semantic releases and changes to packs, corpora,
-inference, or quality thresholds. The historical broad-recognition evaluation
-is retained separately as `bun run quality:research`.
+- [Public API](public-api.md): snapshots, queries, revisions, and source ranges.
+- [Domain packs](domain-packs.md): declarative vocabulary and typed constraints.
+- [Compatibility and release policy](compatibility.md): versioned contracts and
+  reproducible release qualification.
+- [Capability and test-layer matrix](capability-test-matrix.md): where to test behavior.
+- [Performance gates](performance.md): latency, memory, work, and transfer limits.
+- [Documentation guide](metadoc.md): organization, linking, and linting.
+- [Agent guide](../AGENTS.md): repository map and working rules.
 
-Release WASM must be built on an x86_64 Linux host. Apple Silicon machines may
-run native tests but must use `scripts/build-wasm-remote.sh` for release
-artifacts.
-
-## Work with the semantic engine
-
-- [Public API](public-api.md) — embed or query Semath through native, WASM,
-  Worker, or language-server boundaries.
-- [Domain packs](domain-packs.md) — understand and author concepts, typed laws,
-  quantities, and pack dependencies.
-- [Pack maturity report](pack-maturity.md) — inspect dated benchmark evidence,
-  resolved defects, and measured gaps without confusing them with rollout state.
-- [Compatibility and release policy](compatibility.md) — change schemas,
-  protocols, packages, and release artifacts safely.
-
-## Evaluate behavior
-
-- [Capability and test-layer matrix](capability-test-matrix.md) — choose the
-  smallest authoritative test layer for each capability.
-- [Historical STEM scorecards](semantic-quality-scorecards.md) — interpret the
-  earlier calibration, corpus, and broad-recognition release evidence.
-- [Spent holdout postmortems](spent-holdout-postmortems.md) — understand the
-  historical v0.38–v0.43 failures, public regression atlas, and reuse boundary.
-- [Fresh-fixture commissioning history](commissioning-history.md) — review the
-  v0.40–v0.94 development ledger and final-holdout isolation boundary.
-- [Practical STEM breadth benchmark](stem-breadth-benchmark.md) — interpret the
-  reviewed field-by-capability development matrix and its commissioned gaps.
-- Inspect the dated cursor, identity, navigation, and lifecycle fixture review in
-  the [v0.28 development-contract adjudication](v028-development-adjudication.md).
-- [Performance gates](performance.md) — reproduce full-path latency, memory,
-  transfer, artifact, and bounded-invalidation measurements.
-
-## Maintain the project
-
-- [Documentation Guide](metadoc.md) — write, organize, link, and lint docs.
-- [`AGENTS.md`](../AGENTS.md) — follow the compact working rules and repository
-  map used by coding agents.
+Current plans belong in [GitHub issues](https://github.com/corca-ai/semath/issues).
+Issues do not expand the supported product scope.

@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "electromagnetism",
-  "packVersion": "1.1.0",
+  "packVersion": "1.1.1",
   "packKind": "field",
   "namespace": "electromagnetism",
   "title": "Electromagnetism",
@@ -195,28 +195,18 @@
         {
           "id": "force",
           "concept": "quantities-units:force",
-          "description": "Electric force on the charge.",
-          "notation": [
-            "F"
-          ]
+          "description": "Electric force on the charge."
         },
         {
           "id": "charge",
           "concept": "quantities-units:electric-charge",
           "description": "Electric charge.",
-          "shape": "scalar",
-          "notation": [
-            "q",
-            "Q"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "electric-field",
           "concept": "quantities-units:electric-field",
-          "description": "Electric field at the charge.",
-          "notation": [
-            "E"
-          ]
+          "description": "Electric field at the charge."
         }
       ],
       "conditions": [
@@ -262,47 +252,35 @@
           "id": "energy",
           "concept": "quantities-units:energy",
           "description": "Electric potential energy.",
-          "shape": "scalar",
-          "notation": [
-            "U",
-            "W"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "charge",
           "concept": "quantities-units:electric-charge",
           "description": "Electric charge.",
-          "shape": "scalar",
-          "notation": [
-            "q",
-            "Q"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Electric potential relative to the stated reference.",
-          "shape": "scalar",
-          "notation": [
-            "V",
-            "phi"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
         {
           "id": "common-potential-reference",
           "kind": "same-context",
-        "subjects": [
-          "energy",
-          "charge",
-          "voltage"
-        ],
-        "label": "Charge and potential use the same reference and the electrostatic regime is explicit.",
-        "evidencePhrases": [
-          "potential relative to",
-          "region held at potential"
-        ]
+          "subjects": [
+            "energy",
+            "charge",
+            "voltage"
+          ],
+          "label": "Charge and potential use the same reference and the electrostatic regime is explicit.",
+          "evidencePhrases": [
+            "potential relative to",
+            "region held at potential"
+          ]
         }
       ],
       "references": [
@@ -329,31 +307,19 @@
           "id": "power",
           "concept": "quantities-units:power",
           "description": "Instantaneous electric power.",
-          "shape": "scalar",
-          "notation": [
-            "P",
-            "p"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "voltage",
           "concept": "quantities-units:voltage",
           "description": "Terminal voltage.",
-          "shape": "scalar",
-          "notation": [
-            "V",
-            "v"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "current",
           "concept": "quantities-units:electric-current",
           "description": "Terminal current.",
-          "shape": "scalar",
-          "notation": [
-            "I",
-            "i"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
@@ -595,11 +561,11 @@
           "label": "The field, speed, and independent time variable are explicitly bound to one homogeneous wave model."
         }
       ],
-        "activationPhrases": [
-          "homogeneous wave equation",
-          "scalar wave equation",
-          "wave equation"
-        ],
+      "activationPhrases": [
+        "homogeneous wave equation",
+        "scalar wave equation",
+        "wave equation"
+      ],
       "references": [
         "electrodynamics"
       ],

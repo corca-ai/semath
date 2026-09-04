@@ -34,7 +34,7 @@ import {
   planSemanticEditTrace,
   planSemanticLifecycleTraces,
   shrinkEditTrace,
-} from "../packages/evaluation/src/differential";
+} from "./testing/differential";
 
 const DOCUMENT_COUNT = positiveInteger("SEMATH_BUDGET_DOCUMENTS", 60);
 const STABLE_HOST_GATE = process.env.SEMATH_BUDGET_STABLE === "1";

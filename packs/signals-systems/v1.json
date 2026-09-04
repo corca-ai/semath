@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "signals-systems",
-  "packVersion": "1.1.0",
+  "packVersion": "1.1.1",
   "packKind": "field",
   "namespace": "signals-systems",
   "title": "Signals and systems",
@@ -145,22 +145,13 @@
           "concept": "signals-systems:cyclic-frequency",
           "quantity": "quantities-units:frequency",
           "description": "Cyclic frequency.",
-          "shape": "scalar",
-          "notation": [
-            "f",
-            "nu"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "period",
           "concept": "quantities-units:duration",
           "description": "Signal period.",
-          "shape": "scalar",
-          "notation": [
-            "T",
-            "P",
-            "tau"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
@@ -216,31 +207,20 @@
           "concept": "signals-systems:angular-frequency",
           "quantity": "quantities-units:frequency",
           "description": "Angular frequency.",
-          "shape": "scalar",
-          "notation": [
-            "omega",
-            "w"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "pi",
           "concept": "quantities-units:dimensionless",
           "description": "The circle constant pi.",
-          "shape": "scalar",
-          "notation": [
-            "pi"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "frequency",
           "concept": "signals-systems:cyclic-frequency",
           "quantity": "quantities-units:frequency",
           "description": "Cyclic frequency.",
-          "shape": "scalar",
-          "notation": [
-            "f",
-            "nu"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
@@ -274,32 +254,20 @@
           "id": "wave-speed",
           "concept": "quantities-units:velocity",
           "description": "Wave propagation speed.",
-          "shape": "scalar",
-          "notation": [
-            "c",
-            "v"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "frequency",
           "concept": "signals-systems:cyclic-frequency",
           "quantity": "quantities-units:frequency",
           "description": "Cyclic frequency.",
-          "shape": "scalar",
-          "notation": [
-            "f",
-            "nu"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "wavelength",
           "concept": "quantities-units:length",
           "description": "Wavelength.",
-          "shape": "scalar",
-          "notation": [
-            "lambda",
-            "L"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [

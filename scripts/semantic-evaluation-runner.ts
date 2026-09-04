@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { LatexSyntaxService } from "wasmtex/syntax";
-import type { CorpusDocument } from "../packages/evaluation/src/index";
+import type { CorpusDocument } from "./testing/foundation";
 import {
   SEMATH_PROTOCOL_VERSION,
   type DocumentLanguage,

@@ -1,15 +1,15 @@
 # Public API
 
 Semath is a conservative mathematical document analyzer and language-service
-runtime using protocol 17. The [supported scope](conservative-analysis.md)
-defines product guarantees; the richer authoring context is supplementary.
+runtime using protocol 18. The [supported scope](conservative-analysis.md)
+defines product guarantees and the authority of each result.
 An established symbol identifies a source-defined entity. An established
 formula requires grounded typed roles and verified conditions; neither a
 source description nor a prose verdict proves an equation.
 
 | Export | Responsibility |
 | --- | --- |
-| `semath/evaluation` | pure corpus validation, metamorphic planning, scoring, and pack conformance |
+| `semath/authoring` | pack compiler report types and validated packaging |
 | `semath/protocol` | snapshots, deltas, semantic queries, results, and diagnostics |
 | `semath/wasm` | release WASM and its byte-oriented engine ABI |
 | `semath/worker` | typed WASM engine wrapper |
@@ -39,7 +39,7 @@ partial decisions contain a structured known meaning; partial decisions may
 also carry neutral requirements for optional tooling. Ambiguous decisions
 contain bounded alternatives, and conflicting decisions contain source-linked
 conflicts. The selected formula has its own independently derived disposition
-in `semanticView.authoringContext`: evidence about the complete formula cannot
+in `semanticView.formulaAnalysis`: evidence about the complete formula cannot
 establish or conflict the entity at an interior cursor, and an independently
 established entity cannot establish the surrounding formula. Every state has a
 deterministic bounded reason slice whose kinds distinguish proof, uncertainty,
@@ -135,49 +135,36 @@ alternatives but never changes a decision from unsupported to established.
 hosts and release gates can detect routing regressions without reimplementing
 policy.
 
-`semanticView.authoringContext` is always present on a current successful
+`semanticView.formulaAnalysis` is always present on a current successful
 semantic query. Its `disposition` is the independently computed state of the
-selected complete formula: established, conventional, partial, ambiguous,
+selected complete formula: established, partial, ambiguous,
 conflicting, unsupported, or engine-limited. Its optional `formula` supplies
 the exact file, path, revision, scope, UTF-16 range, authored source notation,
 and generated provenance for the complete math region. `lifecycle` reports only
 Semath-owned source facts:
 authored versus generated, current freshness, retraction, editability of the
 source surface, capping, and engine limits. A stale query returns the existing
-typed query error rather than a stale authoring context.
+typed query error rather than stale formula analysis.
 
-The authoring context also exposes structured missing role declarations and
+The formula analysis also exposes structured missing role declarations and
 conditions, bounded exact same-entity notation occurrences, prose claim anchors
-with polarity, modality, evidence parents, and a safe strength ceiling, and a
+with polarity, modality, and evidence parents, and a
 distinct approximation disposition for canonical approximate relations.
 Equation links distinguish `shared-entity` continuity from `derived-law`
 evidence; only the latter can ground consequence wording. All collections are
 source ordered, capped, retractable, and reproduced by native, WASM, Worker,
 and LSP boundaries.
 
-`semanticView.authoringContext.conventionalCandidates`, when present, is a
-bounded advisory projection separate from the meaning decision. Each item has
-the literal `conventional-candidate` disposition, a proposed pack law and
-relation, its current bindings, exact domain evidence, and a discriminated
-requirement list. A `role-declaration` requirement carries the expected
-concept/shape constraint
-for one source symbol; a `condition` requirement carries the typed law
-condition. Hosts may explain or use these values to prepare a reviewed source
-edit, but must not treat them as claims, diagnostics, identity, navigation, or
-edit authorization. Once the author supplies source-backed declarations or an
-accepted edit, normal analysis may establish the result and the conventional
-candidate retracts.
-
-`MathAuthoringContext` contains no phrase ID, rhetorical move, English
+`FormulaAnalysisInfo` contains no phrase ID, rhetorical move, English
 template, UI category, recommendation score, or conclusion that prose should
 be inserted. Hosts remain responsible for writing policy, permissions,
 preview, mutation, collaboration, and undo.
 
 ### Evidence-graded interpretations
 
-Protocol 17 exposes `authoringContext.interpretations` as a bounded, open-world
+Protocol 18 exposes `formulaAnalysis.interpretations` as a bounded, open-world
 projection over the existing meaning decision, typed laws, scoped domain
-hypotheses, structural alternatives, and conventional candidates. It does not replace or weaken the
+hypotheses and structural alternatives. It does not replace or weaken the
 meaning decision. A host may present the hypotheses for manual review, but the
 projection grants no diagnostic, navigation, rename, or edit authority.
 
@@ -187,7 +174,7 @@ formula anchor, typed relation, bindings and conditions when available, and
 the requirement IDs that would discriminate it. `evidence` classifies every
 source-linked item independently as supporting or contradicting and records
 whether it came from an explicit declaration, typed structure, natural-language
-extraction, scoped domain context, a reviewed convention, or derived evidence.
+extraction, scoped domain context, or derived evidence.
 Each item retains its underlying `Evidence` and adds `sourceAnchors`; every
 anchor identifies the evidence's own file, path, range, document revision,
 scope path, current or retracted lifecycle, and authored or generated origin.
@@ -212,7 +199,7 @@ The set always reports `bounded-open-world` exhaustiveness: absence from the
 bounded candidates does not mean that an author's intended interpretation is
 impossible. `analysisLimits` separately reports candidate/evidence capping,
 discriminator capping, engine limits, generated source, and retraction. Caps in
-unrelated authoring-context views do not mark the interpretation set truncated.
+unrelated formula-analysis views do not mark the interpretation set truncated.
 A missing hypothesis or
 advisory facet therefore suppresses only the dependent host assistance and
 never becomes a Problem.

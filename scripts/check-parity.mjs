@@ -3,8 +3,8 @@ import { spawnSync } from "node:child_process";
 import init, { SemathEngine } from "../lib/wasm/semath_wasm.js";
 import { LatexSyntaxService } from "wasmtex/syntax";
 import { adaptWasmtexDocument } from "../packages/wasmtex-adapter/src/index.ts";
-import { firstDifferentialFailure } from "../packages/evaluation/src/differential.ts";
-import { planCursorInvariantSurfaces } from "../packages/evaluation/src/cursor-invariants.ts";
+import { firstDifferentialFailure } from "./testing/differential.ts";
+import { planCursorInvariantSurfaces } from "./testing/cursor-invariants.ts";
 import { SEMATH_PROTOCOL_VERSION } from "../packages/protocol/src/index.ts";
 
 const baseSources = [

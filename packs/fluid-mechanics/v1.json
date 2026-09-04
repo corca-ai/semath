@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "fluid-mechanics",
-  "packVersion": "1.1.0",
+  "packVersion": "1.1.1",
   "packKind": "field",
   "namespace": "fluid-mechanics",
   "title": "Fluid mechanics",
@@ -225,31 +225,19 @@
           "id": "flow-rate",
           "concept": "quantities-units:volumetric-flow-rate",
           "description": "Volumetric flow rate.",
-          "shape": "scalar",
-          "notation": [
-            "Q",
-            "q"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "area",
           "concept": "quantities-units:area",
           "description": "Flow cross-sectional area.",
-          "shape": "scalar",
-          "notation": [
-            "A"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "velocity",
           "concept": "quantities-units:velocity",
           "description": "Mean normal flow velocity.",
-          "shape": "scalar",
-          "notation": [
-            "v",
-            "V",
-            "u"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
@@ -293,57 +281,41 @@
           "id": "mass-flow-rate",
           "concept": "quantities-units:mass-flow-rate",
           "description": "Mass flow rate.",
-          "shape": "scalar",
-          "notation": [
-            "m",
-            "M"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "density",
           "concept": "quantities-units:density",
           "description": "Fluid density.",
-          "shape": "scalar",
-          "notation": [
-            "rho",
-            "d"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "area",
           "concept": "quantities-units:area",
           "description": "Flow cross-sectional area.",
-          "shape": "scalar",
-          "notation": [
-            "A"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "velocity",
           "concept": "quantities-units:velocity",
           "description": "Mean normal flow velocity.",
-          "shape": "scalar",
-          "notation": [
-            "v",
-            "V",
-            "u"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [
         {
           "id": "uniform-section-values",
           "kind": "uniform",
-        "subjects": [
-          "density",
-          "area",
-          "velocity"
-        ],
-        "label": "Density and mean normal velocity are uniform over the stated section.",
-        "evidencePhrases": [
-          "area-mean exit speed",
-          "mean normal flow velocity"
-        ]
+          "subjects": [
+            "density",
+            "area",
+            "velocity"
+          ],
+          "label": "Density and mean normal velocity are uniform over the stated section.",
+          "evidencePhrases": [
+            "area-mean exit speed",
+            "mean normal flow velocity"
+          ]
         }
       ],
       "references": [
@@ -368,41 +340,25 @@
           "id": "pressure",
           "concept": "quantities-units:pressure",
           "description": "Hydrostatic pressure difference.",
-          "shape": "scalar",
-          "notation": [
-            "p",
-            "P"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "density",
           "concept": "quantities-units:density",
           "description": "Constant fluid density.",
-          "shape": "scalar",
-          "notation": [
-            "rho",
-            "d"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "acceleration",
           "concept": "quantities-units:acceleration",
           "description": "Gravitational acceleration magnitude.",
-          "shape": "scalar",
-          "notation": [
-            "g",
-            "a"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "height",
           "concept": "quantities-units:length",
           "description": "Signed height or depth difference.",
-          "shape": "scalar",
-          "notation": [
-            "h",
-            "z"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [

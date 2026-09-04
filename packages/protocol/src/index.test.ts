@@ -4,7 +4,6 @@ import {
   canonicalMathInterpretationPreCapPayload,
   mathInterpretationPreCapSemanticKeyDigest,
   parseMathInterpretationCandidateCapInfo,
-  type ConventionalCandidateInfo,
   type LawConditionInfo,
   type MathInterpretationEvidenceReferenceInfo,
   type MathInterpretationPreCapSemanticKey,
@@ -56,7 +55,7 @@ describe("protocol", () => {
       projectId: "project",
       protocolVersion: SEMATH_PROTOCOL_VERSION,
     };
-    expect(snapshot.protocolVersion).toBe(17);
+    expect(snapshot.protocolVersion).toBe(18);
   });
 
   test("keeps candidate cap metadata all-or-none at the wire boundary", () => {
@@ -103,7 +102,7 @@ describe("protocol", () => {
     ).toThrow();
   });
 
-  test("matches the protocol-17 pre-cap semantic digest vector", async () => {
+  test("matches the pre-cap semantic digest vector", async () => {
     const candidates = Array.from({ length: 17 }, (_, index) =>
       structuralPreCapKey(index),
     );
@@ -208,31 +207,6 @@ describe("protocol", () => {
       subjects: ["A"],
     };
     expect(condition.operatorProperty).toBe("linear");
-  });
-
-  test("keeps conventional candidates structurally non-authoritative", () => {
-    const candidate: ConventionalCandidateInfo = {
-      bindings: [],
-      candidateId: "conventional/linear-algebra/matrix-vector-product/1:5",
-      disposition: "conventional-candidate",
-      evidence: [],
-      lawId: "matrix-vector-product",
-      packId: "linear-algebra",
-      packVersion: "1.4.0",
-      relation: {
-        conditions: [],
-        description: "A matrix maps a vector.",
-        evidence: [],
-        range: { endOffset: 5, startOffset: 1 },
-        relationId: "linear-algebra:matrix-vector-product",
-        roles: [],
-        title: "Matrix-vector product",
-      },
-      relevance: { evidence: [], support: "supported" },
-      requirements: [],
-      title: "Matrix-vector product",
-    };
-    expect(candidate.disposition).toBe("conventional-candidate");
   });
 
   test("keeps exact document identity on every interpretation evidence reference", () => {

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "id": "source-grounding",
+  "cases": [
+    {
+      "id": "typed-mechanical-power-tex",
+      "pairId": "typed-mechanical-power",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "Let $P_{dev}$ be power. Let $F_{dev}$ be force. Let $v_{dev}$ be velocity. The measured balance is $P_{dev}=\\mathbf{F}_{dev}\\cdot\\mathbf{v}_{dev}$.",
+      "cursorNeedle": "P_{dev}=",
+      "expectedDecision": "established",
+      "expectedSupport": "derived",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": [
+        "typed-structure",
+        "derived-evidence"
+      ],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0,
+      "formulaDecision": true
+    },
+    {
+      "id": "typed-mechanical-power-md",
+      "pairId": "typed-mechanical-power",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "Let $P_{dev}$ be power. Let $F_{dev}$ be force. Let $v_{dev}$ be velocity. The measured balance is $P_{dev}=\\mathbf{F}_{dev}\\cdot\\mathbf{v}_{dev}$.",
+      "cursorNeedle": "P_{dev}=",
+      "expectedDecision": "established",
+      "expectedSupport": "derived",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": [
+        "typed-structure",
+        "derived-evidence"
+      ],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0,
+      "formulaDecision": true
+    },
+    {
+      "id": "undeclared-period-tex",
+      "pairId": "undeclared-period",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "For a periodic signal in this section, the asserted relation is $f_{dev}=1/T_{dev}$.",
+      "cursorNeedle": "f_{dev}=",
+      "expectedDecision": "partial",
+      "expectedSupport": "tentative",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": [
+        "domain-context"
+      ],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0,
+      "formulaDecision": false
+    },
+    {
+      "id": "undeclared-period-md",
+      "pairId": "undeclared-period",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "For a periodic signal in this section, the asserted relation is $f_{dev}=1/T_{dev}$.",
+      "cursorNeedle": "f_{dev}=",
+      "expectedDecision": "partial",
+      "expectedSupport": "tentative",
+      "requiredEvidenceRole": "supporting",
+      "requiredProvenance": [
+        "domain-context"
+      ],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 0,
+      "formulaDecision": false
+    },
+    {
+      "id": "open-world-unknown-tex",
+      "pairId": "open-world-unknown",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "The detached warehouse notation is $orchid_{dev}=quartz_{dev}$, and no scientific role is declared for either symbol.",
+      "cursorNeedle": "orchid_{dev}",
+      "expectedDecision": "unsupported",
+      "expectedSupport": null,
+      "requiredEvidenceRole": null,
+      "requiredProvenance": [],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 0,
+      "maximumDiagnostics": 0,
+      "formulaDecision": true
+    },
+    {
+      "id": "open-world-unknown-md",
+      "pairId": "open-world-unknown",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "The detached warehouse notation is $orchid_{dev}=quartz_{dev}$, and no scientific role is declared for either symbol.",
+      "cursorNeedle": "orchid_{dev}",
+      "expectedDecision": "unsupported",
+      "expectedSupport": null,
+      "requiredEvidenceRole": null,
+      "requiredProvenance": [],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 0,
+      "maximumDiagnostics": 0,
+      "formulaDecision": true
+    },
+    {
+      "id": "explicit-role-conflict-tex",
+      "pairId": "explicit-role-conflict",
+      "language": "latex",
+      "path": "main.tex",
+      "source": "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p $",
+      "cursorNeedle": "p $",
+      "expectedDecision": "conflicting",
+      "expectedSupport": "contradicted",
+      "requiredEvidenceRole": "contradicting",
+      "requiredProvenance": [],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 1,
+      "formulaDecision": false
+    },
+    {
+      "id": "explicit-role-conflict-md",
+      "pairId": "explicit-role-conflict",
+      "language": "markdown",
+      "path": "main.md",
+      "source": "Let $p$ denote a probability distribution.\n$p$ is a random variable.\n$p $",
+      "cursorNeedle": "p $",
+      "expectedDecision": "conflicting",
+      "expectedSupport": "contradicted",
+      "requiredEvidenceRole": "contradicting",
+      "requiredProvenance": [],
+      "requiredMissingDiscriminatorPrefix": null,
+      "minimumHypotheses": 1,
+      "maximumDiagnostics": 1,
+      "formulaDecision": false
+    }
+  ]
+}

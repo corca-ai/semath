@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "optimization-ml",
-  "packVersion": "1.3.0",
+  "packVersion": "1.3.1",
   "packKind": "field",
   "namespace": "optimization-ml",
   "title": "Optimization and machine learning",
@@ -249,45 +249,25 @@
           "id": "next",
           "concept": "optimization-ml:iterate",
           "description": "Next iterate.",
-          "shape": "vector",
-          "notation": [
-            "xnext",
-            "y",
-            "z"
-          ]
+          "shape": "vector"
         },
         {
           "id": "current",
           "concept": "optimization-ml:iterate",
           "description": "Current iterate.",
-          "shape": "vector",
-          "notation": [
-            "x",
-            "ycurrent",
-            "w"
-          ]
+          "shape": "vector"
         },
         {
           "id": "step",
           "concept": "optimization-ml:step-size",
           "description": "Scalar step size.",
-          "shape": "scalar",
-          "notation": [
-            "alpha",
-            "eta",
-            "gamma"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "gradient",
           "concept": "optimization-ml:gradient",
           "description": "Objective gradient.",
-          "shape": "vector",
-          "notation": [
-            "g",
-            "d",
-            "nabla"
-          ]
+          "shape": "vector"
         }
       ],
       "conditions": [
@@ -407,30 +387,19 @@
           "id": "loss",
           "concept": "optimization-ml:loss-value",
           "description": "Binary cross-entropy loss.",
-          "shape": "scalar",
-          "notation": [
-            "L",
-            "ell"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "label",
           "concept": "optimization-ml:binary-label",
           "description": "Binary label.",
-          "shape": "scalar",
-          "notation": [
-            "y"
-          ]
+          "shape": "scalar"
         },
         {
           "id": "probability",
           "concept": "optimization-ml:predicted-probability",
           "description": "Predicted probability.",
-          "shape": "scalar",
-          "notation": [
-            "p",
-            "q"
-          ]
+          "shape": "scalar"
         }
       ],
       "conditions": [

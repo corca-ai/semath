@@ -15,8 +15,8 @@ analyzer. CorTeX is the first host.
 
 - `crates/`: Rust semantic core plus native and WASM boundaries.
 - `packages/`: protocol, adapters, Worker, LSP, and pack tooling.
-- `packs/` and `schemas/`: versioned domain knowledge and contracts.
-- `fixtures/`: corpus, parity, and performance cases.
+- `packs/`: versioned declarative vocabulary and typed constraints.
+- `fixtures/`: focused source-grounding, syntax, and constraint regressions.
 - `scripts/`: verification and release tooling.
 - `docs/`: maintained project documentation; keep it flat when practical.
 
@@ -24,8 +24,8 @@ analyzer. CorTeX is the first host.
 
 - Prefer pure, bounded, evidence-preserving core transformations.
 - Prioritize explicit definitions, grounded constraints, safe edits, and
-  retraction. Broad STEM recognition and prose intent inference are research
-  surfaces, not release requirements. Never promote prose verdicts to proof.
+  retraction. Do not infer intent or meanings from conventional notation.
+  Never promote prose verdicts to proof. Follow [the lessons](docs/lessons.md).
 - Preserve native/WASM behavior parity. Prefer the correct architecture and
   concise code over compatibility; breaking API and host UI changes are allowed.
 - Add focused tests at the lowest authoritative layer; minimize E2E coverage.

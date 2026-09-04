@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::semantic_index::{EntityId, NotationComponent, SourceOccurrenceId};
 
-pub const PROTOCOL_VERSION: u32 = 17;
+pub const PROTOCOL_VERSION: u32 = 18;
 pub const WASMTEX_SYNTAX_SCHEMA_VERSION: u32 = 8;
 pub const MATH_INTERPRETATION_HYPOTHESIS_LIMIT: usize = 16;
 
@@ -847,7 +847,6 @@ pub struct LawRecognition {
     pub title: String,
     pub description: String,
     pub description_key: String,
-    pub maturity: String,
     pub status: LawRecognitionStatus,
     pub pack_id: String,
     pub pack_version: String,
@@ -861,60 +860,13 @@ pub struct LawRecognition {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub relation: Option<RelationInfo>,
     pub rank: u32,
-    #[serde(skip)]
-    pub(crate) conventional_candidate: bool,
-    #[serde(skip)]
-    pub(crate) non_authoritative: bool,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(
-    tag = "kind",
-    rename_all = "kebab-case",
-    rename_all_fields = "camelCase"
-)]
-pub enum ConventionalRequirementInfo {
-    RoleDeclaration {
-        requirement_id: String,
-        parameter: String,
-        symbol: String,
-        constraint: SemanticConstraint,
-        evidence: Vec<Evidence>,
-    },
-    Condition {
-        requirement_id: String,
-        condition: LawConditionInfo,
-    },
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
-pub enum ConventionalCandidateDisposition {
-    ConventionalCandidate,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct ConventionalCandidateInfo {
-    pub candidate_id: String,
-    pub disposition: ConventionalCandidateDisposition,
-    pub pack_id: String,
-    pub pack_version: String,
-    pub law_id: String,
-    pub title: String,
-    pub relation: RelationInfo,
-    pub bindings: Vec<LawBinding>,
-    pub requirements: Vec<ConventionalRequirementInfo>,
-    pub relevance: DomainRelevance,
-    pub evidence: Vec<Evidence>,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
-pub enum MathAuthoringDisposition {
+pub enum FormulaDisposition {
     Established,
     Partial,
-    Conventional,
     Ambiguous,
     Conflicting,
     Unsupported,
@@ -963,7 +915,7 @@ pub struct MathFormulaAnchorInfo {
     rename_all = "kebab-case",
     rename_all_fields = "camelCase"
 )]
-pub enum MathAuthoringRequirementInfo {
+pub enum FormulaRequirementInfo {
     Declaration {
         requirement_id: String,
         symbol: String,
@@ -1024,14 +976,6 @@ pub struct MathApproximationInfo {
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
-pub enum MathClaimStrengthCeiling {
-    Asserted,
-    Qualified,
-    Unusable,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
 pub enum MathClaimPolarity {
     Positive,
     Negative,
@@ -1054,7 +998,6 @@ pub struct MathClaimEvidenceLinkInfo {
     pub claim: Location,
     pub polarity: MathClaimPolarity,
     pub modality: MathClaimModality,
-    pub strength_ceiling: MathClaimStrengthCeiling,
     pub supporting_claim_ids: Vec<String>,
     pub supporting_formulas: Vec<MathFormulaAnchorInfo>,
     pub evidence: Vec<Evidence>,
@@ -1077,7 +1020,6 @@ pub enum MathInterpretationKind {
     TypedLaw,
     ScopedDomain,
     StructuralAlternative,
-    ReviewedConvention,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
@@ -1097,7 +1039,6 @@ pub enum MathInterpretationEvidenceProvenance {
     TypedStructure,
     NaturalLanguageExtraction,
     DomainContext,
-    ReviewedConvention,
     DerivedEvidence,
 }
 
@@ -1210,7 +1151,6 @@ pub enum MathInterpretationOrderingReasonKind {
     TypedEvidence,
     DerivedEvidence,
     DomainRelevance,
-    ReviewedConvention,
     StableSourceOrder,
 }
 
@@ -1324,14 +1264,12 @@ pub struct MathInterpretationSetInfo {
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub struct MathAuthoringContext {
-    pub disposition: MathAuthoringDisposition,
+pub struct FormulaAnalysisInfo {
+    pub disposition: FormulaDisposition,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub formula: Option<MathFormulaAnchorInfo>,
     pub requirements: Vec<MathInterpretationRequirementInfo>,
     pub conditions: Vec<LawConditionInfo>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub conventional_candidates: Vec<ConventionalCandidateInfo>,
     pub equation_links: Vec<MathEquationLinkInfo>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approximation: Option<MathApproximationInfo>,
@@ -1400,7 +1338,7 @@ pub struct SemanticViewInfo {
     pub decision: MeaningDecision,
     pub symbol: Option<SymbolInfo>,
     pub context: SemanticContextInfo,
-    pub authoring_context: MathAuthoringContext,
+    pub formula_analysis: FormulaAnalysisInfo,
     pub declarations: Vec<Location>,
     pub diagnostics: Vec<SemanticDiagnostic>,
     pub domains: Vec<DomainActivation>,

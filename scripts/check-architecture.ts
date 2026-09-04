@@ -1,3 +1,4 @@
+import { FORBIDDEN_SEMANTIC_PATHS, checkSemanticBoundaries } from "./testing/semantic-boundaries";
 import { join, relative } from "node:path";
 
 const ROOT = join(import.meta.dir, "..");
@@ -80,5 +81,12 @@ for (const marker of [
     fail(`packages/lsp/src/index.ts contains semantic fallback ${marker}`);
   }
 }
+
+const boundarySources = Object.fromEntries(await Promise.all(
+  [...new Set(FORBIDDEN_SEMANTIC_PATHS.map((rule) => rule.path))].map(async (path) =>
+    [path, await Bun.file(join(ROOT, path)).text()] as const),
+));
+const violations = checkSemanticBoundaries(boundarySources);
+if (violations.length) fail(violations.map((item) => `${item.path}: ${item.id}`).join("\n"));
 
 console.log("architecture OK: dependency direction, singular adapter, and one project authority");

@@ -1,8 +1,6 @@
 # Conservative mathematical document analysis
 
-This is Semath's supported product scope. It supersedes the broad STEM
-recognition and writing-assistance release program described in historical
-evaluation records.
+This document defines Semath's supported product scope.
 
 Semath tracks explicit mathematical evidence in Markdown and LaTeX. It helps an
 author navigate definitions, inspect declared constraints, and review changes.
@@ -45,16 +43,16 @@ analysis limits are information about the analyzer, not defects in the
 document. Only verified edit proposals are actionable, and hosts must still
 review and apply them against the same source revision.
 
-## Existing research surfaces
+## Boundaries
 
-Domain packs, conventional candidates, and the host-neutral authoring context
-remain available as bounded supplementary information. Their presence does
-not expand the supported product scope. They cannot authorize navigation or
-edits, and broad field recognition is not a release requirement.
+Typed law matching exists to inspect explicit constraints and their evidence.
+Pack vocabulary and domain routing cannot supply missing declarations or grant
+edit authority. The analyzer does not propose scientific meanings from familiar
+notation, infer an author's intended argument, or generate writing suggestions.
 
-Existing corpora and spent evaluations remain historical evidence. Their
-scores are not silently recalibrated to claim success under the new scope.
-Generated law cases measure regression stability, not real-document usefulness.
+New capabilities require a concrete author task and independently reviewed
+examples. The [lessons](lessons.md) explain why recognition counts and synthetic
+scores cannot substitute for that evidence.
 
 ## Verification
 
@@ -65,10 +63,7 @@ positive behavior and refusal, not just absence of diagnostics.
 `bun run check` checks code, supported behavior, parity, package integrity, and
 local performance. `bun run quality` adds complete lifecycle and stable
 performance checks. Release qualification uses `bun run release:check` on
-x86_64 Linux and records the exact source and artifact identities. It needs no
-GitHub reservation or independently commissioned one-shot fixture.
+x86_64 Linux and records the exact source and artifact identities.
 
-The archived broad-recognition suite is available as `bun run quality:research`.
-It can expose useful gaps but is not an acceptance criterion for the narrower
-product. Production usefulness still requires review on real author documents;
+Production usefulness requires review on real author documents;
 a passing repository suite does not claim that validation has occurred.

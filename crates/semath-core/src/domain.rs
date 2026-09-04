@@ -316,7 +316,6 @@ pub(crate) fn observe_domains(
         .collect::<BTreeMap<_, _>>();
     let equations = formulas
         .iter()
-        .filter(|formula| !formula.non_authoritative)
         .filter_map(|formula| {
             let evidence = formula.evidence.first()?.clone();
             Some(EquationActivation {

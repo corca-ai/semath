@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 12,
+  "schemaVersion": 13,
   "packId": "discrete-math",
-  "packVersion": "1.0.0",
+  "packVersion": "1.0.1",
   "packKind": "field",
   "namespace": "discrete-math",
   "title": "Discrete mathematics, logic, and sets",

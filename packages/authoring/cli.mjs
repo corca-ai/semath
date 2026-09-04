@@ -1,24 +1,12 @@
 #!/usr/bin/env bun
 
 import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import {
-  compareScorecards,
   findForbiddenRuntimeBranches,
   packagePackAssets,
-  projectValidatedPack,
-  scaffoldPackWorkspace,
 } from "./src/index.ts";
-import {
-  findCorpusDuplicates,
-  observeQualityRun,
-  parseCorpus,
-  parseQualityManifest,
-  planPackPropertyCells,
-  planQualityRun,
-  scoreQuality,
-  explainQualityCase,
-} from "../evaluation/src/index.ts";
+
 
 const [command, ...args] = process.argv.slice(2);
 try {
@@ -28,18 +16,6 @@ try {
       break;
     case "validate":
       await validateCommand(args);
-      break;
-    case "scaffold":
-      await scaffoldCommand(args);
-      break;
-    case "score":
-      await scoreCommand(args, false);
-      break;
-    case "explain":
-      await scoreCommand(args, true);
-      break;
-    case "compare":
-      await compareCommand(args);
       break;
     case "package":
       await packageCommand(args);
@@ -64,12 +40,8 @@ async function initialize([directory, packId]) {
   const source = wasm.createPackTemplate(packId);
   const report = inspect(wasm, [{ path: "pack.json", source }]);
   assertCompilerClean(report);
-  const workspace = scaffoldPackWorkspace(projectValidatedPack(JSON.parse(source), report.forms));
   await writeNew(join(target, "pack.json"), source);
-  await writeNew(join(target, "corpus.json"), pretty(workspace.corpus));
-  await writeNew(join(target, "manifest.json"), pretty(workspace.manifest));
   console.log(`initialized ${packId} in ${target}`);
-  console.log("Review the generated positive and refusal seeds before claiming probe maturity.");
 }
 
 async function validateCommand(paths) {
@@ -79,70 +51,7 @@ async function validateCommand(paths) {
   const report = inspect(wasm, sources);
   printCompilerReport(report);
   assertCompilerClean(report);
-  const properties = planPackPropertyCells(
-    sources.map((source) => projectValidatedPack(JSON.parse(source.source), report.forms)),
-    20,
-  );
-  console.log(`semantic property plan OK: ${properties.length} required law cells`);
-}
 
-async function scaffoldCommand([packPath, directory]) {
-  if (!packPath || !directory) fail("scaffold requires <pack.json> <directory>");
-  const wasm = await loadWasm();
-  const [source] = await readSources([packPath]);
-  const report = inspect(wasm, [source]);
-  printCompilerReport(report);
-  assertCompilerClean(report);
-  const workspace = scaffoldPackWorkspace(
-    projectValidatedPack(JSON.parse(source.source), report.forms),
-  );
-  const target = resolve(directory);
-  await mkdir(target, { recursive: true });
-  await writeNew(join(target, "corpus.json"), pretty(workspace.corpus));
-  await writeNew(join(target, "manifest.json"), pretty(workspace.manifest));
-  console.log(`scaffolded ${workspace.corpus.cases.length} reviewed starting cells in ${target}`);
-}
-
-async function scoreCommand(args, explain) {
-  const [workspacePath, packId, caseId] = args;
-  if (!workspacePath || !packId || (explain && !caseId)) {
-    fail(explain
-      ? "explain requires <workspace-or-manifest> <pack-id> <case-id>"
-      : "score requires <workspace-or-manifest> <pack-id>");
-  }
-  const { corpora, manifest } = await loadWorkspace(workspacePath);
-  const scoped = scopePack(manifest, corpora, packId);
-  const duplicateFailures = findCorpusDuplicates([...scoped.corpora.values()]);
-  if (duplicateFailures.length) {
-    fail(duplicateFailures.join("\n"));
-  }
-  const plan = planQualityRun(scoped.manifest, scoped.corpora);
-  const results = await runWasm(plan);
-  if (explain) {
-    const index = plan.planned.findIndex(
-      (item) => !item.generatedFrom && item.case.id === caseId,
-    );
-    if (index < 0) fail(`${caseId}: case not found in ${packId}`);
-    console.log(pretty(explainQualityCase(plan.planned[index], results[index])).trim());
-    return;
-  }
-  const observations = observeQualityRun(plan, results);
-  const scorecard = scoreQuality(scoped.manifest, scoped.corpora, observations);
-  console.log(pretty(scorecard).trim());
-  if (scorecard.failures.length) fail("focused scorecard did not pass");
-}
-
-async function compareCommand([baselinePath, candidatePath]) {
-  if (!baselinePath || !candidatePath) {
-    fail("compare requires <baseline-scorecard.json> <candidate-scorecard.json>");
-  }
-  const [baseline, candidate] = await Promise.all([
-    readJson(baselinePath),
-    readJson(candidatePath),
-  ]);
-  const comparison = compareScorecards(baseline, candidate);
-  console.log(pretty(comparison).trim());
-  if (comparison.regressions.length) fail("candidate contains metric regressions");
 }
 
 async function packageCommand([outputPath, ...paths]) {
@@ -192,60 +101,6 @@ async function loadWasm() {
 function inspect(wasm, sources) {
   const payload = new TextEncoder().encode(JSON.stringify({ schemaVersion: 3, sources }));
   return JSON.parse(new TextDecoder().decode(wasm.inspectPackCatalog(payload)));
-}
-
-async function runWasm(plan) {
-  const wasm = await loadWasm();
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-  const engine = new wasm.SemathEngine();
-  try {
-    const { documents, ...metadata } = plan.snapshot;
-    engine.beginReset(encoder.encode(JSON.stringify(metadata)));
-    for (const document of documents) {
-      engine.ingestResetDocument(encoder.encode(JSON.stringify(document)));
-    }
-    engine.finishReset();
-    return plan.queries.map((query) =>
-      JSON.parse(decoder.decode(engine.query(encoder.encode(JSON.stringify(query))))),
-    );
-  } finally {
-    engine.free();
-  }
-}
-
-async function loadWorkspace(path) {
-  const manifestPath = path.endsWith(".json")
-    ? resolve(path)
-    : resolve(path, "manifest.json");
-  const manifest = parseQualityManifest(await readJson(manifestPath));
-  const corpora = new Map();
-  for (const suite of manifest.suites) {
-    const source = await readJson(resolve(dirname(manifestPath), suite.path));
-    corpora.set(suite.id, parseCorpus(source, suite));
-  }
-  return { corpora, manifest };
-}
-
-function scopePack(manifest, corpora, packId) {
-  const support = manifest.packs.find((pack) => pack.packId === packId);
-  if (!support) fail(`${packId}: support declaration not found`);
-  const suiteIds = new Set(
-    Object.values(support.capabilities).flatMap((capability) => capability.suiteIds),
-  );
-  const suites = manifest.suites.filter(
-    (suite) => suite.kind === "law" && suite.packId === packId && suiteIds.has(suite.id),
-  );
-  if (!suites.length) fail(`${packId}: no law corpus suites are owned by this pack`);
-  return {
-    corpora: new Map(suites.map((suite) => [suite.id, corpora.get(suite.id)])),
-    manifest: {
-      ...manifest,
-      foundationSuites: [],
-      packs: [support],
-      suites,
-    },
-  };
 }
 
 function printCompilerReport(report) {
@@ -322,10 +177,6 @@ function usage() {
 
   init <directory> <pack-id>
   validate <pack.json...>
-  scaffold <pack.json> <directory>
-  score <workspace-or-manifest> <pack-id>
-  explain <workspace-or-manifest> <pack-id> <case-id>
-  compare <baseline-scorecard.json> <candidate-scorecard.json>
   package <output.json> <pack.json...>
   audit-runtime <pack.json...>`);
 }

@@ -1,8 +1,8 @@
 use crate::domain::formula_has_independent_typed_evidence;
 use crate::{
-    ConstraintStatus, ConventionalCandidateInfo, DomainActivation, DomainSupportTier, Evidence,
-    LawBindingProof, LawRecognition, LawRecognitionStatus, Location, MathAuthoringRequirementInfo,
-    MathFormulaAnchorInfo, MathInterpretationAlternativeInfo, MathInterpretationAnalysisLimitInfo,
+    ConstraintStatus, DomainActivation, DomainSupportTier, Evidence, FormulaRequirementInfo,
+    LawBindingProof, LawRecognition, LawRecognitionStatus, Location, MathFormulaAnchorInfo,
+    MathInterpretationAlternativeInfo, MathInterpretationAnalysisLimitInfo,
     MathInterpretationAnalysisLimitKind, MathInterpretationCandidateCapInfo,
     MathInterpretationConditionInfo, MathInterpretationDomainRelevanceInfo,
     MathInterpretationEvidenceInfo, MathInterpretationEvidenceProvenance,
@@ -60,11 +60,11 @@ pub(crate) fn normalize_source_anchors(
 pub(crate) struct MathInterpretationInput<'a> {
     pub decision: &'a MeaningDecision,
     pub formulas: &'a [LawRecognition],
-    pub conventional_candidates: &'a [ConventionalCandidateInfo],
+
     pub domains: &'a [DomainActivation],
     pub structural_candidates: &'a [SemanticCandidateInfo],
     pub context: &'a SemanticContextInfo,
-    pub requirements: &'a [MathAuthoringRequirementInfo],
+    pub requirements: &'a [FormulaRequirementInfo],
     pub formula: Option<&'a MathFormulaAnchorInfo>,
     pub focus_range: Option<&'a SourceRange>,
     pub file_id: &'a str,
@@ -94,7 +94,6 @@ pub(crate) fn project_math_interpretations(
                     .relevance
                     .as_ref()
                     .map(|relevance| &relevance.evidence),
-                false,
             );
             hypotheses.push(MathInterpretationHypothesisInfo {
                 hypothesis_id: relation.relation_id.clone(),
@@ -110,7 +109,7 @@ pub(crate) fn project_math_interpretations(
                 relation: Some(relation.clone()),
                 bindings,
                 conditions: formula.conditions.clone(),
-                evidence: graded_evidence(&input, supporting, contradicting, false),
+                evidence: graded_evidence(&input, supporting, contradicting),
                 missing_discriminator_ids: requirements_for_prefix(
                     input.requirements,
                     &formula.law_id,
@@ -134,56 +133,6 @@ pub(crate) fn project_math_interpretations(
 
     for candidate in input.structural_candidates {
         hypotheses.push(structural_hypothesis(&input, candidate));
-    }
-
-    for candidate in input.conventional_candidates {
-        let mut supporting = candidate.evidence.clone();
-        supporting.extend(
-            candidate
-                .bindings
-                .iter()
-                .map(|binding| binding.evidence.clone()),
-        );
-        supporting.extend(
-            candidate
-                .conditions()
-                .flat_map(|condition| condition.evidence.clone()),
-        );
-        let ordering_reasons = ordering_reasons(
-            &input,
-            MathInterpretationSupportTier::Tentative,
-            &supporting,
-            Some(&candidate.relevance.evidence),
-            true,
-        );
-        hypotheses.push(MathInterpretationHypothesisInfo {
-            hypothesis_id: candidate.candidate_id.clone(),
-            kind: MathInterpretationKind::ReviewedConvention,
-            label: candidate.title.clone(),
-            support: MathInterpretationSupportTier::Tentative,
-            rank: u32::MAX,
-            range: candidate.relation.range.clone(),
-            location: location(&input, &candidate.relation.range),
-            document_version: input.lifecycle.document_version,
-            scope_path: input.scope_path.to_vec(),
-            formula: input.formula.cloned(),
-            relation: Some(candidate.relation.clone()),
-            bindings: candidate.bindings.clone(),
-            conditions: candidate.conditions().cloned().collect(),
-            evidence: graded_evidence(&input, supporting, Vec::new(), true),
-            missing_discriminator_ids: candidate
-                .requirements
-                .iter()
-                .map(conventional_requirement_id)
-                .filter(|candidate_id| {
-                    input
-                        .requirements
-                        .iter()
-                        .any(|requirement| requirement_id(requirement) == candidate_id.as_str())
-                })
-                .collect(),
-            ordering_reasons,
-        });
     }
 
     if let MeaningDecision::Ambiguous { alternatives, .. } = input.decision {
@@ -353,21 +302,6 @@ fn pre_cap_semantic_key_digest<'a>(keys: impl Iterator<Item = &'a str>) -> Strin
     keys.sort_unstable();
     let canonical = serde_json::to_vec(&keys).expect("interpretation semantic keys serialize");
     format!("{:x}", Sha256::digest(canonical))
-}
-
-trait ConventionalCandidateConditions {
-    fn conditions(&self) -> impl Iterator<Item = &crate::LawConditionInfo>;
-}
-
-impl ConventionalCandidateConditions for ConventionalCandidateInfo {
-    fn conditions(&self) -> impl Iterator<Item = &crate::LawConditionInfo> {
-        self.requirements
-            .iter()
-            .filter_map(|requirement| match requirement {
-                crate::ConventionalRequirementInfo::Condition { condition, .. } => Some(condition),
-                crate::ConventionalRequirementInfo::RoleDeclaration { .. } => None,
-            })
-    }
 }
 
 fn formula_support(
@@ -570,7 +504,7 @@ fn structural_hypothesis(
     let mut supporting = claim_evidence(input.context, &candidate.supporting_claim_ids);
     if supporting.is_empty() {
         supporting.push(Evidence {
-            rule_id: "semath/authoring/structural-alternative".into(),
+            rule_id: "semath/analysis/structural-alternative".into(),
             kind: "source-structure".into(),
             strength: "contextual".into(),
             source_ranges: vec![candidate.range.clone()],
@@ -585,7 +519,7 @@ fn structural_hypothesis(
             MathInterpretationSupportTier::Contradicted
         }
     };
-    let ordering_reasons = ordering_reasons(input, support, &supporting, None, false);
+    let ordering_reasons = ordering_reasons(input, support, &supporting, None);
     MathInterpretationHypothesisInfo {
         hypothesis_id: candidate.candidate_id.clone(),
         kind: MathInterpretationKind::StructuralAlternative,
@@ -600,7 +534,7 @@ fn structural_hypothesis(
         relation: None,
         bindings: Vec::new(),
         conditions: Vec::new(),
-        evidence: graded_evidence(input, supporting, contradicting, false),
+        evidence: graded_evidence(input, supporting, contradicting),
         missing_discriminator_ids: disambiguation_ids_for_alternative(
             input.requirements,
             &candidate.candidate_id,
@@ -686,14 +620,13 @@ fn conflict_hypothesis(
         relation: None,
         bindings: Vec::new(),
         conditions: Vec::new(),
-        evidence: graded_evidence(input, Vec::new(), conflict.evidence.clone(), false),
+        evidence: graded_evidence(input, Vec::new(), conflict.evidence.clone()),
         missing_discriminator_ids: input.requirements.iter().map(requirement_id).collect(),
         ordering_reasons: ordering_reasons(
             input,
             MathInterpretationSupportTier::Contradicted,
             &conflict.evidence,
             None,
-            false,
         ),
     })
 }
@@ -718,7 +651,6 @@ fn alternative_hypothesis(
             .relevance
             .as_ref()
             .map(|relevance| &relevance.evidence),
-        false,
     );
     MathInterpretationHypothesisInfo {
         hypothesis_id: alternative.alternative_id.clone(),
@@ -734,7 +666,7 @@ fn alternative_hypothesis(
         relation: None,
         bindings: Vec::new(),
         conditions: Vec::new(),
-        evidence: graded_evidence(input, alternative.evidence.clone(), Vec::new(), false),
+        evidence: graded_evidence(input, alternative.evidence.clone(), Vec::new()),
         missing_discriminator_ids: disambiguation_ids_for_alternative(
             input.requirements,
             &alternative.alternative_id,
@@ -788,8 +720,7 @@ fn source_meaning_hypothesis(
         .formula
         .map(|formula| formula.location.range.clone())
         .or_else(|| input.focus_range.cloned())?;
-    let projected_evidence =
-        graded_evidence(input, supporting.clone(), contradicting.clone(), false);
+    let projected_evidence = graded_evidence(input, supporting.clone(), contradicting.clone());
     let support = if support == MathInterpretationSupportTier::Contradicted {
         support
     } else {
@@ -801,7 +732,7 @@ fn source_meaning_hypothesis(
     };
     let mut ordering_evidence = supporting;
     ordering_evidence.extend(contradicting);
-    let ordering_reasons = ordering_reasons(input, support, &ordering_evidence, None, false);
+    let ordering_reasons = ordering_reasons(input, support, &ordering_evidence, None);
     Some(MathInterpretationHypothesisInfo {
         hypothesis_id: "source-meaning".into(),
         kind: MathInterpretationKind::SourceMeaning,
@@ -841,7 +772,6 @@ fn graded_evidence(
     input: &MathInterpretationInput<'_>,
     supporting: Vec<Evidence>,
     contradicting: Vec<Evidence>,
-    convention: bool,
 ) -> Vec<MathInterpretationEvidenceInfo> {
     let mut projected = supporting
         .into_iter()
@@ -852,7 +782,7 @@ fn graded_evidence(
                 .map(|evidence| (MathInterpretationEvidenceRole::Contradicting, evidence)),
         )
         .map(|(role, evidence)| {
-            let provenance = evidence_provenance(&evidence, convention);
+            let provenance = evidence_provenance(&evidence);
             let source_anchors = (input.resolve_evidence)(&evidence).anchors;
             let mut evidence = evidence;
             evidence.source_ranges = source_anchors
@@ -943,10 +873,10 @@ fn project_alternative(
 
 fn project_requirement(
     input: &MathInterpretationInput<'_>,
-    requirement: &MathAuthoringRequirementInfo,
+    requirement: &FormulaRequirementInfo,
 ) -> MathInterpretationRequirementInfo {
     match requirement {
-        MathAuthoringRequirementInfo::Declaration {
+        FormulaRequirementInfo::Declaration {
             requirement_id,
             symbol,
             occurrence_id,
@@ -957,7 +887,7 @@ fn project_requirement(
             occurrence_id: occurrence_id.clone(),
             evidence: evidence_references(input, evidence),
         },
-        MathAuthoringRequirementInfo::RoleDeclaration {
+        FormulaRequirementInfo::RoleDeclaration {
             requirement_id,
             parameter,
             symbol,
@@ -970,14 +900,14 @@ fn project_requirement(
             constraint: constraint.clone(),
             evidence: evidence_references(input, evidence),
         },
-        MathAuthoringRequirementInfo::Condition {
+        FormulaRequirementInfo::Condition {
             requirement_id,
             condition,
         } => MathInterpretationRequirementInfo::Condition {
             requirement_id: requirement_id.clone(),
             condition: project_condition(input, condition),
         },
-        MathAuthoringRequirementInfo::Disambiguation {
+        FormulaRequirementInfo::Disambiguation {
             requirement_id,
             alternatives,
             evidence,
@@ -1027,15 +957,10 @@ fn source_meaning_support(
     }
 }
 
-fn evidence_provenance(
-    evidence: &Evidence,
-    convention: bool,
-) -> MathInterpretationEvidenceProvenance {
+fn evidence_provenance(evidence: &Evidence) -> MathInterpretationEvidenceProvenance {
     let kind = evidence.kind.as_str();
     if kind.contains("domain") || matches!(kind, "document" | "document-field" | "section") {
         MathInterpretationEvidenceProvenance::DomainContext
-    } else if convention {
-        MathInterpretationEvidenceProvenance::ReviewedConvention
     } else if kind.contains("prose")
         || kind == "attached-prose"
         || evidence.rule_id.starts_with("english-")
@@ -1062,17 +987,11 @@ fn ordering_reasons(
     support: MathInterpretationSupportTier,
     primary_evidence: &[Evidence],
     relevance: Option<&Vec<Evidence>>,
-    convention: bool,
 ) -> Vec<MathInterpretationOrderingReason> {
     let mut reasons = Vec::new();
     if primary_evidence.is_empty() {
         // The stable source range still makes the candidate inspectable, but it
         // must not be described as evidence-backed.
-    } else if convention {
-        reasons.push(MathInterpretationOrderingReason {
-            kind: MathInterpretationOrderingReasonKind::ReviewedConvention,
-            evidence: evidence_references(input, primary_evidence.iter().take(1)),
-        });
     } else {
         reasons.push(MathInterpretationOrderingReason {
             kind: match support {
@@ -1100,10 +1019,7 @@ fn ordering_reasons(
     reasons
 }
 
-fn requirements_for_prefix(
-    requirements: &[MathAuthoringRequirementInfo],
-    prefix: &str,
-) -> Vec<String> {
+fn requirements_for_prefix(requirements: &[FormulaRequirementInfo], prefix: &str) -> Vec<String> {
     requirements
         .iter()
         .map(requirement_id)
@@ -1111,11 +1027,11 @@ fn requirements_for_prefix(
         .collect()
 }
 
-fn disambiguation_ids(requirements: &[MathAuthoringRequirementInfo]) -> Vec<String> {
+fn disambiguation_ids(requirements: &[FormulaRequirementInfo]) -> Vec<String> {
     requirements
         .iter()
         .filter_map(|requirement| match requirement {
-            MathAuthoringRequirementInfo::Disambiguation { requirement_id, .. } => {
+            FormulaRequirementInfo::Disambiguation { requirement_id, .. } => {
                 Some(requirement_id.clone())
             }
             _ => None,
@@ -1124,13 +1040,13 @@ fn disambiguation_ids(requirements: &[MathAuthoringRequirementInfo]) -> Vec<Stri
 }
 
 fn disambiguation_ids_for_alternative(
-    requirements: &[MathAuthoringRequirementInfo],
+    requirements: &[FormulaRequirementInfo],
     alternative_id: &str,
 ) -> Vec<String> {
     requirements
         .iter()
         .filter_map(|requirement| match requirement {
-            MathAuthoringRequirementInfo::Disambiguation {
+            FormulaRequirementInfo::Disambiguation {
                 requirement_id,
                 alternatives,
                 ..
@@ -1145,23 +1061,12 @@ fn disambiguation_ids_for_alternative(
         .collect()
 }
 
-fn requirement_id(requirement: &MathAuthoringRequirementInfo) -> String {
+fn requirement_id(requirement: &FormulaRequirementInfo) -> String {
     match requirement {
-        MathAuthoringRequirementInfo::Declaration { requirement_id, .. }
-        | MathAuthoringRequirementInfo::RoleDeclaration { requirement_id, .. }
-        | MathAuthoringRequirementInfo::Condition { requirement_id, .. }
-        | MathAuthoringRequirementInfo::Disambiguation { requirement_id, .. } => {
-            requirement_id.clone()
-        }
-    }
-}
-
-fn conventional_requirement_id(requirement: &crate::ConventionalRequirementInfo) -> String {
-    match requirement {
-        crate::ConventionalRequirementInfo::RoleDeclaration { requirement_id, .. }
-        | crate::ConventionalRequirementInfo::Condition { requirement_id, .. } => {
-            requirement_id.clone()
-        }
+        FormulaRequirementInfo::Declaration { requirement_id, .. }
+        | FormulaRequirementInfo::RoleDeclaration { requirement_id, .. }
+        | FormulaRequirementInfo::Condition { requirement_id, .. }
+        | FormulaRequirementInfo::Disambiguation { requirement_id, .. } => requirement_id.clone(),
     }
 }
 
@@ -1172,7 +1077,7 @@ fn analysis_limits(
 ) -> Vec<MathInterpretationAnalysisLimitInfo> {
     let anchor_evidence = input.formula.map_or_else(Vec::new, |formula| {
         vec![Evidence {
-            rule_id: "semath/authoring/analysis-limit".into(),
+            rule_id: "semath/analysis/analysis-limit".into(),
             kind: "source-occurrence".into(),
             strength: "contextual".into(),
             source_ranges: vec![formula.location.range.clone()],
@@ -1232,10 +1137,9 @@ const fn limit_rank(kind: MathInterpretationAnalysisLimitKind) -> u8 {
 mod tests {
     use super::*;
     use crate::{
-        ConventionalCandidateDisposition, ConventionalRequirementInfo, DecisionReason,
-        DecisionReasonKind, DomainRelevance, LawBinding, LawConditionInfo, MathSourceFreshness,
-        MeaningConclusion, RelationInfo, ScientificConstraintKind, SemanticClaimInfo,
-        SemanticClaimStatus, SemanticConstraint, SemanticConstraintKind,
+        DecisionReason, DecisionReasonKind, DomainRelevance, LawBinding, LawConditionInfo,
+        MathSourceFreshness, MeaningConclusion, RelationInfo, ScientificConstraintKind,
+        SemanticClaimInfo, SemanticClaimStatus, SemanticConstraint, SemanticConstraintKind,
     };
 
     fn range(start_offset: u32, end_offset: u32) -> SourceRange {
@@ -1282,7 +1186,6 @@ mod tests {
             title: "Typed law".into(),
             description: "A reviewed typed law.".into(),
             description_key: "typed-law".into(),
-            maturity: "recognition".into(),
             status: LawRecognitionStatus::Verified,
             pack_id: "test-pack".into(),
             pack_version: "1.0.0".into(),
@@ -1311,8 +1214,6 @@ mod tests {
             }),
             relation: Some(relation("test-pack:law", "Typed law")),
             rank: 2,
-            conventional_candidate: false,
-            non_authoritative: false,
         }
     }
 
@@ -1369,7 +1270,7 @@ mod tests {
             },
             authority: if evidence.kind.contains("derived") {
                 InterpretationEvidenceAuthority::Derived
-            } else if evidence_provenance(evidence, false)
+            } else if evidence_provenance(evidence)
                 == MathInterpretationEvidenceProvenance::ExplicitDeclaration
             {
                 InterpretationEvidenceAuthority::Explicit
@@ -1394,7 +1295,7 @@ mod tests {
         let projected = project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[formula],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -1469,11 +1370,11 @@ mod tests {
             evidence: vec![external_evidence.clone()],
         };
         let requirements = [
-            MathAuthoringRequirementInfo::Condition {
+            FormulaRequirementInfo::Condition {
                 requirement_id: "law/condition/external".into(),
                 condition,
             },
-            MathAuthoringRequirementInfo::Disambiguation {
+            FormulaRequirementInfo::Disambiguation {
                 requirement_id: "meaning/disambiguation".into(),
                 alternatives: vec![MeaningAlternative {
                     alternative_id: "alternative/external".into(),
@@ -1516,7 +1417,7 @@ mod tests {
         let projected = project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[formula],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -1591,7 +1492,7 @@ mod tests {
         let projected = project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[formula],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -1641,7 +1542,7 @@ mod tests {
         let projected = project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[formula],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -1664,77 +1565,6 @@ mod tests {
         assert!(hypothesis.evidence.iter().any(|item| {
             item.evidence.kind == "law-chain-binding"
                 && item.provenance == MathInterpretationEvidenceProvenance::DerivedEvidence
-        }));
-    }
-
-    #[test]
-    fn keeps_conventional_hypotheses_tentative_with_exact_missing_discriminators() {
-        let requirement = ConventionalRequirementInfo::RoleDeclaration {
-            requirement_id: "law/binding/value".into(),
-            parameter: "value".into(),
-            symbol: "x".into(),
-            constraint: constraint(),
-            evidence: vec![evidence("structural-candidate", "test/candidate", 12)],
-        };
-        let candidate = ConventionalCandidateInfo {
-            candidate_id: "conventional/test-pack/law/10:20".into(),
-            disposition: ConventionalCandidateDisposition::ConventionalCandidate,
-            pack_id: "test-pack".into(),
-            pack_version: "1.0.0".into(),
-            law_id: "law".into(),
-            title: "Typed law".into(),
-            relation: relation("test-pack:law", "Typed law"),
-            bindings: Vec::new(),
-            requirements: vec![requirement],
-            relevance: DomainRelevance {
-                support: DomainSupportTier::Tentative,
-                evidence: vec![evidence("prose-domain-prior", "test/domain", 0)],
-            },
-            evidence: vec![
-                evidence("prose-domain-prior", "test/domain", 0),
-                evidence("structural-candidate", "test/convention", 12),
-            ],
-        };
-        let decision = MeaningDecision::Unsupported {
-            reasons: Vec::new(),
-        };
-        let context = context(Vec::new(), Vec::new());
-        let lifecycle = lifecycle();
-        let authored_requirement = MathAuthoringRequirementInfo::RoleDeclaration {
-            requirement_id: "law/binding/value".into(),
-            parameter: "value".into(),
-            symbol: "x".into(),
-            constraint: constraint(),
-            evidence: vec![evidence("structural-candidate", "test/candidate", 12)],
-        };
-        let projected = project_math_interpretations(MathInterpretationInput {
-            decision: &decision,
-            formulas: &[],
-            conventional_candidates: &[candidate],
-            domains: &[],
-            structural_candidates: &context.candidates,
-            context: &context,
-            requirements: &[authored_requirement],
-            formula: None,
-            focus_range: Some(&range(10, 20)),
-            file_id: "main",
-            path: "main.tex",
-            scope_path: &[],
-            lifecycle: &lifecycle,
-            discriminator_set_capped: false,
-            resolve_evidence: &resolve_test_evidence,
-            refutation_evidence: &[],
-        });
-
-        let hypothesis = &projected.hypotheses[0];
-        assert_eq!(hypothesis.kind, MathInterpretationKind::ReviewedConvention);
-        assert_eq!(hypothesis.support, MathInterpretationSupportTier::Tentative);
-        assert_eq!(hypothesis.missing_discriminator_ids, ["law/binding/value"]);
-        assert!(hypothesis.evidence.iter().any(|item| {
-            item.provenance == MathInterpretationEvidenceProvenance::DomainContext
-        }));
-        assert!(hypothesis.evidence.iter().any(|item| {
-            item.provenance == MathInterpretationEvidenceProvenance::ReviewedConvention
         }));
     }
 
@@ -1768,7 +1598,7 @@ mod tests {
         let projected = project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[],
-            conventional_candidates: &[],
+
             domains: &domains,
             structural_candidates: &context.candidates,
             context: &context,
@@ -1834,7 +1664,7 @@ mod tests {
             alternatives: vec![alternative],
             reasons: Vec::new(),
         };
-        let requirement = MathAuthoringRequirementInfo::Disambiguation {
+        let requirement = FormulaRequirementInfo::Disambiguation {
             requirement_id: "meaning/disambiguation".into(),
             alternatives: vec![MeaningAlternative {
                 alternative_id: "application".into(),
@@ -1857,7 +1687,7 @@ mod tests {
         let projected = project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -1923,7 +1753,7 @@ mod tests {
         project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -2011,7 +1841,7 @@ mod tests {
         project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -2137,7 +1967,7 @@ mod tests {
         project_math_interpretations(MathInterpretationInput {
             decision: &decision,
             formulas: &[formula],
-            conventional_candidates: &[],
+
             domains: &[],
             structural_candidates: &context.candidates,
             context: &context,
@@ -2173,7 +2003,7 @@ mod tests {
     }
 
     #[test]
-    fn discriminator_cap_is_independent_from_other_authoring_view_limits() {
+    fn discriminator_cap_is_independent_from_other_analysis_view_limits() {
         let decision = MeaningDecision::Unsupported {
             reasons: Vec::new(),
         };
@@ -2186,7 +2016,7 @@ mod tests {
             project_math_interpretations(MathInterpretationInput {
                 decision: &decision,
                 formulas: &[],
-                conventional_candidates: &[],
+
                 domains: &[],
                 structural_candidates: &context.candidates,
                 context: &context,
@@ -2215,7 +2045,7 @@ mod tests {
 
         let project_count = |count| {
             let mut requirements = (0..count)
-                .map(|index| MathAuthoringRequirementInfo::Disambiguation {
+                .map(|index| FormulaRequirementInfo::Disambiguation {
                     requirement_id: format!("requirement/{index}"),
                     alternatives: Vec::new(),
                     evidence: Vec::new(),
@@ -2226,7 +2056,7 @@ mod tests {
             project_math_interpretations(MathInterpretationInput {
                 decision: &decision,
                 formulas: &[],
-                conventional_candidates: &[],
+
                 domains: &[],
                 structural_candidates: &context.candidates,
                 context: &context,
