@@ -1,7 +1,6 @@
 #[cfg(test)]
 use crate::{DocumentLanguage, SourceIndex};
 use crate::{ProjectDocument, SourceRange, SyntaxBlockKind};
-use std::collections::BTreeMap;
 
 pub(crate) fn scope_visible(declaration: &[u32], occurrence: &[u32]) -> bool {
     declaration.len() <= occurrence.len()
@@ -35,6 +34,7 @@ impl ScopeGraph {
             .scopes
             .iter()
             .enumerate()
+            .filter(|(id, syntax)| *id == 0 || !transparent_scope(syntax))
             .map(|(id, syntax)| {
                 let mut ancestors = Vec::new();
                 let mut parent = syntax.parent;
@@ -46,13 +46,13 @@ impl ScopeGraph {
                     }
                     visited[parent_index] = true;
                     let ancestor = &document.scopes[parent_index];
-                    if ancestor.kind != "document" {
+                    if !transparent_scope(ancestor) {
                         ancestors.push(parent_id);
                     }
                     parent = ancestor.parent;
                 }
                 ancestors.reverse();
-                if syntax.kind != "document" {
+                if !transparent_scope(syntax) {
                     ancestors.push(id as u32);
                 }
                 Scope {
@@ -77,7 +77,6 @@ impl ScopeGraph {
                 },
             );
         }
-        append_equation_cluster_scopes(document, &mut scopes);
         Self { scopes }
     }
 
@@ -120,71 +119,6 @@ impl ScopeGraph {
             .max_by_key(|scope| scope.depth)
             .unwrap_or(&self.scopes[0])
     }
-}
-
-fn append_equation_cluster_scopes(document: &ProjectDocument, scopes: &mut Vec<Scope>) {
-    let mut starts = document
-        .blocks
-        .iter()
-        .enumerate()
-        .filter(|(_, block)| block.kind == SyntaxBlockKind::Paragraph)
-        .filter(|(_, block)| block_contains_relation(document, &block.range))
-        .map(|(block_id, block)| {
-            (
-                block_id as u32,
-                block.parent_scope,
-                block.range.start_offset,
-            )
-        })
-        .collect::<Vec<_>>();
-    starts.sort_by_key(|(_, parent, start)| (*parent, *start));
-    let counts = starts
-        .iter()
-        .fold(BTreeMap::new(), |mut counts, (_, parent, _)| {
-            *counts.entry(*parent).or_insert(0usize) += 1;
-            counts
-        });
-    for (position, (block_id, parent_id, start_offset)) in starts.iter().enumerate() {
-        if counts.get(parent_id).copied().unwrap_or_default() < 2 {
-            continue;
-        }
-        let Some((parent_range, mut path, parent_depth)) = scopes
-            .iter()
-            .find(|scope| scope.id == *parent_id as usize)
-            .map(|scope| (scope.range.clone(), scope.path.clone(), scope.depth))
-        else {
-            continue;
-        };
-        let end_offset = starts[position + 1..]
-            .iter()
-            .find(|(_, next_parent, _)| next_parent == parent_id)
-            .map_or(parent_range.end_offset, |(_, _, next_start)| *next_start);
-        if *start_offset >= end_offset {
-            continue;
-        }
-        path.push(0x8000_0000 | *block_id);
-        scopes.push(Scope {
-            id: scopes.len(),
-            depth: parent_depth + 1,
-            range: SourceRange {
-                start_offset: *start_offset,
-                end_offset,
-            },
-            path,
-        });
-    }
-}
-
-fn block_contains_relation(document: &ProjectDocument, block: &SourceRange) -> bool {
-    document.math_roots.iter().any(|root| {
-        block.start_offset <= root.full_range.start_offset
-            && root.full_range.end_offset <= block.end_offset
-            && document.nodes.iter().any(|node| {
-                node.math_class.as_deref() == Some("relation")
-                    && root.full_range.start_offset <= node.ranges.full.start_offset
-                    && node.ranges.full.end_offset <= root.full_range.end_offset
-            })
-    })
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -255,6 +189,15 @@ impl AttachmentGraph {
             .filter(|region| ranges_overlap(&region.range, range))
             .min_by_key(|region| region.range.end_offset - region.range.start_offset)
     }
+}
+
+fn transparent_scope(scope: &crate::SyntaxScope) -> bool {
+    scope.kind == "document"
+        || (scope.kind == "environment"
+            && scope
+                .name
+                .as_deref()
+                .is_some_and(|name| name == "document" || is_math_environment(name)))
 }
 
 fn attachment_scope(document: &ProjectDocument, mut scope_id: u32) -> u32 {
@@ -447,6 +390,32 @@ mod tests {
 
         assert_eq!(ScopeGraph::new(&first).path_at(4), vec![1]);
         assert_eq!(ScopeGraph::new(&shifted).path_at(11), vec![1]);
+    }
+
+    #[test]
+    fn display_layout_preserves_lexical_identity_but_theorems_do_not() {
+        let mut source = document("01234567890123456789", DocumentLanguage::Latex);
+        let mut display = syntax_scope("environment", Some(1), 5, 10);
+        display.name = Some("align".into());
+        let mut theorem = syntax_scope("environment", Some(1), 12, 18);
+        theorem.name = Some("theorem".into());
+        source.scopes = vec![
+            syntax_scope("document", None, 0, 20),
+            syntax_scope("section", Some(0), 0, 20),
+            display,
+            theorem,
+        ];
+        let graph = ScopeGraph::new(&source);
+        assert_eq!(graph.path_at(3), graph.path_at(7));
+        assert_eq!(graph.id_at(3), graph.id_at(7));
+        assert!(graph.visible(graph.id_at(7), 19));
+        assert!(!graph.visible(graph.id_at(15), 19));
+        assert_ne!(graph.path_at(3), graph.path_at(15));
+        assert!(super::scope_visible(&graph.path_at(3), &graph.path_at(15)));
+        assert!(!super::scope_visible(
+            &graph.path_at(15),
+            &graph.path_at(19)
+        ));
     }
 
     #[test]

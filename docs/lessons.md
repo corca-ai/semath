@@ -13,7 +13,9 @@ follows the [supported scope](conservative-analysis.md).
   report an error only when grounded facts demonstrate a conflict.
 - Specify expected results before consulting engine output. Generated cases
   catch regressions but do not independently establish accuracy. Never change
-  an expectation merely because the current implementation disagrees.
+  an expectation merely because the current implementation disagrees. Check
+  whether annotated text is active source: a definition inside a comment is a
+  refusal case. Correct source-label errors openly and restate the baseline.
 - Test successful work as well as refusal. Silence alone is not correctness.
   Keep focused source-order, scope, contradiction, and retraction examples.
 - Check the actual input path. Native helpers alone cannot validate the syntax

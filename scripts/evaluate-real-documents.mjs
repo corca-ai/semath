@@ -32,6 +32,8 @@ if (workerId) {
     protocolVersion: SEMATH_PROTOCOL_VERSION,
     complete: false,
     expectedTasks: tasks.length,
+    expectedNavigationTasks: tasks.filter(task => task.kind === "definition").length,
+    expectedInactiveTasks: tasks.filter(task => task.kind === "inactive-source").length,
     sources: [],
   };
   await mkdir(".artifacts/real-documents", { recursive: true });
@@ -60,7 +62,7 @@ if (workerId) {
 function failure(source, status, error) {
   return {
     id: source.id, field: source.field, archiveSha256: source.archiveSha256, status, error,
-    observations: tasks.filter(task => task.document === source.id).map(task => ({ id: task.id, outcome: status })),
+    observations: tasks.filter(task => task.document === source.id).map(task => ({ id: task.id, kind: task.kind, outcome: status })),
   };
 }
 
@@ -81,6 +83,7 @@ async function evaluate(source) {
   const snapshot = { documents, epoch: source.id, inventoryVersion: 1, mainFileId: source.main, projectId: source.id, protocolVersion: SEMATH_PROTOCOL_VERSION };
   const cases = tasks.filter(task => task.document === source.id);
   const queries = cases.flatMap(task => {
+    assert.ok(["definition", "inactive-source"].includes(task.kind), `${task.id}: unknown task kind`);
     const input = inputs.find(input => input.fileId === task.file);
     assert.equal(input.content.slice(task.offset, task.offset + task.symbol.length), task.symbol, `${task.id}: stale use annotation`);
     const declaration = inputs.find(input => input.fileId === task.definition.file);
@@ -119,7 +122,13 @@ async function evaluate(source) {
     const definition = results[index * 2].value;
     const rename = results[index * 2 + 1].value;
     const exact = definition.locations.length === 1 && definition.locations.every(location => location.fileId === task.definition.file && location.range.startOffset === task.definition.startOffset && location.range.endOffset === task.definition.endOffset);
-    return { id: task.id, outcome: exact ? "correct" : definition.locations.length === 0 ? "abstained" : "wrong-target", definition, rename };
+    const inactive = task.kind === "inactive-source";
+    const refused = definition.locations.length === 0 && definition.authorization.status === "refused"
+      && rename.proposal === null && rename.authorization.status === "refused";
+    const outcome = inactive ? (refused ? "correct-refusal" : "unexpected-authority")
+      : exact && definition.authorization.status === "authorized" ? "correct"
+      : definition.locations.length === 0 ? "abstained" : "wrong-target";
+    return { id: task.id, kind: task.kind, outcome, definition, rename };
   });
   const diagnostics = results.slice(cases.length * 2).map((result, index) => ({ file: queries[cases.length * 2 + index].fileId, ...result.value }));
   return {

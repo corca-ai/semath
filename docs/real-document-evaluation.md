@@ -23,8 +23,13 @@ these papers. Original archives and extracted files stay under ignored
 The collector reads pinned regular files without executing TeX or extracting
 arbitrary archive paths. It rejects changed content and bounded archive violations.
 
-[Tasks](../fixtures/real-documents/tasks.json) records 15 definition destinations
-selected from the original source before the first engine run. Offsets are UTF-16,
+[Tasks](../fixtures/real-documents/tasks.json) records 14 definition destinations
+and one inactive-source refusal task. The original 15 destinations were selected
+from source before the first engine run; subsequent context review found that
+`primes-convolution` is inside a `comment` environment (offsets 8812..13517).
+Its former success label was invalid. This correction changes the historical
+navigation baseline from 4/15 to 3/14 and adds a separate failed refusal task;
+it does not count as improved navigation. Offsets are UTF-16,
 zero-based, half-open, with original line endings preserved. They are source-first,
 agent-authored annotations, not independent human labels. Inspect the declaration
 and use in context before adding or correcting an annotation. Keep a substantive
@@ -65,7 +70,10 @@ observation, not editor latency or a replacement for [performance gates](perform
 
 A navigation task succeeds only when its single destination exactly matches the
 annotated file and range. Report correct, abstained, wrong-target, rejected, and
-timed-out outcomes separately, both per field and across all 15 tasks. A successful
+timed-out outcomes separately, both per field and across all 14 navigation tasks.
+The inactive-source task passes only when both navigation and rename refuse,
+with no destination or edit proposal. Report it separately as `correct-refusal`
+or `unexpected-authority`; never add a refusal to the navigation numerator. A successful
 process or conservative refusal alone is not a useful navigation result.
 
 Rename queries propose `w` and retain the response for inspection. Their complete
