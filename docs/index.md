@@ -21,6 +21,7 @@ fixture, or threshold changes. Build release WASM only on that platform.
 - [Compatibility and release policy](compatibility.md): versioned contracts and
   reproducible release qualification.
 - [Capability and test-layer matrix](capability-test-matrix.md): where to test behavior.
+- [Real document evaluation](real-document-evaluation.md): pinned TeX sources, author tasks, and limits.
 - [Performance gates](performance.md): latency, memory, work, and transfer limits.
 - [Documentation guide](metadoc.md): organization, linking, and linting.
 - [Agent guide](../AGENTS.md): repository map and working rules.

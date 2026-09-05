@@ -1511,12 +1511,34 @@ fn classify_discourse_frame(
                     &["were", "had", "imagine", "counterfactually", "would"],
                 ),
             )
-        } else if starts_with_any(&lower, &["if ", "when ", "provided ", "assuming "])
-            || words.contains(&"could")
+        } else if starts_with_any(
+            &lower,
+            &[
+                "if ",
+                "when ",
+                "provided ",
+                "assuming ",
+                "even with ",
+                "even if ",
+                "even when ",
+            ],
+        ) || words.contains(&"could")
         {
             (
                 Conditionality::Conditional,
-                first_marker(&lower, &["if", "when", "provided", "assuming", "could"]),
+                first_marker(
+                    &lower,
+                    &[
+                        "even with",
+                        "even if",
+                        "even when",
+                        "if",
+                        "when",
+                        "provided",
+                        "assuming",
+                        "could",
+                    ],
+                ),
             )
         } else {
             (Conditionality::Unconditional, None)
@@ -2683,6 +2705,23 @@ mod tests {
             &[],
         );
         assert!(descriptive[0].frame.establishes());
+    }
+
+    #[test]
+    fn concessive_conditions_do_not_assert_their_math_globally() {
+        for source in [
+            "Even with $k=n$, the cost stays bounded.",
+            "Even if $k=n$, the cost stays bounded.",
+            "Even when $k=n$, the cost stays bounded.",
+        ] {
+            let clauses = segment_scientific_clauses(source, DocumentLanguage::Latex, &[]);
+            assert_eq!(clauses[0].frame.conditionality, Conditionality::Conditional);
+            assert!(!clauses[0].frame.establishes());
+            assert!(!clauses[0].frame.evidence.is_empty());
+        }
+        let asserted =
+            segment_scientific_clauses("The even kernel has $k=n$.", DocumentLanguage::Latex, &[]);
+        assert!(asserted[0].frame.establishes());
     }
 
     #[test]

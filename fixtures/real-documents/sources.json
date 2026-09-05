@@ -1,0 +1,176 @@
+[
+  {
+    "id": "attention",
+    "field": "machine-learning",
+    "title": "Attention Is All You Need",
+    "authors": "Vaswani et al.",
+    "version": "1706.03762v7",
+    "pageUrl": "https://arxiv.org/abs/1706.03762v7",
+    "sourceUrl": "https://arxiv.org/src/1706.03762v7",
+    "licenseUrl": "https://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+    "archiveSha256": "2e7a7d9ee2520d22eb23dae0cb148e167be02a30d6cb3f11b1c67723194339c6",
+    "main": "ms.tex",
+    "files": [
+      {
+        "path": "background.tex",
+        "sha256": "4293e7032a2f4f653cb340854b23dae41a1801ea6b487270732db19723918618"
+      },
+      {
+        "path": "introduction.tex",
+        "sha256": "ece15efaec8325b6e88d2b90a3d7be0ee08b6b4c631d858877b806f862bd6553"
+      },
+      {
+        "path": "model_architecture.tex",
+        "sha256": "d524e853dc5f98bb482ee7289908b9640ee9e6ea38586c14c7c1ea0a5c0f5fdf"
+      },
+      {
+        "path": "ms.tex",
+        "sha256": "69a159fa848798bee868a9d394913745e3996ae274f2bc7cfc6d5fcd7a7438a0"
+      },
+      {
+        "path": "nips_2017.sty",
+        "sha256": "f1af9ca822eac10140e9e55ca2f20a59ce20605c3bc32670d9108de95da7ff01"
+      },
+      {
+        "path": "parameter_attention.tex",
+        "sha256": "c698e2bfec0a0acfa2a6447ceabc920aa4b631df1a291647b7124ae9688aff5d"
+      },
+      {
+        "path": "results.tex",
+        "sha256": "da5281baf549caad349c796d51404537674acb72baec0ef9509c95748499b4c8"
+      },
+      {
+        "path": "sqrt_d_trick.tex",
+        "sha256": "db2dfbf394ad8b07c882f77735838f4f2dfbe585b0b5c69ef361e43daa7c906d"
+      },
+      {
+        "path": "training.tex",
+        "sha256": "34fa70917e3f58d02743393ff651be8d679a27cd51a4027180a0efc5ddd913e1"
+      },
+      {
+        "path": "visualizations.tex",
+        "sha256": "3833fb2220d95a20c1fe4f82264f8f95e2e7ea7f78383d8285a89cae9e6c2178"
+      },
+      {
+        "path": "why_self_attention.tex",
+        "sha256": "b0f2e5cb18558766558c02387cafa4813dcd00c980e3676e5fc249029b6acab8"
+      }
+    ]
+  },
+  {
+    "id": "adam",
+    "field": "optimization",
+    "title": "Adam: A Method for Stochastic Optimization",
+    "authors": "Kingma and Ba",
+    "version": "1412.6980v1",
+    "pageUrl": "https://arxiv.org/abs/1412.6980v1",
+    "sourceUrl": "https://arxiv.org/src/1412.6980v1",
+    "licenseUrl": "https://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+    "archiveSha256": "bbf12c860fe3cf3ac0b8ab27d77207d8cdfbd5eb4147fe8d088aa78dc8b1e3da",
+    "main": "0_adam_main.tex",
+    "files": [
+      {
+        "path": "0_adam_main.bbl",
+        "sha256": "854205186518e7fc71f55e848c78e0a25a6dadafd1e06cc2f4e6db01116a3d82"
+      },
+      {
+        "path": "0_adam_main.tex",
+        "sha256": "53a4bbc79f88e006c28e541fa3993498bb32baea702d90dff57de9f71208a740"
+      },
+      {
+        "path": "1_introduction.tex",
+        "sha256": "8f805ce0c64062cec4a81b999af17dce9cc6f163cafd9b36ec1cd3e4d681be51"
+      },
+      {
+        "path": "2_algorithm.tex",
+        "sha256": "c9a4a6a6cfdbccf211de9c0b043ecee8e2df352568e8bba216eb98d538669151"
+      },
+      {
+        "path": "3_initbiascorrection.tex",
+        "sha256": "91495a5d5b56932432a09129d0bb5465dc5b6b35ffc672bbf7b19513d562248a"
+      },
+      {
+        "path": "4_convergence.tex",
+        "sha256": "0516abf3bdb2a2830a93113463d67dbca7ba89dc360ef91e0978e6f2e7188db8"
+      },
+      {
+        "path": "5_relatedwork.tex",
+        "sha256": "9a977673beff12a707b6a01a32ac11f59fb046ce6a1a792ba57cebff0e6d53d7"
+      },
+      {
+        "path": "6_experiments_durk.tex",
+        "sha256": "0aa9a11c4a2bc7a1e0014700c9f85659cf3f29fb78c4e763b6aa4855e69bfb15"
+      },
+      {
+        "path": "6_experiments_jimmy.tex",
+        "sha256": "66b722a1c72d28c13401340cbaf08630d78c82d923b68d62c83fc2f94b438f57"
+      },
+      {
+        "path": "iclr2015.sty",
+        "sha256": "cdfbe3a685265117907ac9f8846d4255e9cbb6fc3d031203e5b5ca73bbc52560"
+      }
+    ]
+  },
+  {
+    "id": "variational",
+    "field": "statistics",
+    "title": "Variational Inference: A Review for Statisticians",
+    "authors": "Blei, Kucukelbir and McAuliffe",
+    "version": "1601.00670v1",
+    "pageUrl": "https://arxiv.org/abs/1601.00670v1",
+    "sourceUrl": "https://arxiv.org/src/1601.00670v1",
+    "licenseUrl": "https://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+    "archiveSha256": "25aaf95c01c3bfe88b58997e01c4939975ac87bf4d3ab7a13d8ae4bf2ebacdf0",
+    "main": "main_expand.tex",
+    "files": [
+      {
+        "path": "main_expand.bbl",
+        "sha256": "ccf79985f761abc05c22b10438a5337aecf1fdcd6b9ff30941eb8466b5304a26"
+      },
+      {
+        "path": "main_expand.tex",
+        "sha256": "2a6a6152129c522265f4b24a956ea6546341a5b6a5d8cd5130a20139b1db941a"
+      }
+    ]
+  },
+  {
+    "id": "gravity",
+    "field": "theoretical-physics",
+    "title": "On the Origin of Gravity and the Laws of Newton",
+    "authors": "Verlinde",
+    "version": "1001.0785v1",
+    "pageUrl": "https://arxiv.org/abs/1001.0785v1",
+    "sourceUrl": "https://arxiv.org/src/1001.0785v1",
+    "licenseUrl": "https://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+    "archiveSha256": "5d8b906660fd8e10b5c5020e68661189c00ab2a15c3b7392f8f28df843f65180",
+    "main": "NewtonPaper.tex",
+    "files": [
+      {
+        "path": "NewtonPaper.tex",
+        "sha256": "c4a908b11aba0490f8d6b349fcf2d6329599215b50ead2fe514e1d8e860b86d8"
+      }
+    ]
+  },
+  {
+    "id": "primes",
+    "field": "number-theory",
+    "title": "Small gaps between primes",
+    "authors": "Maynard",
+    "version": "1311.4600v1",
+    "pageUrl": "https://arxiv.org/abs/1311.4600v1",
+    "sourceUrl": "https://arxiv.org/src/1311.4600v1",
+    "licenseUrl": "https://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+    "archiveSha256": "f22c7cf10b89d3b97d521f98da460c0519743eae6b6c2a92797d862e23218067",
+    "main": "Small_gaps_between_primes.tex",
+    "files": [
+      {
+        "path": "Small_gaps_between_primes.bbl",
+        "sha256": "c5ef552159a8e8c1c0d944d253e75701e71186aa5bae101a9209a914ec1c4436"
+      },
+      {
+        "path": "Small_gaps_between_primes.tex",
+        "sha256": "53744669296216a35a57a75b8864cc94b12a016ea4786a62c26b55d18357192b"
+      }
+    ]
+  }
+]

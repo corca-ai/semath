@@ -1,0 +1,197 @@
+[
+  {
+    "id": "attention-Q",
+    "document": "attention",
+    "file": "model_architecture.tex",
+    "offset": 4978,
+    "symbol": "Q",
+    "definition": {
+      "file": "model_architecture.tex",
+      "startOffset": 4822,
+      "endOffset": 4823
+    },
+    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation."
+  },
+  {
+    "id": "attention-K",
+    "document": "attention",
+    "file": "model_architecture.tex",
+    "offset": 4981,
+    "symbol": "K",
+    "definition": {
+      "file": "model_architecture.tex",
+      "startOffset": 4888,
+      "endOffset": 4889
+    },
+    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation."
+  },
+  {
+    "id": "attention-V",
+    "document": "attention",
+    "file": "model_architecture.tex",
+    "offset": 4984,
+    "symbol": "V",
+    "definition": {
+      "file": "model_architecture.tex",
+      "startOffset": 4896,
+      "endOffset": 4897
+    },
+    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation."
+  },
+  {
+    "id": "adam-objective",
+    "document": "adam",
+    "file": "2_algorithm.tex",
+    "offset": 2036,
+    "symbol": "f",
+    "definition": {
+      "file": "2_algorithm.tex",
+      "startOffset": 1841,
+      "endOffset": 1842
+    },
+    "rationale": "The objective function is explicitly introduced before this expectation."
+  },
+  {
+    "id": "adam-first-moment",
+    "document": "adam",
+    "file": "2_algorithm.tex",
+    "offset": 3668,
+    "symbol": "m_t",
+    "definition": {
+      "file": "2_algorithm.tex",
+      "startOffset": 2622,
+      "endOffset": 2625
+    },
+    "rationale": "The prose explicitly assigns notation to the moving average before the alternative update expression."
+  },
+  {
+    "id": "adam-second-moment",
+    "document": "adam",
+    "file": "2_algorithm.tex",
+    "offset": 3680,
+    "symbol": "v_t",
+    "definition": {
+      "file": "2_algorithm.tex",
+      "startOffset": 2655,
+      "endOffset": 2658
+    },
+    "rationale": "The prose explicitly assigns notation to the moving average before the alternative update expression."
+  },
+  {
+    "id": "variational-parameter",
+    "document": "variational",
+    "file": "main_expand.tex",
+    "offset": 54077,
+    "symbol": "\\nu_j",
+    "definition": {
+      "file": "main_expand.tex",
+      "startOffset": 53850,
+      "endOffset": 53855
+    },
+    "rationale": "The variational parameter is explicitly declared in the preceding paragraph."
+  },
+  {
+    "id": "variational-global",
+    "document": "variational",
+    "file": "main_expand.tex",
+    "offset": 54962,
+    "symbol": "\\beta",
+    "definition": {
+      "file": "main_expand.tex",
+      "startOffset": 54674,
+      "endOffset": 54679
+    },
+    "rationale": "The preceding paragraph introduces the global latent vector; formatting must not destroy its declaration."
+  },
+  {
+    "id": "variational-local",
+    "document": "variational",
+    "file": "main_expand.tex",
+    "offset": 54969,
+    "symbol": "\\bz",
+    "definition": {
+      "file": "main_expand.tex",
+      "startOffset": 54777,
+      "endOffset": 54780
+    },
+    "rationale": "The preceding paragraph introduces a local latent vector through an author-defined macro; preserve macro source provenance."
+  },
+  {
+    "id": "gravity-acceleration",
+    "document": "gravity",
+    "file": "NewtonPaper.tex",
+    "offset": 22035,
+    "symbol": "a",
+    "definition": {
+      "file": "NewtonPaper.tex",
+      "startOffset": 21692,
+      "endOffset": 21693
+    },
+    "rationale": "The acceleration is explicitly named before the subsequent equation in a custom equation macro."
+  },
+  {
+    "id": "gravity-bits",
+    "document": "gravity",
+    "file": "NewtonPaper.tex",
+    "offset": 24036,
+    "symbol": "N",
+    "definition": {
+      "file": "NewtonPaper.tex",
+      "startOffset": 23257,
+      "endOffset": 23258
+    },
+    "rationale": "Navigate to the explicit bit-count declaration; source uses an author-defined equation environment macro."
+  },
+  {
+    "id": "gravity-mass",
+    "document": "gravity",
+    "file": "NewtonPaper.tex",
+    "offset": 25043,
+    "symbol": "M",
+    "definition": {
+      "file": "NewtonPaper.tex",
+      "startOffset": 24160,
+      "endOffset": 24161
+    },
+    "rationale": "Navigate to the introduced enclosed mass, without claiming the gravitational law is proven."
+  },
+  {
+    "id": "primes-M_1",
+    "document": "primes",
+    "file": "Small_gaps_between_primes.tex",
+    "offset": 71570,
+    "symbol": "M_1",
+    "definition": {
+      "file": "Small_gaps_between_primes.tex",
+      "startOffset": 71458,
+      "endOffset": 71461
+    },
+    "rationale": "The matrices are explicitly declared inside this lemma; navigate to this local declaration."
+  },
+  {
+    "id": "primes-M_2",
+    "document": "primes",
+    "file": "Small_gaps_between_primes.tex",
+    "offset": 71541,
+    "symbol": "M_2",
+    "definition": {
+      "file": "Small_gaps_between_primes.tex",
+      "startOffset": 71462,
+      "endOffset": 71465
+    },
+    "rationale": "The matrices are explicitly declared inside this lemma; navigate to this local declaration."
+  },
+  {
+    "id": "primes-convolution",
+    "document": "primes",
+    "file": "Small_gaps_between_primes.tex",
+    "offset": 11849,
+    "symbol": "f_1",
+    "definition": {
+      "file": "Small_gaps_between_primes.tex",
+      "startOffset": 11723,
+      "endOffset": 11726
+    },
+    "rationale": "The named Dirichlet convolution is declared before its next use; do not confuse it with f."
+  }
+]
