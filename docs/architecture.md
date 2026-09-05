@@ -41,6 +41,7 @@ transformations. None may substitute for another's authority. Paragraphs and
 supported display-math layout environments do not introduce lexical identities;
 section and theorem environments retain their actual enclosing scope. Inactive
 source and macro definition templates must not become active structural scopes.
+Layout metadata such as equation labels and tags cannot create symbol uses.
 
 ## Conservative inference
 

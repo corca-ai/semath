@@ -10,6 +10,15 @@ import { firstDifferentialFailure } from "./testing/differential.ts";
 // Public acceptance examples use real syntax and independently stated expectations.
 const cases = [
   {
+    id: "equation-labels-are-not-variable-uses",
+    symbol: "t",
+    source: "\\[\\label{t}\\tag{t}x=0\\] Let $t$ denote duration. Inspect $t$.",
+    needle: "$t$.",
+    offset: 1,
+    definition: true,
+    diagnostics: [],
+  },
+  {
     id: "inactive-tex-source-cannot-authorize-navigation-or-edits",
     language: "latex",
     source: "\\begin{comment}Let $z$ denote displacement. Inspect $z$.\\end{comment}",

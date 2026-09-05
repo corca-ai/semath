@@ -597,6 +597,13 @@ fn lower_snapshot_node(
             }
             ("scripted", None)
         }
+        NotationNodeKind::Command
+            if crate::canonical::is_ignorable_command(node.name.as_deref()) =>
+        {
+            children.clear();
+            child_symbols.clear();
+            ("text", None)
+        }
         NotationNodeKind::Command => {
             let name = node.name.clone().unwrap_or_default();
             let kind = match name.as_str() {
@@ -1269,6 +1276,30 @@ mod tests {
             "blocks": [], "declarations": [], "macros": [], "includes": []
         }))
         .unwrap()
+    }
+
+    #[test]
+    fn layout_metadata_does_not_contribute_mathematical_symbols() {
+        for name in ["label", "tag"] {
+            let mut document = valid_snapshot_document();
+            document.content = format!("$\\{name}{{x}}$");
+            let end = document.content.len() as u32;
+            let symbol_range = crate::SourceRange {
+                start_offset: end - 3,
+                end_offset: end - 2,
+            };
+            document.nodes[0].ranges.full = symbol_range.clone();
+            document.nodes[0].ranges.editable = Some(symbol_range);
+            document.nodes[1].kind = NotationNodeKind::Command;
+            document.nodes[1].name = Some(name.into());
+            document.nodes[1].ranges.full.end_offset = end - 1;
+            document.math_roots[0].full_range.end_offset = end;
+            document.math_roots[0].content_range.end_offset = end - 1;
+            document.scopes[0].range.end_offset = end;
+            let parsed = parse_snapshot(&document).unwrap();
+            assert!(parsed[0].symbols.is_empty(), "{name}");
+            assert!(parsed[0].root.children.is_empty(), "{name}");
+        }
     }
 
     #[test]
