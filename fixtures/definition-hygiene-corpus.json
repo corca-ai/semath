@@ -5,12 +5,16 @@
     {
       "id": "free-use-before-unique-definition",
       "content": "$x+1$ appears first.\nLet $x$ denote a scalar.\nLater $x$ is used.",
-      "expected": ["used-before-explicit-definition:x"]
+      "expected": [
+        "used-before-explicit-definition:x"
+      ]
     },
     {
       "id": "unique-definition-without-another-use",
       "content": "Let $z$ denote a scalar.",
-      "expected": ["defined-but-unused:z"]
+      "expected": [
+        "defined-but-unused:z"
+      ]
     },
     {
       "id": "ordinary-use-after-definition",
@@ -45,6 +49,30 @@
     {
       "id": "subscript-use-is-a-real-free-use",
       "content": "Let $i$ denote an index.\nThe coefficient is $a_i$.",
+      "expected": []
+    },
+    {
+      "id": "command-use-after-definition",
+      "content": "Let $\\beta$ denote a vector. Inspect $\\beta$.",
+      "expected": []
+    },
+    {
+      "id": "command-use-before-definition",
+      "content": "Inspect $\\beta$. Let $\\beta$ denote a vector.",
+      "expected": [
+        "used-before-explicit-definition:beta"
+      ]
+    },
+    {
+      "id": "unused-command-definition",
+      "content": "Let $\\beta$ denote a vector.",
+      "expected": [
+        "defined-but-unused:beta"
+      ]
+    },
+    {
+      "id": "unfinished-command-use-disables-unused-hint",
+      "content": "Let $\\beta$ denote a vector. Inspect $\\beta+",
       "expected": []
     }
   ]

@@ -37,7 +37,10 @@ never become semantic facts.
 
 Scope controls visibility; attachment controls which source blocks can exchange
 evidence; domain routing orders compatible typed rules. These are separate
-transformations. None may substitute for another's authority.
+transformations. None may substitute for another's authority. Paragraphs and
+supported display-math layout environments do not introduce lexical identities;
+section and theorem environments retain their actual enclosing scope. Inactive
+source and macro definition templates must not become active structural scopes.
 
 ## Conservative inference
 

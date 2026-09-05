@@ -10,7 +10,8 @@
       "startOffset": 4822,
       "endOffset": 4823
     },
-    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation."
+    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation.",
+    "kind": "definition"
   },
   {
     "id": "attention-K",
@@ -23,7 +24,8 @@
       "startOffset": 4888,
       "endOffset": 4889
     },
-    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation."
+    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation.",
+    "kind": "definition"
   },
   {
     "id": "attention-V",
@@ -36,7 +38,8 @@
       "startOffset": 4896,
       "endOffset": 4897
     },
-    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation."
+    "rationale": "The preceding prose explicitly names the query, key and value matrices; navigate from the first attention equation.",
+    "kind": "definition"
   },
   {
     "id": "adam-objective",
@@ -49,7 +52,8 @@
       "startOffset": 1841,
       "endOffset": 1842
     },
-    "rationale": "The objective function is explicitly introduced before this expectation."
+    "rationale": "The objective function is explicitly introduced before this expectation.",
+    "kind": "definition"
   },
   {
     "id": "adam-first-moment",
@@ -62,7 +66,8 @@
       "startOffset": 2622,
       "endOffset": 2625
     },
-    "rationale": "The prose explicitly assigns notation to the moving average before the alternative update expression."
+    "rationale": "The prose explicitly assigns notation to the moving average before the alternative update expression.",
+    "kind": "definition"
   },
   {
     "id": "adam-second-moment",
@@ -75,7 +80,8 @@
       "startOffset": 2655,
       "endOffset": 2658
     },
-    "rationale": "The prose explicitly assigns notation to the moving average before the alternative update expression."
+    "rationale": "The prose explicitly assigns notation to the moving average before the alternative update expression.",
+    "kind": "definition"
   },
   {
     "id": "variational-parameter",
@@ -88,7 +94,8 @@
       "startOffset": 53850,
       "endOffset": 53855
     },
-    "rationale": "The variational parameter is explicitly declared in the preceding paragraph."
+    "rationale": "The variational parameter is explicitly declared in the preceding paragraph.",
+    "kind": "definition"
   },
   {
     "id": "variational-global",
@@ -101,7 +108,8 @@
       "startOffset": 54674,
       "endOffset": 54679
     },
-    "rationale": "The preceding paragraph introduces the global latent vector; formatting must not destroy its declaration."
+    "rationale": "The preceding paragraph introduces the global latent vector; formatting must not destroy its declaration.",
+    "kind": "definition"
   },
   {
     "id": "variational-local",
@@ -114,7 +122,8 @@
       "startOffset": 54777,
       "endOffset": 54780
     },
-    "rationale": "The preceding paragraph introduces a local latent vector through an author-defined macro; preserve macro source provenance."
+    "rationale": "The preceding paragraph introduces a local latent vector through an author-defined macro; preserve macro source provenance.",
+    "kind": "definition"
   },
   {
     "id": "gravity-acceleration",
@@ -127,7 +136,8 @@
       "startOffset": 21692,
       "endOffset": 21693
     },
-    "rationale": "The acceleration is explicitly named before the subsequent equation in a custom equation macro."
+    "rationale": "The acceleration is explicitly named before the subsequent equation in a custom equation macro.",
+    "kind": "definition"
   },
   {
     "id": "gravity-bits",
@@ -140,7 +150,8 @@
       "startOffset": 23257,
       "endOffset": 23258
     },
-    "rationale": "Navigate to the explicit bit-count declaration; source uses an author-defined equation environment macro."
+    "rationale": "Navigate to the explicit bit-count declaration; source uses an author-defined equation environment macro.",
+    "kind": "definition"
   },
   {
     "id": "gravity-mass",
@@ -153,7 +164,8 @@
       "startOffset": 24160,
       "endOffset": 24161
     },
-    "rationale": "Navigate to the introduced enclosed mass, without claiming the gravitational law is proven."
+    "rationale": "Navigate to the introduced enclosed mass, without claiming the gravitational law is proven.",
+    "kind": "definition"
   },
   {
     "id": "primes-M_1",
@@ -166,7 +178,8 @@
       "startOffset": 71458,
       "endOffset": 71461
     },
-    "rationale": "The matrices are explicitly declared inside this lemma; navigate to this local declaration."
+    "rationale": "The matrices are explicitly declared inside this lemma; navigate to this local declaration.",
+    "kind": "definition"
   },
   {
     "id": "primes-M_2",
@@ -179,7 +192,8 @@
       "startOffset": 71462,
       "endOffset": 71465
     },
-    "rationale": "The matrices are explicitly declared inside this lemma; navigate to this local declaration."
+    "rationale": "The matrices are explicitly declared inside this lemma; navigate to this local declaration.",
+    "kind": "definition"
   },
   {
     "id": "primes-convolution",
@@ -192,6 +206,7 @@
       "startOffset": 11723,
       "endOffset": 11726
     },
-    "rationale": "The named Dirichlet convolution is declared before its next use; do not confuse it with f."
+    "rationale": "Correction from original-source inspection: both annotated spans are inside the comment environment at UTF-16 offsets 8812..13517. They are inactive source, so navigation and rename must refuse. The previous navigation-success label was invalid; retained spans identify the same source, not a live declaration.",
+    "kind": "inactive-source"
   }
 ]

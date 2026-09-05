@@ -72,13 +72,16 @@ pub(crate) fn analyze_hygiene(
         let [definition] = candidates.as_slice() else {
             continue;
         };
+        let Some(notation) = source_notation(document, &definition.location.range) else {
+            continue;
+        };
         if !eligible_definition(document, definition, parsed)
-            || has_unclosed_occurrence(symbol, parsed)
+            || has_unclosed_occurrence(notation, parsed)
         {
             continue;
         }
         let scope_id = scopes.id_at(definition.location.range.start_offset);
-        let mut occurrences = free_occurrences(symbol, parsed)
+        let mut occurrences = free_occurrences(notation, parsed)
             .into_iter()
             .filter(|range| {
                 *range != definition.location.range && scopes.visible(scope_id, range.start_offset)
@@ -136,11 +139,15 @@ fn eligible_definition(
         })
 }
 
-fn atomic_source_notation(document: &ProjectDocument, range: &SourceRange) -> bool {
+fn source_notation<'a>(document: &'a ProjectDocument, range: &SourceRange) -> Option<&'a str> {
     let index = SourceIndex::new(&document.content);
     let start = index.byte_for_utf16(range.start_offset);
     let end = index.byte_for_utf16(range.end_offset);
-    let Some(notation) = document.content.get(start..end) else {
+    document.content.get(start..end)
+}
+
+fn atomic_source_notation(document: &ProjectDocument, range: &SourceRange) -> bool {
+    let Some(notation) = source_notation(document, range) else {
         return false;
     };
     if let Some(command) = notation.strip_prefix('\\') {

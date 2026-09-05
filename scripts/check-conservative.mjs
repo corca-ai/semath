@@ -10,6 +10,40 @@ import { firstDifferentialFailure } from "./testing/differential.ts";
 // Public acceptance examples use real syntax and independently stated expectations.
 const cases = [
   {
+    id: "inactive-tex-source-cannot-authorize-navigation-or-edits",
+    language: "latex",
+    source: "\\begin{comment}Let $z$ denote displacement. Inspect $z$.\\end{comment}",
+    needle: "$z$.",
+    offset: 1,
+    definition: false,
+    diagnostics: [],
+  },
+  {
+    id: "command-definition-hygiene-uses-source-spelling",
+    symbol: "\\beta",
+    rename: false,
+    source: "Let $\\beta$ be a vector. Inspect $\\beta$.",
+    needle: "$\\beta$.",
+    offset: 1,
+    definition: true,
+    diagnostics: [],
+  },
+  {
+    id: "display-environments-preserve-definition-visibility",
+    source: "Let $z$ denote displacement. \\begin{align}z=0\\end{align}",
+    needle: "z=0",
+    definition: true,
+    diagnostics: [],
+  },
+  {
+    id: "definitions-survive-unrelated-equation-paragraphs",
+    source: "Let $z$ denote displacement. $a=b$.\n\nAnother equation is $c=d$.\n\nInspect $z$.",
+    needle: "$z$.",
+    offset: 1,
+    definition: true,
+    diagnostics: [],
+  },
+  {
     id: "concessive-comparison-is-not-a-global-conflict",
     source: "The short kernel has $k<n$. Even with $k=n$, the cost stays bounded.",
     needle: "k=n",
@@ -114,6 +148,7 @@ const decode = (value) => JSON.parse(new TextDecoder().decode(value));
 let observations = 0;
 for (const language of ["latex", "markdown"]) {
   for (const item of cases) {
+    if (item.language && item.language !== language) continue;
     const source = { content: item.source, documentVersion: 1, fileId: "main", language, path: language === "latex" ? "main.tex" : "main.md" };
     const syntax = new LatexSyntaxService();
     syntax.reset({ documents: [source] });
@@ -142,7 +177,7 @@ for (const language of ["latex", "markdown"]) {
         if (item.definition === true) {
           // Remove the actual source declaration, then compare the live engine
           // with a native reset at that same document and inventory revision.
-          const changedSource = { ...source, content: "Inspect $z$.", documentVersion: 2 };
+          const changedSource = { ...source, content: `Inspect $${item.symbol ?? "z"}$.`, documentVersion: 2 };
           syntax.upsert(changedSource);
           const changedDocument = adaptWasmtexDocument({ content: changedSource.content, language, syntax: syntax.getFile("main") });
           const changedSnapshot = { ...snapshot, documents: [changedDocument], inventoryVersion: 2 };
@@ -152,7 +187,7 @@ for (const language of ["latex", "markdown"]) {
             documentVersion: 2,
             inventoryVersion: 2,
             analysisGeneration: 1,
-            query: entry.query.kind === "diagnostics" ? entry.query : { ...entry.query, offset: changedSource.content.indexOf("z") },
+            query: entry.query.kind === "diagnostics" ? entry.query : { ...entry.query, offset: changedSource.content.indexOf(item.symbol ?? "z") },
           }));
           const rebuilt = nativeQueries(changedSnapshot, changedQueries);
           const incremental = changedQueries.map((query) => decode(engine.query(encode(query))));
@@ -206,20 +241,23 @@ function verify(item, source, results, label) {
   }
   if (item.definition === true) {
     assert.equal(definition.locations.length, 1, `${label}: definition`);
-    assert.equal(source.content.slice(definition.locations[0].range.startOffset, definition.locations[0].range.endOffset), "z", `${label}: definition source`);
+    assert.equal(source.content.slice(definition.locations[0].range.startOffset, definition.locations[0].range.endOffset), item.symbol ?? "z", `${label}: definition source`);
     assert.equal(references.locations.length, 2, `${label}: complete references`);
+  } else if (item.definition === false) {
+    assert.deepEqual(definition.locations, [], `${label}: no guessed definition`);
+  }
+  if (item.definition === true && item.rename !== false) {
     assert.equal(rename.kind, "editProposal", `${label}: rename result`);
     assert.ok(rename.proposal, `${label}: authorized rename`);
     const edits = rename.proposal.files.flatMap((file) => file.edits);
     assert.equal(edits.length, 2, `${label}: complete rename`);
     for (const edit of edits) {
-      assert.equal(source.content.slice(edit.range.startOffset, edit.range.endOffset), "z", `${label}: edit source`);
+      assert.equal(source.content.slice(edit.range.startOffset, edit.range.endOffset), item.symbol ?? "z", `${label}: edit source`);
       assert.equal(edit.replacementText, "w", `${label}: replacement`);
     }
-  } else if (item.definition === false) {
+  } else if (item.definition === false || item.rename === false) {
     assert.equal(rename.kind, "editProposal", `${label}: rename refusal result`);
     assert.equal(rename.authorization.status, "refused", `${label}: rename refusal`);
-    assert.deepEqual(definition.locations, [], `${label}: no guessed definition`);
     assert.ok(!rename.proposal, `${label}: no guessed rename`);
   }
 }
