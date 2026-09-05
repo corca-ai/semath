@@ -9,6 +9,13 @@ import { firstDifferentialFailure } from "./testing/differential.ts";
 
 // Public acceptance examples use real syntax and independently stated expectations.
 const cases = [
+  {
+    id: "concessive-comparison-is-not-a-global-conflict",
+    source: "The short kernel has $k<n$. Even with $k=n$, the cost stays bounded.",
+    needle: "k=n",
+    diagnostics: [],
+    unproved: true,
+  },
   ...[
     ["field-is-not-role-evidence", "For a periodic signal, the asserted relation is $f=1/T$.", "f=1/T"],
     ["law-name-is-not-role-evidence", "For the inductor, the passive sign convention is used. $v_L=L\\frac{di_L}{dt}$.", "v_L=L"],

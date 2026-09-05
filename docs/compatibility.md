@@ -2,7 +2,7 @@
 
 | Semath | Protocol | Pack schema | wasmtex syntax |
 | --- | ---: | ---: | ---: |
-| `0.19.1` | 18 | 13 | 8 |
+| `0.19.2` | 18 | 13 | 8 |
 
 `package.json` pins the reviewed wasmtex commit. The dependency, generated WASM,
 protocol, and pack schema form one tested set. Hosts must adopt matching

@@ -29,3 +29,8 @@ follows the [supported scope](conservative-analysis.md).
 
 These rules guide implementation and review. The [test matrix](capability-test-matrix.md)
 identifies the checks that enforce the corresponding contracts.
+
+A real document can fail before inference: author macros can corrupt structural
+scopes, and ordinary case comparisons can resemble contradictory assertions.
+Count rejected inputs and abstentions against the intended task, and repair
+source structure or evidence authority before broadening mathematical coverage.
